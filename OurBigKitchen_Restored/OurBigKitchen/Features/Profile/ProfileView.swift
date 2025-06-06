@@ -59,7 +59,7 @@ struct ProfileHeaderView: View {
             
             // User Info
             VStack(spacing: 8) {
-                Text(authService.currentUser?.name ?? "John Doe")
+                Text(authService.currentUser?.fullName ?? "John Doe")
                     .font(.title2)
                     .fontWeight(.bold)
                 
@@ -108,14 +108,14 @@ struct StatisticsView: View {
                 StatisticCard(
                     icon: "calendar",
                     title: "Total Sessions",
-                    value: "\(sessionService.sessions.count)",
+                    value: "\(sessionService.getSessions().count)",
                     color: .blue
                 )
                 
                 StatisticCard(
                     icon: "clock",
                     title: "Hours Volunteered",
-                    value: String(format: "%.1f", impactService.impacts.reduce(0) { $0 + $1.hours }),
+                    value: String(format: "%.1f", impactService.getImpacts().reduce(0) { $0 + $1.hours }),
                     color: .green
                 )
                 
@@ -198,7 +198,7 @@ struct RecentActivityView: View {
                 .foregroundColor(.blue)
             }
             
-            if impactService.impacts.isEmpty {
+            if impactService.getImpacts().isEmpty {
                 VStack(spacing: 10) {
                     Image(systemName: "clock")
                         .font(.title)
@@ -212,7 +212,7 @@ struct RecentActivityView: View {
                 .padding(30)
             } else {
                 LazyVStack(spacing: 10) {
-                    ForEach(impactService.impacts.prefix(3)) { impact in
+                    ForEach(impactService.getImpacts().prefix(3)) { impact in
                         ActivityRowView(impact: impact)
                     }
                 }
@@ -235,7 +235,7 @@ struct ActivityRowView: View {
                 .frame(width: 8, height: 8)
             
             VStack(alignment: .leading, spacing: 4) {
-                Text(impact.description)
+                Text(impact.title)
                     .font(.subheadline)
                     .fontWeight(.medium)
                 

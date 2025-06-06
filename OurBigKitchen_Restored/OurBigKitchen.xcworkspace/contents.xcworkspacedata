@@ -8,11 +8,4 @@
          location = "group:OurBigKitchen.xcodeproj">
       </FileRef>
    </Group>
-   <Group
-      location = "container:"
-      name = "FinePrint">
-      <FileRef
-         location = "group:FinePrint/FinePrint.xcodeproj">
-      </FileRef>
-   </Group>
 </Workspace>

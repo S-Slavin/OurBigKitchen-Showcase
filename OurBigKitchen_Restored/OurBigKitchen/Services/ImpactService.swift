@@ -13,6 +13,7 @@ class ImpactService: ObservableObject {
     @Published private(set) var familiesHelped: Int = 0
     @Published private(set) var livesTouched: Int = 0
     @Published private(set) var foodSavedKg: Double = 0.0
+    @Published private(set) var impacts: [Impact] = []
     
     private init() {
         // Generate some sample data for demo purposes
@@ -86,6 +87,10 @@ class ImpactService: ObservableObject {
         }
     }
     
+    func getImpacts() -> [Impact] {
+        return impacts
+    }
+    
     // MARK: - Private Helpers
     
     private func updateUserStats(for userId: String) {
@@ -117,21 +122,38 @@ class ImpactService: ObservableObject {
         
         // Generate some sample posts
         for i in 0..<3 {
-            // We're not using real images in this sample
-            // In a real implementation, images would be loaded from assets or a server
-            
             let post = ImpactPost(
                 id: "sample\(i)",
                 userId: userIds[i % userIds.count],
                 date: Calendar.current.date(byAdding: .day, value: -i, to: Date()) ?? Date(),
                 tags: Array(sampleTags.prefix(2 + (i % 3))),
                 message: messages[i % messages.count],
-                imageData: nil, // No actual image data in samples
+                imageData: nil,
                 views: Int.random(in: 5...20),
                 shares: Int.random(in: 0...10)
             )
             
             impactPosts.append(post)
+            
+            // Create corresponding impact
+            let impact = Impact(
+                id: post.id,
+                userId: post.userId,
+                title: post.message,
+                description: post.message,
+                date: post.date,
+                hours: Double(Int.random(in: 1...5)),
+                location: "Our Big Kitchen",
+                category: .cooking,
+                impactMetric: ImpactMetric(
+                    mealsServed: Int.random(in: 10...50),
+                    peopleFed: Int.random(in: 20...100),
+                    wasteReduced: Double(Int.random(in: 5...20)),
+                    carbonFootprintReduced: Double(Int.random(in: 10...30)),
+                    volunteerHours: Double(Int.random(in: 1...5))
+                )
+            )
+            impacts.append(impact)
         }
         
         // Generate user stats based on these posts

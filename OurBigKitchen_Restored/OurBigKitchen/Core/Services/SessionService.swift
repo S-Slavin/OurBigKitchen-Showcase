@@ -6,6 +6,7 @@ class SessionService: ObservableObject {
     @Published var isSessionActive = false
     @Published var sessionStartTime: Date?
     @Published var sessionDuration: TimeInterval = 0
+    @Published private(set) var sessions: [Session] = []
     
     static let shared = SessionService()
     
@@ -22,6 +23,15 @@ class SessionService: ObservableObject {
     func endSession() {
         isSessionActive = false
         stopTimer()
+        if let startTime = sessionStartTime {
+            let session = Session(
+                id: UUID().uuidString,
+                startTime: startTime,
+                endTime: Date(),
+                duration: sessionDuration
+            )
+            sessions.append(session)
+        }
         sessionStartTime = nil
         sessionDuration = 0
     }
@@ -36,5 +46,9 @@ class SessionService: ObservableObject {
     private func stopTimer() {
         timer?.invalidate()
         timer = nil
+    }
+    
+    func getSessions() -> [Session] {
+        return sessions
     }
 } 

@@ -1,6 +1,16 @@
 import SwiftUI
 import Combine
 
+struct Shadow {
+    let radius: CGFloat
+    let x: CGFloat
+    let y: CGFloat
+    
+    var shadow: ShadowStyle {
+        ShadowStyle(radius: radius, x: x, y: y)
+    }
+}
+
 class ThemeManager: ObservableObject {
     @Published var isDarkMode = false
     @Published var primaryColor: Color = .blue
@@ -17,6 +27,7 @@ class ThemeManager: ObservableObject {
         static let hoursContributed = Color.blue
         static let primaryText = Color.primary
         static let secondaryText = Color.secondary
+        static let cardBackground = Color(.secondarySystemBackground)
     }
     
     struct CornerRadius {

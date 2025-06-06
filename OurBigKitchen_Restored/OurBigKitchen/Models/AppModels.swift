@@ -190,6 +190,24 @@ enum AppModels {
         }
     }
 
+    // MARK: - Session Models
+    struct Session: Identifiable, Codable {
+        let id: String
+        let startTime: Date
+        let endTime: Date
+        let duration: TimeInterval
+        
+        init(id: String = UUID().uuidString,
+             startTime: Date,
+             endTime: Date,
+             duration: TimeInterval) {
+            self.id = id
+            self.startTime = startTime
+            self.endTime = endTime
+            self.duration = duration
+        }
+    }
+
     // MARK: - Impact Models
     struct ImpactMetric: Codable {
         let mealsServed: Int
@@ -337,6 +355,7 @@ struct UpcomingSession: Identifiable {
     let location: String
     let duration: TimeInterval
     let type: SessionType
+    let volunteers: Int
     
     enum SessionType {
         case cooking
@@ -403,7 +422,8 @@ extension UpcomingSession {
             date: Date().addingTimeInterval(86400), // Tomorrow
             location: "Main Kitchen",
             duration: 7200, // 2 hours
-            type: .cooking
+            type: .cooking,
+            volunteers: 12
         ),
         UpcomingSession(
             id: UUID(),
@@ -411,7 +431,8 @@ extension UpcomingSession {
             date: Date().addingTimeInterval(172800), // In 2 days
             location: "Distribution Center",
             duration: 5400, // 1.5 hours
-            type: .delivery
+            type: .delivery,
+            volunteers: 8
         ),
         UpcomingSession(
             id: UUID(),
@@ -419,7 +440,8 @@ extension UpcomingSession {
             date: Date().addingTimeInterval(345600), // In 4 days
             location: "Community Hall",
             duration: 3600, // 1 hour
-            type: .volunteering
+            type: .volunteering,
+            volunteers: 15
         ),
         UpcomingSession(
             id: UUID(),
@@ -427,7 +449,8 @@ extension UpcomingSession {
             date: Date().addingTimeInterval(345600), // In 4 days
             location: "Main Kitchen - Kids Area",
             duration: 9000, // 2.5 hours
-            type: .cooking
+            type: .cooking,
+            volunteers: 10
         ),
         UpcomingSession(
             id: UUID(),
@@ -435,7 +458,8 @@ extension UpcomingSession {
             date: Date().addingTimeInterval(259200), // In 3 days
             location: "Community Hub",
             duration: 10800, // 3 hours
-            type: .delivery
+            type: .delivery,
+            volunteers: 6
         ),
         UpcomingSession(
             id: UUID(),
@@ -443,7 +467,8 @@ extension UpcomingSession {
             date: Date().addingTimeInterval(518400), // In 6 days
             location: "Main Kitchen",
             duration: 10800, // 3 hours
-            type: .volunteering
+            type: .volunteering,
+            volunteers: 20
         ),
         UpcomingSession(
             id: UUID(),
@@ -451,7 +476,8 @@ extension UpcomingSession {
             date: Date().addingTimeInterval(432000), // In 5 days
             location: "Training Room",
             duration: 7200, // 2 hours
-            type: .other
+            type: .other,
+            volunteers: 8
         )
     ]
 } 
