@@ -31,6 +31,7 @@ class UserAuthInfo {
     }
 }
 
+@MainActor
 class AuthenticationViewModel: ObservableObject {
     enum LoginType: String, CaseIterable {
         case individual = "Individual"

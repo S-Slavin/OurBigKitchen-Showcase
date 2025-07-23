@@ -11,6 +11,7 @@ import Combine
 
 // We'll use the types from StatsManager and from UserManager directly
 
+@MainActor
 class LeaderboardViewModel: ObservableObject {
     @Published var individualRankings: [UserRanking] = []
     @Published var corporateRankings: [CorporateRanking] = []

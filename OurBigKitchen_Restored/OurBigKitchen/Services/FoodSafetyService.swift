@@ -8,6 +8,7 @@
 import Foundation
 import Combine
 
+@MainActor
 class FoodSafetyService: ObservableObject {
     static let shared = FoodSafetyService()
     
@@ -98,11 +99,11 @@ class FoodSafetyService: ObservableObject {
     
     private func updateUserFoodSafetyStatus(email: String) {
         // Get current user
-        userManager.getCurrentUser()
-            .flatMap { user -> AnyPublisher<AppModels.User, Error> in
+        userManager.fetchUserProfile()
+            .compactMap { user -> AppModels.User? in
                 // Only update if this is the current user's email
                 guard user.email.lowercased() == email.lowercased() else {
-                    return Just(user).setFailureType(to: Error.self).eraseToAnyPublisher()
+                    return nil
                 }
                 
                 // Create updated user with food safety flag set to true
@@ -123,10 +124,18 @@ class FoodSafetyService: ObservableObject {
                     )
                     
                     // Update the user
-                    return self.userManager.updateUser(updatedUser)
+                    return updatedUser
                 }
                 
-                return Just(user).setFailureType(to: Error.self).eraseToAnyPublisher()
+                return nil
+            }
+            .flatMap { [weak self] updatedUser -> AnyPublisher<AppModels.User, Error> in
+                guard let self = self, let user = updatedUser else {
+                    return Fail(error: NSError(domain: "FoodSafetyService", code: 400, userInfo: [NSLocalizedDescriptionKey: "No user to update"]))
+                        .eraseToAnyPublisher()
+                }
+                
+                return self.userManager.updateUserProfile(user)
             }
             .sink(
                 receiveCompletion: { _ in },

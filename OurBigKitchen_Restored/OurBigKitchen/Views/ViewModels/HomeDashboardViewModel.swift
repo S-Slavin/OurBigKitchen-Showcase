@@ -33,6 +33,7 @@ extension AppModels.Activity {
     }
 }
 
+@MainActor
 class HomeDashboardViewModel: ObservableObject {
     @Published var user: AppModels.User?
     @Published var todayStats: DailyStats?
@@ -69,7 +70,7 @@ class HomeDashboardViewModel: ObservableObject {
         isLoading = true
         
         // Load user data
-        userManager.getCurrentUser()
+        userManager.fetchUserProfile()
             .sink { [weak self] completion in
                 if case .failure(let error) = completion {
                     self?.error = error

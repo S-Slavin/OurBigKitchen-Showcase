@@ -29,7 +29,7 @@ struct PersistenceController {
         return result
     }()
 
-    let container: NSPersistentCloudKitContainer
+    var container: NSPersistentCloudKitContainer
 
     init(inMemory: Bool = false) {
         container = NSPersistentCloudKitContainer(name: "OurBigKitchen")
@@ -37,7 +37,7 @@ struct PersistenceController {
             container.persistentStoreDescriptions.first!.url = URL(fileURLWithPath: "/dev/null")
         }
         
-        container.loadPersistentStores { (storeDescription, error) in
+        container.loadPersistentStores { [weak self] (storeDescription, error) in
             if let error = error as NSError? {
                 // Log the error
                 print("Error loading persistent store: \(error), \(error.userInfo)")
@@ -50,7 +50,7 @@ struct PersistenceController {
                         
                         // Try loading again
                         do {
-                            try container.persistentStoreCoordinator.addPersistentStore(
+                            try self?.container.persistentStoreCoordinator.addPersistentStore(
                                 ofType: storeDescription.type,
                                 configurationName: storeDescription.configuration,
                                 at: storeURL,
@@ -60,9 +60,9 @@ struct PersistenceController {
                         } catch {
                             print("Failed to recreate store: \(error)")
                             // Create a new in-memory store as fallback
-                            container = NSPersistentCloudKitContainer(name: "OurBigKitchen")
-                            container.persistentStoreDescriptions.first!.url = URL(fileURLWithPath: "/dev/null")
-                            container.loadPersistentStores { (_, error) in
+                            self?.container = NSPersistentCloudKitContainer(name: "OurBigKitchen")
+                            self?.container.persistentStoreDescriptions.first!.url = URL(fileURLWithPath: "/dev/null")
+                            self?.container.loadPersistentStores { (_, error) in
                                 if let error = error {
                                     print("Failed to create in-memory store: \(error)")
                                 }

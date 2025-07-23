@@ -116,6 +116,33 @@ final class UserManager: ObservableObject {
         self.currentUser = nil
         NotificationCenter.default.post(name: .didClearUserData, object: nil)
     }
+    
+    // MARK: - Ranking Methods
+    
+    func getUserRankings(category: UserRankingCategory) -> AnyPublisher<[UserRanking], Error> {
+        // Mock implementation - in a real app this would fetch from network
+        return Future { [weak self] promise in
+            Task { @MainActor in
+                // Generate mock rankings based on current user
+                guard let currentUser = self?.currentUser else {
+                    promise(.failure(AuthError.userNotFound))
+                    return
+                }
+                
+                let mockRankings = [
+                    UserRanking(user: currentUser, score: 100, rank: 1),
+                    UserRanking(user: AppModels.User(firstName: "John", lastName: "Doe", email: "john@example.com"), score: 85, rank: 2),
+                    UserRanking(user: AppModels.User(firstName: "Jane", lastName: "Smith", email: "jane@example.com"), score: 75, rank: 3)
+                ]
+                
+                promise(.success(mockRankings))
+            }
+        }.eraseToAnyPublisher()
+    }
+    
+    var currentUserId: String? {
+        return currentUser?.id
+    }
 }
 
 // MARK: - Data Extensions

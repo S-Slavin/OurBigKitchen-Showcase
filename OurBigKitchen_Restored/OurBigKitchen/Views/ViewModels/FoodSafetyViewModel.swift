@@ -9,6 +9,7 @@ import Foundation
 import Combine
 import SwiftUI
 
+@MainActor
 class FoodSafetyViewModel: ObservableObject {
     @Published var participantName: String = ""
     @Published var participantEmail: String = ""
@@ -39,7 +40,7 @@ class FoodSafetyViewModel: ObservableObject {
     // MARK: - Data Loading
     
     private func prefillUserData() {
-        userManager.getCurrentUser()
+        userManager.fetchUserProfile()
             .receive(on: RunLoop.main)
             .sink(
                 receiveCompletion: { _ in },

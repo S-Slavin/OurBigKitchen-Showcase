@@ -3,6 +3,7 @@ import Combine
 import SwiftUI
 import CryptoKit
 
+@MainActor
 class AuthService: ObservableObject {
     static let shared = AuthService()
     
@@ -25,9 +26,7 @@ class AuthService: ObservableObject {
             email: email,
             role: .volunteer
         )
-        await MainActor.run {
-            self.currentUser = mockUser
-        }
+        self.currentUser = mockUser
         return mockUser
     }
     
@@ -40,9 +39,7 @@ class AuthService: ObservableObject {
             email: "group@example.com",
             role: .volunteer
         )
-        await MainActor.run {
-            self.currentUser = mockUser
-        }
+        self.currentUser = mockUser
         return mockUser
     }
     
@@ -55,9 +52,7 @@ class AuthService: ObservableObject {
             email: "apple@example.com",
             role: .volunteer
         )
-        await MainActor.run {
-            self.currentUser = mockUser
-        }
+        self.currentUser = mockUser
         return mockUser
     }
     
@@ -70,17 +65,13 @@ class AuthService: ObservableObject {
             email: "google@example.com",
             role: .volunteer
         )
-        await MainActor.run {
-            self.currentUser = mockUser
-        }
+        self.currentUser = mockUser
         return mockUser
     }
     
     func signOut() async throws {
         // Clear user data
-        await MainActor.run {
-            self.currentUser = nil
-        }
+        self.currentUser = nil
     }
     
     // MARK: - Keychain Methods
@@ -158,9 +149,7 @@ class AuthService: ObservableObject {
             wwcNumber: wwcNumber,
             wwcExpiry: wwcExpiry
         )
-        await MainActor.run {
-            self.currentUser = mockUser
-        }
+        self.currentUser = mockUser
         return mockUser
     }
     

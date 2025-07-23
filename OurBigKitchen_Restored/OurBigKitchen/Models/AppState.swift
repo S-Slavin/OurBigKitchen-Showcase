@@ -2,6 +2,7 @@ import Foundation
 import SwiftUI
 import Combine
 
+@MainActor
 class AppState: ObservableObject {
     @Published var userProfile: AppModels.User?
     @Published var isAuthenticated = false
@@ -33,9 +34,7 @@ class AppState: ObservableObject {
         }
         
         // Move all I/O operations to background thread to avoid main thread warnings
-        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-            guard let self = self else { return }
-            
+        Task.detached {
             // Load saved state instead of resetting
             // Initialize terms status
             let termsAccepted = self.termsManager.checkTermsStatus() || UserDefaults.standard.bool(forKey: "hasAcceptedTerms")
@@ -52,7 +51,7 @@ class AppState: ObservableObject {
                                                    UserDefaults.standard.bool(forKey: "hasSignedIn"))
             
             // Update UI on main thread
-            DispatchQueue.main.async {
+            await MainActor.run {
                 // First update the loading state
                 self.isLoading = false
                 
@@ -139,9 +138,7 @@ class AppState: ObservableObject {
     
     func refreshAuthState() {
         // Move I/O operations to background thread
-        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-            guard let self = self else { return }
-            
+        Task.detached {
             // Check UserDefaults first
             let isAuthenticatedInDefaults = UserDefaults.standard.bool(forKey: "isAuthenticated")
             
@@ -166,7 +163,7 @@ class AppState: ObservableObject {
             }
             
             // Update UI on main thread
-            DispatchQueue.main.async {
+            await MainActor.run {
                 self.isAuthenticated = newAuthState
                 self.userProfile = profile
                 print("DEBUG: Auth state refreshed - isAuthenticated: \(self.isAuthenticated)")

@@ -10,6 +10,7 @@ import Foundation
 import Combine
 import SwiftUI
 
+@MainActor
 class ImpactViewModel: ObservableObject {
     // MARK: - Published Properties
     

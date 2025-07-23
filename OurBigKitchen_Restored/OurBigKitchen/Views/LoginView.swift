@@ -6,6 +6,7 @@ import Combine
 // from a shared import
 extension UserAuthInfo {}
 
+@MainActor
 class LoginViewModel: ObservableObject {
     @Published var firstName = ""
     @Published var lastName = ""
