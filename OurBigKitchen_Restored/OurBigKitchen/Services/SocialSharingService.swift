@@ -24,7 +24,6 @@ enum SocialShare {
 
 @MainActor
 class SocialSharingService: ObservableObject {
-    @MainActor
     static let shared = SocialSharingService()
     
     @Published var lastSharedItem: SocialShare?
