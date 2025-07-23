@@ -1,15 +1,6 @@
 import Foundation
 import SwiftUI
 
-extension NSNotification.Name {
-    static let didUpdateAuth = NSNotification.Name("didUpdateAuth")
-    static let didLogout = NSNotification.Name("didLogout")
-    static let didUpdateUser = NSNotification.Name("didUpdateUser")
-    static let didDeleteUser = NSNotification.Name("didDeleteUser")
-    static let didUpdatePreferences = NSNotification.Name("didUpdatePreferences")
-    static let didClearUserData = NSNotification.Name("didClearUserData")
-}
-
 enum AppModels {
     // MARK: - User Models
     enum UserRole: String, Codable, CaseIterable {
