@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 
+@MainActor
 class ContactService {
     
     // MARK: - Shared Instance

@@ -18,6 +18,7 @@ private enum APIConstants {
     static let bearerPrefix = "Bearer "
 }
 
+@MainActor
 class NetworkManager: NetworkManaging {
     static let shared = NetworkManager()
     

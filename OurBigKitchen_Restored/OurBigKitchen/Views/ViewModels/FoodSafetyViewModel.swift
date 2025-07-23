@@ -26,10 +26,10 @@ class FoodSafetyViewModel: ObservableObject {
     private let authManager: AuthManager
     private let termsManager: TermsManager
     
-    init(foodSafetyService: FoodSafetyService = .shared, 
-         userManager: UserManager = .shared,
-         authManager: AuthManager = .shared,
-         termsManager: TermsManager = .shared) {
+    init(foodSafetyService: FoodSafetyService = FoodSafetyService.shared, 
+         userManager: UserManager = UserManager.shared,
+         authManager: AuthManager = AuthManager.shared,
+         termsManager: TermsManager = TermsManager.shared) {
         self.foodSafetyService = foodSafetyService
         self.userManager = userManager
         self.authManager = authManager

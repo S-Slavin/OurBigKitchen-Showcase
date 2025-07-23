@@ -85,8 +85,8 @@ class ImpactDashboardViewModel: ObservableObject {
     // MARK: - Initialization
     
     init(
-        statsManager: StatsManager = .shared,
-        userManager: UserManager = .shared,
+        statsManager: StatsManager = StatsManager.shared,
+        userManager: UserManager = UserManager.shared,
         socialSharingService: SocialSharingService
     ) {
         self.statsManager = statsManager

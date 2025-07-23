@@ -1,11 +1,12 @@
 import Foundation
 import Security
 
+@MainActor
 struct TestUtils {
     static let testEmail = "test@example.com"
     static let testPassword = "Test123!"
     
-    static func createTestUser() {
+    static func createTestUser() async {
         // Create a test user with predefined attributes
         let user = AppModels.User(
             firstName: "Test",
@@ -33,7 +34,7 @@ struct TestUtils {
         }
     }
     
-    static func clearTestData() {
+    static func clearTestData() async {
         // Clear user data
         do {
             try PersistenceManager.shared.remove(forKey: "user_\(testEmail)")
@@ -48,7 +49,7 @@ struct TestUtils {
         }
     }
     
-    static func printCurrentState() {
+    static func printCurrentState() async {
         // Check if user exists
         if let user = try? PersistenceManager.shared.getObject(forKey: "user_\(testEmail)", as: AppModels.User.self) {
             print("User exists: \(user)")
@@ -57,14 +58,14 @@ struct TestUtils {
         }
         
         // Check if password exists
-        if let password = try? AuthService.shared.loadDataFromKeychain(key: "password_\(testEmail)") {
+        if let _ = try? AuthService.shared.loadDataFromKeychain(key: "password_\(testEmail)") {
             print("Password exists in keychain")
         } else {
             print("Password does not exist in keychain")
         }
         
         // Check if reset token exists
-        if let token = try? AuthService.shared.loadDataFromKeychain(key: "reset_token_\(testEmail)") {
+        if let _ = try? AuthService.shared.loadDataFromKeychain(key: "reset_token_\(testEmail)") {
             print("Reset token exists in keychain")
         } else {
             print("Reset token does not exist in keychain")

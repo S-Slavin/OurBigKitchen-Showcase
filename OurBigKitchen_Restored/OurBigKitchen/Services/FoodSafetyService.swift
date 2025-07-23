@@ -22,7 +22,7 @@ class FoodSafetyService: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     private let registrationsKey = "food_safety_registrations"
     
-    init(networkManager: NetworkManager = .shared, userManager: UserManager = .shared) {
+    init(networkManager: NetworkManager = NetworkManager.shared, userManager: UserManager = UserManager.shared) {
         self.networkManager = networkManager
         self.userManager = userManager
         loadCompanies()
@@ -107,9 +107,8 @@ class FoodSafetyService: ObservableObject {
                 }
                 
                 // Create updated user with food safety flag set to true
-                var updatedUser = user
                 if !user.hasFoodSafetyRegistration {
-                    updatedUser = AppModels.User(
+                    let updatedUser = AppModels.User(
                         id: user.id,
                         firstName: user.firstName,
                         lastName: user.lastName,

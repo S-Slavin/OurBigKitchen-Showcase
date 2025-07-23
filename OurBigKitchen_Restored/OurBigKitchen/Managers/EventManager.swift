@@ -3,14 +3,15 @@ import Combine
 
 struct EmptyResponse: Decodable {}
 
+@MainActor
 class EventManager {
     static let shared = EventManager()
     private let networkManager: NetworkManager
     private let persistenceManager: PersistenceManager
     private let upcomingEventsKey = "upcoming_events"
     
-    private init(networkManager: NetworkManager = .shared,
-                persistenceManager: PersistenceManager = .shared) {
+    private init(networkManager: NetworkManager = NetworkManager.shared,
+                persistenceManager: PersistenceManager = PersistenceManager.shared) {
         self.networkManager = networkManager
         self.persistenceManager = persistenceManager
     }

@@ -2,6 +2,7 @@ import Foundation
 import Combine
 import SwiftUI
 
+@MainActor
 class TermsManager: ObservableObject {
     static let shared = TermsManager()
     

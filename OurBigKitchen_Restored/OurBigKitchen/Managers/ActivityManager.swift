@@ -1,14 +1,15 @@
 import Foundation
 import Combine
 
+@MainActor
 class ActivityManager {
     static let shared = ActivityManager()
     private let networkManager: NetworkManager
     private let persistenceManager: PersistenceManager
     private let recentActivitiesKey = "recent_activities"
     
-    private init(networkManager: NetworkManager = .shared,
-                persistenceManager: PersistenceManager = .shared) {
+    private init(networkManager: NetworkManager = NetworkManager.shared,
+                persistenceManager: PersistenceManager = PersistenceManager.shared) {
         self.networkManager = networkManager
         self.persistenceManager = persistenceManager
     }

@@ -3,6 +3,7 @@ import Combine
 import SwiftUI
 
 // This service manages impact posts, statistics, and sharing
+@MainActor
 class ImpactService: ObservableObject {
     static let shared = ImpactService()
     

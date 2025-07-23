@@ -12,7 +12,7 @@ class AuthService: ObservableObject {
     private let networkManager: NetworkManager
     private let userManager: UserManager
     
-    init(networkManager: NetworkManager = .shared, userManager: UserManager = .shared) {
+    init(networkManager: NetworkManager = NetworkManager.shared, userManager: UserManager = UserManager.shared) {
         self.networkManager = networkManager
         self.userManager = userManager
     }
