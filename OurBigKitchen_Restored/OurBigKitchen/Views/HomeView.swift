@@ -87,7 +87,7 @@ struct HomeView: View {
         .background(
             RoundedRectangle(cornerRadius: ThemeManager.CornerRadius.large)
                 .fill(Color.white)
-                .shadow(radius: ThemeManager.ShadowStyle.medium.radius)
+                .shadow(radius: ThemeManager.Shadow.medium)
         )
         .padding(.horizontal)
     }
@@ -180,7 +180,7 @@ struct ImpactCard: View {
         .background(
             RoundedRectangle(cornerRadius: ThemeManager.CornerRadius.medium)
                 .fill(Color.white)
-                .shadow(radius: ThemeManager.ShadowStyle.small.radius)
+                .shadow(radius: ThemeManager.Shadow.small)
         )
     }
 }
@@ -221,7 +221,7 @@ struct SessionCard: View {
                 .font(.subheadline)
                 .foregroundColor(ThemeManager.Colors.secondary)
             
-            Text("\(session.volunteers) volunteers")
+            Text(session.formattedDuration)
                 .font(.caption)
                 .foregroundColor(ThemeManager.Colors.secondary)
         }
@@ -230,7 +230,7 @@ struct SessionCard: View {
         .background(
             RoundedRectangle(cornerRadius: ThemeManager.CornerRadius.medium)
                 .fill(Color.white)
-                .shadow(radius: ThemeManager.ShadowStyle.small.radius)
+                .shadow(radius: ThemeManager.Shadow.small)
         )
     }
 }

@@ -79,12 +79,12 @@ class LoginViewModel: ObservableObject {
         
         authManager.loginWithGroupCode(email: email, groupCode: groupCode)
             .sink(
-                receiveCompletion: { [weak self] completion in
+                receiveCompletion: { [weak self] (completion: Subscribers.Completion<Error>) in
                     if case .failure = completion {
                         self?.showError(message: "Failed to login with group code")
                     }
                 },
-                receiveValue: { [weak self] _ in
+                receiveValue: { [weak self] (user: AppModels.User) in
                     self?.clearFields()
                 }
             )
@@ -99,12 +99,12 @@ class LoginViewModel: ObservableObject {
         
         authManager.login(email: email, password: password)
             .sink(
-                receiveCompletion: { [weak self] completion in
+                receiveCompletion: { [weak self] (completion: Subscribers.Completion<Error>) in
                     if case .failure = completion {
                         self?.showError(message: "Failed to login with email")
                     }
                 },
-                receiveValue: { [weak self] _ in
+                receiveValue: { [weak self] (user: AppModels.User) in
                     self?.clearFields()
                 }
             )
@@ -114,12 +114,12 @@ class LoginViewModel: ObservableObject {
     func loginWithApple() {
         authManager.loginWithApplePublisher()
             .sink(
-                receiveCompletion: { [weak self] completion in
+                receiveCompletion: { [weak self] (completion: Subscribers.Completion<Error>) in
                     if case .failure = completion {
                         self?.showError(message: "Failed to login with Apple")
                     }
                 },
-                receiveValue: { [weak self] _ in
+                receiveValue: { [weak self] (user: AppModels.User) in
                     self?.clearFields()
                 }
             )
@@ -129,12 +129,12 @@ class LoginViewModel: ObservableObject {
     func loginWithGmail() {
         authManager.loginWithGmailPublisher()
             .sink(
-                receiveCompletion: { [weak self] completion in
+                receiveCompletion: { [weak self] (completion: Subscribers.Completion<Error>) in
                     if case .failure = completion {
                         self?.showError(message: "Failed to login with Gmail")
                     }
                 },
-                receiveValue: { [weak self] _ in
+                receiveValue: { [weak self] (user: AppModels.User) in
                     self?.clearFields()
                 }
             )
@@ -188,10 +188,6 @@ struct LoginView: View {
     private let accentColor = Color(red: 0.85, green: 0.33, blue: 0.10) // Dark Orange
     private let backgroundColor = Color(red: 1.0, green: 0.98, blue: 0.94) // Cream
     
-    init() {
-        // Initialize without onboarding state
-    }
-    
     var body: some View {
         NavigationView {
             VStack(spacing: 20) {
@@ -202,163 +198,124 @@ struct LoginView: View {
                     .frame(width: 120, height: 120)
                     .padding(.top, 40)
                 
-                Text("Welcome to Our Big Kitchen")
+                Text("Welcome Back!")
                     .font(.title)
                     .fontWeight(.bold)
+                    .foregroundColor(primaryColor)
                 
-                // Login type selector
+                // Login type picker
                 Picker("Login Type", selection: $viewModel.selectedLoginType) {
-                    Text("Group Code").tag(LoginViewModel.LoginType.groupCode)
-                    Text("Email").tag(LoginViewModel.LoginType.email)
-                    Text("Social").tag(LoginViewModel.LoginType.social)
+                    ForEach(LoginViewModel.LoginType.allCases, id: \.self) { type in
+                        Text(type.rawValue).tag(type)
+                    }
                 }
-                .pickerStyle(.segmented)
+                .pickerStyle(SegmentedPickerStyle())
                 .padding(.horizontal)
                 
-                // Login forms
                 ScrollView {
                     VStack(spacing: 20) {
                         switch viewModel.selectedLoginType {
                         case .groupCode:
-                            groupCodeLoginForm
+                            // Group code login fields
+                            TextField("Email", text: $viewModel.email)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .autocapitalization(.none)
+                                .keyboardType(.emailAddress)
+                            
+                            SecureField("Group Code", text: $viewModel.groupCode)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                            
+                            Button(action: viewModel.loginWithGroupCode) {
+                                Text("Login with Group Code")
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .background(primaryColor)
+                                    .foregroundColor(.white)
+                                    .cornerRadius(10)
+                            }
+                            .disabled(viewModel.isLoading)
+                            
                         case .email:
-                            emailLoginForm
+                            // Email login fields
+                            TextField("First Name", text: $viewModel.firstName)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                            
+                            TextField("Last Name", text: $viewModel.lastName)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                            
+                            TextField("Email", text: $viewModel.email)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .autocapitalization(.none)
+                                .keyboardType(.emailAddress)
+                            
+                            SecureField("Password", text: $viewModel.password)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                            
+                            Button(action: viewModel.loginWithEmail) {
+                                Text("Login with Email")
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .background(primaryColor)
+                                    .foregroundColor(.white)
+                                    .cornerRadius(10)
+                            }
+                            .disabled(!viewModel.isEmailFormValid || viewModel.isLoading)
+                            
                         case .social:
-                            socialLoginForm
+                            // Social login buttons
+                            Button(action: viewModel.loginWithApple) {
+                                HStack {
+                                    Image(systemName: "applelogo")
+                                    Text("Continue with Apple")
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.black)
+                                .foregroundColor(.white)
+                                .cornerRadius(10)
+                            }
+                            .disabled(viewModel.isLoading)
+                            
+                            Button(action: viewModel.loginWithGmail) {
+                                HStack {
+                                    Image("google_logo") // Add this image to assets
+                                    Text("Continue with Google")
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.white)
+                                .foregroundColor(.black)
+                                .cornerRadius(10)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                                )
+                            }
+                            .disabled(viewModel.isLoading)
                         }
                     }
-                    .padding()
+                    .padding(.horizontal)
+                }
+                
+                // Loading indicator
+                if viewModel.isLoading {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle())
+                }
+                
+                // Error alert
+                .alert(isPresented: $viewModel.showError) {
+                    Alert(
+                        title: Text("Error"),
+                        message: Text(viewModel.errorMessage),
+                        dismissButton: .default(Text("OK"))
+                    )
                 }
                 
                 Spacer()
             }
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Close") {
-                        dismiss()
-                    }
-                }
-            }
-            .alert("Error", isPresented: $viewModel.showError) {
-                Button("OK", role: .cancel) {}
-            } message: {
-                Text(viewModel.errorMessage)
-            }
-        }
-    }
-    
-    private var groupCodeLoginForm: some View {
-        VStack(spacing: 15) {
-            TextField("Group Code", text: $viewModel.groupCode)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .autocapitalization(.none)
-            
-            Button(action: {
-                viewModel.loginWithGroupCode()
-            }) {
-                Text("Login with Group Code")
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
-                    .background(
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(Color.blue)
-                            .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: 1)
-                    )
-            }
-            .buttonStyle(ButtonStyles.scale)
-            .disabled(viewModel.isLoading || viewModel.groupCode.isEmpty)
-        }
-    }
-    
-    private var emailLoginForm: some View {
-        VStack(spacing: 15) {
-            TextField("First Name", text: $viewModel.firstName)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .autocapitalization(.words)
-            
-            TextField("Last Name", text: $viewModel.lastName)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .autocapitalization(.words)
-            
-            TextField("Email", text: $viewModel.email)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .autocapitalization(.none)
-                .keyboardType(.emailAddress)
-            
-            SecureField("Password", text: $viewModel.password)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-            
-            Button(action: {
-                viewModel.loginWithEmail()
-            }) {
-                Text("Login with Email")
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
-                    .background(
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(Color.blue)
-                            .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: 1)
-                    )
-            }
-            .buttonStyle(ButtonStyles.scale)
-            .disabled(viewModel.isLoading || !viewModel.isEmailFormValid)
-        }
-    }
-    
-    private var socialLoginForm: some View {
-        VStack(spacing: 15) {
-            Button(action: {
-                viewModel.loginWithApple()
-            }) {
-                HStack {
-                    Image(systemName: "apple.logo")
-                    Text("Continue with Apple")
-                }
-                .font(.subheadline)
-                .fontWeight(.medium)
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 10)
-                .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(Color.black)
-                        .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: 1)
-                )
-            }
-            .buttonStyle(ButtonStyles.scale)
-            .disabled(viewModel.isLoading)
-            
-            Button(action: {
-                viewModel.loginWithGmail()
-            }) {
-                HStack {
-                    Image(systemName: "g.circle.fill")
-                    Text("Continue with Google")
-                }
-                .font(.subheadline)
-                .fontWeight(.medium)
-                .foregroundColor(.black)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 10)
-                .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(Color.white)
-                        .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: 1)
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                )
-            }
-            .buttonStyle(ButtonStyles.scale)
-            .disabled(viewModel.isLoading)
+            .background(backgroundColor.ignoresSafeArea())
+            .navigationBarHidden(true)
         }
     }
 }

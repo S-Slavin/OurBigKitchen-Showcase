@@ -1,363 +1,204 @@
 import Foundation
 import Combine
 import SwiftUI
+import UserNotifications
 
-class AuthManager: ObservableObject {
+@MainActor
+final class AuthManager: ObservableObject {
     static let shared = AuthManager()
     
-    @Published private(set) var isAuthenticated: Bool = false
-    @Published private(set) var isLoading: Bool = false
-    @Published private(set) var error: Error?
-    @Published private(set) var currentUser: AppModels.User?
+    @Published var isAuthenticated = false
+    @Published var currentUser: AppModels.User?
+    @Published var error: Error?
+    @Published var isLoading = false
     
-    private let persistenceManager = PersistenceManager.shared
-    private let userManager = UserManager.shared
-    
-    private let tokenKey = "authToken"
-    private let userKey = "currentUser"
-    
+    private let authService: AuthService
+    private let userManager: UserManager
     private var cancellables = Set<AnyCancellable>()
     
     private init() {
-        print("DEBUG: AuthManager initializing")
-        checkAuthentication()
-        
-        // Set a flag to prevent multiple initialization checks
-        if !UserDefaults.standard.bool(forKey: "authManagerInitialized") {
-            UserDefaults.standard.set(true, forKey: "authManagerInitialized")
-            UserDefaults.standard.synchronize()
-        }
+        self.authService = AuthService.shared
+        self.userManager = UserManager.shared
     }
     
-    private func checkAuthentication() {
-        do {
-            if let token = try? persistenceManager.getString(forKey: tokenKey),
-               let user: AppModels.User = try? persistenceManager.getObject(forKey: userKey, as: AppModels.User.self) {
-                self.currentUser = user
-                self.isAuthenticated = true
-                
-                // Ensure UserDefaults is also updated
-                UserDefaults.standard.set(true, forKey: "isAuthenticated")
-                UserDefaults.standard.set(true, forKey: "hasSignedIn")
-                UserDefaults.standard.synchronize()
-                
-                print("DEBUG: AuthManager restored authentication state for user: \(user.email)")
-            } else if UserDefaults.standard.bool(forKey: "isAuthenticated") {
-                // If UserDefaults says authenticated but we don't have the token,
-                // create a simple user model to maintain authentication
-                self.isAuthenticated = true
-                print("DEBUG: AuthManager restored authentication state from UserDefaults")
-            }
-        }
-    }
-    
-    func loginPublisher(email: String, password: String) -> AnyPublisher<AppModels.User, Error> {
-        Future<AppModels.User, Error> { [weak self] promise in
-            guard let self = self else {
-                promise(.failure(AuthError.unknown))
-                return
-            }
-            
-            guard !email.isEmpty, !password.isEmpty else {
-                promise(.failure(AuthError.invalidCredentials))
-                return
-            }
-            
-            self.isLoading = true
-            
-            // Create mock user (replace with actual API call in production)
-            let user = AppModels.User(
-                id: UUID().uuidString,
-                firstName: "Test",
-                lastName: "User",
-                email: email,
-                role: .volunteer
-            )
-            
-            do {
-                try self.persistenceManager.saveString(UUID().uuidString, forKey: self.tokenKey)
-                try self.persistenceManager.save(user, forKey: self.userKey)
-                try self.userManager.cacheUser(user)
-                
-                self.currentUser = user
-                self.isAuthenticated = true
-                self.error = nil
-                self.isLoading = false
-                
-                NotificationCenter.default.post(name: Notification.Name.didLogin, object: nil)
-                NotificationCenter.default.post(name: Notification.Name.didUpdateAuth, object: nil)
-                
-                promise(.success(user))
-            } catch {
-                self.error = error
-                self.isLoading = false
-                promise(.failure(error))
-            }
-        }
-        .eraseToAnyPublisher()
-    }
-    
-    // Renamed to avoid duplicate method
-    func login(email: String, password: String) -> AnyPublisher<AppModels.User, Error> {
-        Future<AppModels.User, Error> { [weak self] promise in
-            guard let self = self else {
-                promise(.failure(AuthError.unknown))
-                return
-            }
-            
-            guard !email.isEmpty, !password.isEmpty else {
-                promise(.failure(AuthError.invalidCredentials))
-                return
-            }
-            
-            self.isLoading = true
-            
-            // Create mock user (replace with actual API call in production)
-            let user = AppModels.User(
-                id: UUID().uuidString,
-                firstName: "Test",
-                lastName: "User",
-                email: email,
-                role: .volunteer
-            )
-            
-            do {
-                try self.persistenceManager.saveString(UUID().uuidString, forKey: self.tokenKey)
-                try self.persistenceManager.save(user, forKey: self.userKey)
-                try self.userManager.cacheUser(user)
-                
-                self.currentUser = user
-                self.isAuthenticated = true
-                self.error = nil
-                self.isLoading = false
-                
-                NotificationCenter.default.post(name: Notification.Name.didLogin, object: nil)
-                NotificationCenter.default.post(name: Notification.Name.didUpdateAuth, object: nil)
-                
-                promise(.success(user))
-            } catch {
-                self.error = error
-                self.isLoading = false
-                promise(.failure(error))
-            }
-        }
-        .eraseToAnyPublisher()
-    }
-    
-    func logout() {
-        do {
-            try persistenceManager.remove(forKey: tokenKey)
-            try persistenceManager.remove(forKey: userKey)
-            
-            currentUser = nil
-            isAuthenticated = false
-            error = nil
-            
-            NotificationCenter.default.post(name: Notification.Name.didLogout, object: nil)
-            NotificationCenter.default.post(name: Notification.Name.didUpdateAuth, object: nil)
-        } catch {
-            self.error = error
-        }
-    }
-    
-    func loginWithGroupCode(email: String, groupCode: String) -> AnyPublisher<AppModels.User, Error> {
-        Future<AppModels.User, Error> { [weak self] promise in
-            guard let self = self else {
-                promise(.failure(AuthError.unknown))
-                return
-            }
-            
-            guard !email.isEmpty, !groupCode.isEmpty else {
-                promise(.failure(AuthError.invalidCredentials))
-                return
-            }
-            
-            self.isLoading = true
-            
-            // Create mock user with group code (replace with actual API call in production)
-            let user = AppModels.User(
-                id: UUID().uuidString,
-                firstName: "Group",
-                lastName: "User",
-                email: email,
-                role: .volunteer
-            )
-            
-            do {
-                try self.persistenceManager.saveString(UUID().uuidString, forKey: self.tokenKey)
-                try self.persistenceManager.save(user, forKey: self.userKey)
-                try self.userManager.cacheUser(user)
-                
-                self.currentUser = user
-                self.isAuthenticated = true
-                self.error = nil
-                self.isLoading = false
-                
-                NotificationCenter.default.post(name: Notification.Name.didLogin, object: nil)
-                NotificationCenter.default.post(name: Notification.Name.didUpdateAuth, object: nil)
-                
-                promise(.success(user))
-            } catch {
-                self.error = error
-                self.isLoading = false
-                promise(.failure(error))
-            }
-        }
-        .eraseToAnyPublisher()
-    }
-    
-    func loginWithApplePublisher() -> AnyPublisher<AppModels.User, Error> {
-        Future<AppModels.User, Error> { [weak self] promise in
-            guard let self = self else {
-                promise(.failure(AuthError.unknown))
-                return
-            }
-            
-            self.isLoading = true
-            
-            // Simulate Apple authentication (replace with actual Sign in with Apple in production)
-            let user = AppModels.User(
-                id: UUID().uuidString,
-                firstName: "Apple",
-                lastName: "User",
-                email: "apple_user@example.com",
-                role: .volunteer
-            )
-            
-            do {
-                try self.persistenceManager.saveString(UUID().uuidString, forKey: self.tokenKey)
-                try self.persistenceManager.save(user, forKey: self.userKey)
-                try self.userManager.cacheUser(user)
-                
-                self.currentUser = user
-                self.isAuthenticated = true
-                self.error = nil
-                self.isLoading = false
-                
-                NotificationCenter.default.post(name: Notification.Name.didLogin, object: nil)
-                NotificationCenter.default.post(name: Notification.Name.didUpdateAuth, object: nil)
-                
-                promise(.success(user))
-            } catch {
-                self.error = error
-                self.isLoading = false
-                promise(.failure(error))
-            }
-        }
-        .eraseToAnyPublisher()
-    }
-    
-    func loginWithGmailPublisher() -> AnyPublisher<AppModels.User, Error> {
-        Future<AppModels.User, Error> { [weak self] promise in
-            guard let self = self else {
-                promise(.failure(AuthError.unknown))
-                return
-            }
-            
-            self.isLoading = true
-            
-            // Simulate Google authentication (replace with actual Google Sign-In in production)
-            let user = AppModels.User(
-                id: UUID().uuidString,
-                firstName: "Google",
-                lastName: "User",
-                email: "google_user@gmail.com",
-                role: .volunteer
-            )
-            
-            do {
-                try self.persistenceManager.saveString(UUID().uuidString, forKey: self.tokenKey)
-                try self.persistenceManager.save(user, forKey: self.userKey)
-                try self.userManager.cacheUser(user)
-                
-                self.currentUser = user
-                self.isAuthenticated = true
-                self.error = nil
-                self.isLoading = false
-                
-                NotificationCenter.default.post(name: Notification.Name.didLogin, object: nil)
-                NotificationCenter.default.post(name: Notification.Name.didUpdateAuth, object: nil)
-                
-                promise(.success(user))
-            } catch {
-                self.error = error
-                self.isLoading = false
-                promise(.failure(error))
-            }
-        }
-        .eraseToAnyPublisher()
-    }
-    
-    // MARK: - Async Auth Methods
-    
-    func loginAsync(email: String, password: String) async throws -> AppModels.User {
-        do {
-            return try await self.loginPublisher(email: email, password: password).async()
-        } catch {
-            throw error
-        }
-    }
-    
-    func loginWithApple() async throws -> AppModels.User {
-        do {
-            return try await self.loginWithApplePublisher().async()
-        } catch {
-            throw error
-        }
-    }
-    
-    func loginWithGmail() async throws -> AppModels.User {
-        do {
-            return try await self.loginWithGmailPublisher().async()
-        } catch {
-            throw error
-        }
-    }
-    
-    // MARK: - Direct User Save Methods
+    // MARK: - User Management
     
     func saveUser(user: AppModels.User) throws {
-        do {
-            // Generate a token for this user
-            let token = UUID().uuidString
-            try persistenceManager.saveString(token, forKey: tokenKey)
-            try persistenceManager.save(user, forKey: userKey)
-            try userManager.cacheUser(user)
-            
-            // Update state
-            self.currentUser = user
-            self.isAuthenticated = true
-            
-            // Notify system
-            NotificationCenter.default.post(name: Notification.Name.didLogin, object: nil)
-            NotificationCenter.default.post(name: Notification.Name.didUpdateAuth, object: nil)
-        } catch {
-            self.error = error
-            throw error
+        try userManager.saveUser(user)
+        self.currentUser = user
+        self.isAuthenticated = true
+        NotificationCenter.default.post(name: .didUpdateAuth, object: nil)
+        
+        // Schedule WWCC reminders if applicable
+        if user.role == .wwcVolunteer {
+            scheduleWWCCReminders(for: user)
         }
     }
     
     func saveAppleUser(user: AppModels.User) throws {
-        var updatedUser = user
-        updatedUser.id = UUID().uuidString
-        updatedUser.authProvider = "apple"
-        
+        var appleUser = user
+        appleUser.authProvider = "apple"
+        try saveUser(user: appleUser)
+    }
+    
+    func saveGmailUser(user: AppModels.User) throws {
+        var gmailUser = user
+        gmailUser.authProvider = "gmail"
+        try saveUser(user: gmailUser)
+    }
+    
+    func signIn(email: String, password: String) async throws {
         do {
-            try saveUser(user: updatedUser)
+            let user = try await authService.signIn(email: email, password: password)
+            self.currentUser = user
+            self.isAuthenticated = true
         } catch {
+            self.error = error
             throw error
         }
     }
     
-    func saveGmailUser(user: AppModels.User) throws {
-        var updatedUser = user
-        updatedUser.id = UUID().uuidString
-        updatedUser.authProvider = "gmail"
+    func login(email: String, password: String) -> AnyPublisher<AppModels.User, Error> {
+        isLoading = true
         
-        do {
-            try saveUser(user: updatedUser)
-        } catch {
-            throw error
+        return Future { [weak self] promise in
+            Task { @MainActor in
+                do {
+                    let user = try await self?.authService.signIn(email: email, password: password)
+                    self?.currentUser = user
+                    self?.isAuthenticated = true
+                    self?.isLoading = false
+                    if let user = user {
+                        promise(.success(user))
+                    } else {
+                        promise(.failure(AuthError.invalidCredentials))
+                    }
+                } catch {
+                    self?.error = error
+                    self?.isLoading = false
+                    promise(.failure(error))
+                }
+            }
+        }.eraseToAnyPublisher()
+    }
+    
+    func loginWithGroupCode(email: String, groupCode: String) -> AnyPublisher<AppModels.User, Error> {
+        isLoading = true
+        
+        return Future { [weak self] promise in
+            Task { @MainActor in
+                do {
+                    let user = try await self?.authService.signInWithGroupCode(code: groupCode)
+                    self?.currentUser = user
+                    self?.isAuthenticated = true
+                    self?.isLoading = false
+                    if let user = user {
+                        promise(.success(user))
+                    } else {
+                        promise(.failure(AuthError.invalidGroupCode))
+                    }
+                } catch {
+                    self?.error = error
+                    self?.isLoading = false
+                    promise(.failure(error))
+                }
+            }
+        }.eraseToAnyPublisher()
+    }
+    
+    func loginWithApplePublisher() -> AnyPublisher<AppModels.User, Error> {
+        isLoading = true
+        
+        return Future { [weak self] promise in
+            Task { @MainActor in
+                do {
+                    let user = try await self?.authService.signInWithApple()
+                    self?.currentUser = user
+                    self?.isAuthenticated = true
+                    self?.isLoading = false
+                    if let user = user {
+                        promise(.success(user))
+                    } else {
+                        promise(.failure(AuthError.appleSignInFailed))
+                    }
+                } catch {
+                    self?.error = error
+                    self?.isLoading = false
+                    promise(.failure(error))
+                }
+            }
+        }.eraseToAnyPublisher()
+    }
+    
+    func loginWithGmailPublisher() -> AnyPublisher<AppModels.User, Error> {
+        isLoading = true
+        
+        return Future { [weak self] promise in
+            Task { @MainActor in
+                do {
+                    let user = try await self?.authService.signInWithGoogle()
+                    self?.currentUser = user
+                    self?.isAuthenticated = true
+                    self?.isLoading = false
+                    if let user = user {
+                        promise(.success(user))
+                    } else {
+                        promise(.failure(AuthError.googleSignInFailed))
+                    }
+                } catch {
+                    self?.error = error
+                    self?.isLoading = false
+                    promise(.failure(error))
+                }
+            }
+        }.eraseToAnyPublisher()
+    }
+    
+    func logout() {
+        Task { @MainActor in
+            do {
+                try await authService.signOut()
+                self.currentUser = nil
+                self.isAuthenticated = false
+                NotificationCenter.default.post(name: .didLogout, object: nil)
+            } catch {
+                self.error = error
+            }
+        }
+    }
+    
+    func scheduleWWCCReminders(for user: AppModels.User) {
+        guard let wwcExpiry = user.wwcExpiry else { return }
+        
+        let center = UNUserNotificationCenter.current()
+        
+        // Remove any existing WWCC reminders
+        center.removePendingNotificationRequests(withIdentifiers: ["wwcc_3months", "wwcc_2months", "wwcc_1month", "wwcc_2weeks", "wwcc_1week", "wwcc_1day"])
+        
+        // Calculate reminder dates
+        let calendar = Calendar.current
+        let reminders = [
+            (days: -90, id: "wwcc_3months", title: "WWCC Expiry - 3 Months", body: "Your Working with Children Check will expire in 3 months. Please start the renewal process."),
+            (days: -60, id: "wwcc_2months", title: "WWCC Expiry - 2 Months", body: "Your Working with Children Check will expire in 2 months. Don't forget to renew it."),
+            (days: -30, id: "wwcc_1month", title: "WWCC Expiry - 1 Month", body: "Your Working with Children Check will expire in 1 month. Please renew it soon."),
+            (days: -14, id: "wwcc_2weeks", title: "WWCC Expiry - 2 Weeks", body: "Your Working with Children Check will expire in 2 weeks. Urgent: Please renew it."),
+            (days: -7, id: "wwcc_1week", title: "WWCC Expiry - 1 Week", body: "Your Working with Children Check will expire in 1 week. Very urgent: Please renew it now."),
+            (days: -1, id: "wwcc_1day", title: "WWCC Expiry - Tomorrow", body: "Your Working with Children Check will expire tomorrow. Critical: Please renew immediately.")
+        ]
+        
+        for reminder in reminders {
+            guard let date = calendar.date(byAdding: .day, value: reminder.days, to: wwcExpiry) else { continue }
+            
+            let content = UNMutableNotificationContent()
+            content.title = reminder.title
+            content.body = reminder.body
+            content.sound = .default
+            
+            let components = calendar.dateComponents([.year, .month, .day], from: date)
+            let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
+            
+            let request = UNNotificationRequest(identifier: reminder.id, content: content, trigger: trigger)
+            center.add(request)
         }
     }
 } 

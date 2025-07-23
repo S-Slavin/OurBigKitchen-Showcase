@@ -233,6 +233,7 @@ struct SimpleSignInView: View {
             Button(action: {
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                     isSignUp = 0
+                    appState.isSigningUp = false
                 }
             }) {
                 Text("Login")
@@ -268,6 +269,7 @@ struct SimpleSignInView: View {
             Button(action: {
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                     isSignUp = 1
+                    appState.isSigningUp = true
                 }
             }) {
                 Text("Sign Up")

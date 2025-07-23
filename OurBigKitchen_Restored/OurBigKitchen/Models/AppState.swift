@@ -10,6 +10,7 @@ class AppState: ObservableObject {
     @Published var hasAcceptedTerms: Bool = false
     @Published var hasAcceptedHealthProtocols: Bool = false
     @Published var userType: AppModels.UserRole?
+    @Published var isSigningUp = false // Track if user is in signup flow
     
     private let authManager = AuthManager.shared
     private let termsManager = TermsManager.shared

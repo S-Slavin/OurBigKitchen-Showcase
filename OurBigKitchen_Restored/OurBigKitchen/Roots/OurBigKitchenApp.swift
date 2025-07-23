@@ -160,31 +160,33 @@ struct RootView: View {
             }
             .padding()
         } else if !UserDefaults.standard.bool(forKey: "hasSeenOnboarding") {
-            // Onboarding welcome slides
-            UserWelcomeView(onComplete: {
-                // Optimized onboarding completion handler
-                // First set the flag to prevent redundant processing
-                UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
-                
-                // Then notify UI to update in a controlled sequence
-                // Use a single main thread call for better performance
-                DispatchQueue.main.async {
-                    print("DEBUG: Onboarding complete, proceeding to next screen")
+            // Only show welcome slides if not signing up
+            if !appState.isSigningUp {
+                UserWelcomeView(onComplete: {
+                    // Optimized onboarding completion handler
+                    // First set the flag to prevent redundant processing
+                    UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
                     
-                    // Post relevant notifications with slight delays
-                    NotificationCenter.default.post(name: .didUpdateAuth, object: nil)
-                    
-                    // Force UI refresh with animation
-                    withAnimation(.easeInOut(duration: 0.5)) {
-                        self.isLoading = false
+                    // Then notify UI to update in a controlled sequence
+                    // Use a single main thread call for better performance
+                    DispatchQueue.main.async {
+                        print("DEBUG: Onboarding complete, proceeding to next screen")
+                        
+                        // Post relevant notifications with slight delays
+                        NotificationCenter.default.post(name: .didUpdateAuth, object: nil)
+                        
+                        // Force UI refresh with animation
+                        withAnimation(.easeInOut(duration: 0.5)) {
+                            self.isLoading = false
+                        }
                     }
+                })
+                .onAppear {
+                    print("DEBUG: Showing UserWelcomeView")
                 }
-            })
-            .onAppear {
-                print("DEBUG: Showing UserWelcomeView")
+                .ignoresSafeArea()
             }
-            .ignoresSafeArea()
-        } else if !appState.isAuthenticated && !UserDefaults.standard.bool(forKey: "isAuthenticated") && !UserDefaults.standard.bool(forKey: "hasSignedIn") {
+            
             // Only show sign in if truly not authenticated in all sources
             // Use the new AuthTypeSelectionView for better user experience
             AuthTypeSelectionView()

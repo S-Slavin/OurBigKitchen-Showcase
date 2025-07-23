@@ -11,10 +11,12 @@ class ThemeManager: ObservableObject {
         static let secondary = Color.gray
         static let accent = Color.orange
         static let background = Color.white
+        static let cardBackground = Color(UIColor.systemBackground)
         static let mealsServed = Color.green
         static let donations = Color.purple
         static let wasteReduced = Color.yellow
         static let hoursContributed = Color.blue
+        static let volunteers = Color.orange
         static let primaryText = Color.primary
         static let secondaryText = Color.secondary
     }
@@ -25,21 +27,12 @@ class ThemeManager: ObservableObject {
         static let large: CGFloat = 16
     }
     
-    struct ShadowStyle {
-        static let small = Shadow(radius: 2, x: 0, y: 1)
-        static let medium = Shadow(radius: 4, x: 0, y: 2)
-        static let large = Shadow(radius: 8, x: 0, y: 4)
+    struct Shadow {
+        static let small: CGFloat = 2
+        static let medium: CGFloat = 4
+        static let large: CGFloat = 8
     }
     
-    func setDarkMode(_ enabled: Bool) {
-        isDarkMode = enabled
-    }
-    
-    func setPrimaryColor(_ color: Color) {
-        primaryColor = color
-    }
-    
-    func setAccentColor(_ color: Color) {
-        accentColor = color
-    }
+    static let shared = ThemeManager()
+    private init() {}
 } 

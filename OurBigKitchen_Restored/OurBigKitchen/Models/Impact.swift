@@ -125,4 +125,47 @@ struct Impact: Codable, Equatable, Hashable {
             timeSpent: nil
         )
     }
+}
+
+struct ImpactPost: Identifiable, Codable {
+    let id: String
+    let userId: String
+    let message: String
+    let date: Date
+    let tags: [String]
+    var views: Int
+    var shares: Int
+    let imageData: Data?
+    
+    init(id: String = UUID().uuidString,
+         userId: String,
+         message: String,
+         date: Date = Date(),
+         tags: [String] = [],
+         views: Int = 0,
+         shares: Int = 0,
+         imageData: Data? = nil) {
+        self.id = id
+        self.userId = userId
+        self.message = message
+        self.date = date
+        self.tags = tags
+        self.views = views
+        self.shares = shares
+        self.imageData = imageData
+    }
+}
+
+struct UserImpactStats: Codable {
+    let totalImpacts: Int
+    let totalShares: Int
+    let totalViews: Int
+    
+    init(totalImpacts: Int = 0,
+         totalShares: Int = 0,
+         totalViews: Int = 0) {
+        self.totalImpacts = totalImpacts
+        self.totalShares = totalShares
+        self.totalViews = totalViews
+    }
 } 

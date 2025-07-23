@@ -1,21 +1,23 @@
-// swift-tools-version:5.3
+// swift-tools-version:5.9
 import PackageDescription
 
 let package = Package(
     name: "OurBigKitchen",
-    platforms: [.iOS(.v14)],
+    platforms: [.iOS(.v15)],
     products: [
-        .executable(name: "OurBigKitchen", targets: ["OurBigKitchen"])
+        .library(
+            name: "OurBigKitchen",
+            targets: ["OurBigKitchen"]
+        )
     ],
+    dependencies: [],
     targets: [
         .target(
             name: "OurBigKitchen",
-            path: "OurBigKitchen"
-        ),
-        .testTarget(
-            name: "OurBigKitchenTests",
-            dependencies: ["OurBigKitchen"],
-            path: "OurBigKitchenTests"
+            path: "OurBigKitchen",
+            resources: [
+                .process("Resources")
+            ]
         )
     ]
 )

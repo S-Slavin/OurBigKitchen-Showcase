@@ -1,8 +1,8 @@
 import SwiftUI
 import Combine
 
-// ButtonStyles is imported from the project module
-class AuthViewModel: ObservableObject {
+@MainActor
+final class ContentViewModel: ObservableObject {
     @Published var isAuthenticated = false
     @Published var showingLoginSheet = false
     @Published var userType: AppModels.UserRole?
@@ -22,6 +22,10 @@ class AuthViewModel: ObservableObject {
         // Use the TermsManager to get terms acceptance status
         hasAcceptedTerms = termsManager.checkTermsStatus()
         
+        setupSubscriptions()
+    }
+    
+    private func setupSubscriptions() {
         // Subscribe to the TermsManager to stay updated
         termsManager.$hasAcceptedTerms
             .sink { [weak self] accepted in
@@ -35,27 +39,17 @@ class AuthViewModel: ObservableObject {
             .store(in: &cancellables)
         
         // Listen for authentication updates
-        NotificationCenter.default.addObserver(self, 
-            selector: #selector(refreshAuthState), 
-            name: .didUpdateAuth, 
-            object: nil)
-    }
-    
-    deinit {
-        NotificationCenter.default.removeObserver(self)
-    }
-    
-    @objc func refreshAuthState() {
-        Task { @MainActor in
-            self.checkAuthentication()
-        }
+        NotificationCenter.default
+            .publisher(for: .didUpdateAuth)
+            .sink { [weak self] _ in
+                self?.checkAuthentication()
+            }
+            .store(in: &cancellables)
     }
     
     func checkAuthentication() {
-        Task { @MainActor in
-            self.isAuthenticated = authManager.isAuthenticated
-            self.userType = authManager.currentUser?.role
-        }
+        isAuthenticated = authManager.isAuthenticated
+        userType = authManager.currentUser?.role
     }
     
     func logout() {
@@ -78,41 +72,6 @@ class AuthViewModel: ObservableObject {
             self.hasAcceptedTerms = true
             NotificationCenter.default.post(name: .didUpdateAuth, object: nil)
         }
-    }
-}
-
-class ContentViewModel: ObservableObject {
-    @Published var isAuthenticated = false
-    @Published var userType: AppModels.UserRole?
-    @Published var hasAcceptedTerms = false
-    
-    private let authManager = AuthManager.shared
-    private let termsManager = TermsManager.shared
-    private var cancellables = Set<AnyCancellable>()
-    
-    init() {
-        setupSubscriptions()
-        checkAuthentication()
-    }
-    
-    private func setupSubscriptions() {
-        NotificationCenter.default
-            .publisher(for: .didUpdateAuth)
-            .sink { [weak self] _ in
-                self?.checkAuthentication()
-            }
-            .store(in: &cancellables)
-            
-        termsManager.$hasAcceptedTerms
-            .sink { [weak self] accepted in
-                self?.hasAcceptedTerms = accepted
-            }
-            .store(in: &cancellables)
-    }
-    
-    private func checkAuthentication() {
-        isAuthenticated = authManager.isAuthenticated
-        userType = authManager.currentUser?.role
     }
 }
 

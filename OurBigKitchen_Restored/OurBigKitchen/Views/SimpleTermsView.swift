@@ -164,38 +164,22 @@ struct SimpleTermsView: View {
     
     private func acceptTerms() {
         print("Accepting terms...")
-        // Update UserDefaults directly in addition to using AppState
-        UserDefaults.standard.set(true, forKey: "termsAccepted")
-        UserDefaults.standard.set(true, forKey: "hasAcceptedTerms")
         
-        // Make sure health protocols are still required
-        UserDefaults.standard.set(false, forKey: "hasAcceptedHealthProtocols")
-        UserDefaults.standard.synchronize()
-        
-        // Reset health protocols to ensure it's not skipped
-        appState.resetHealthProtocols()
-        
-        // Update AppState for terms
-        appState.acceptTerms()
-        
-        // Post notification to force UI refresh - post multiple times with delays to ensure it's processed
-        NotificationCenter.default.post(name: .didUpdateTerms, object: nil)
-        
-        // Force another update to ensure health protocols state is correct
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            // Confirm health protocols are still marked as not accepted
-            if UserDefaults.standard.bool(forKey: "hasAcceptedHealthProtocols") {
-                UserDefaults.standard.set(false, forKey: "hasAcceptedHealthProtocols")
-                UserDefaults.standard.synchronize()
-                appState.resetHealthProtocols()
-            }
+        Task { @MainActor in
+            // Update UserDefaults in a single batch
+            let defaults = UserDefaults.standard
+            defaults.set(true, forKey: "termsAccepted")
+            defaults.set(true, forKey: "hasAcceptedTerms")
+            defaults.set(false, forKey: "hasAcceptedHealthProtocols")
             
-            // Confirm terms are accepted
+            // Reset health protocols to ensure it's not skipped
+            appState.resetHealthProtocols()
+            
+            // Update AppState for terms
+            appState.acceptTerms()
+            
+            // Post a single notification to trigger UI updates
             NotificationCenter.default.post(name: .didUpdateTerms, object: nil)
-            NotificationCenter.default.post(name: .didUpdateHealthProtocols, object: nil)
-            NotificationCenter.default.post(name: .didUpdateAuth, object: nil)
-            
-            print("Terms accepted in appState, hasAcceptedTerms: \(appState.hasAcceptedTerms), hasAcceptedHealthProtocols: \(appState.hasAcceptedHealthProtocols)")
         }
     }
 }

@@ -1,6 +1,15 @@
 import Foundation
 import SwiftUI
 
+extension NSNotification.Name {
+    static let didUpdateAuth = NSNotification.Name("didUpdateAuth")
+    static let didLogout = NSNotification.Name("didLogout")
+    static let didUpdateUser = NSNotification.Name("didUpdateUser")
+    static let didDeleteUser = NSNotification.Name("didDeleteUser")
+    static let didUpdatePreferences = NSNotification.Name("didUpdatePreferences")
+    static let didClearUserData = NSNotification.Name("didClearUserData")
+}
+
 enum AppModels {
     // MARK: - User Models
     enum UserRole: String, Codable, CaseIterable {
@@ -72,10 +81,11 @@ enum AppModels {
         let hasFoodSafetyRegistration: Bool
         var authProvider: String?
         var company: String?
+        var dob: Date?
         
         // Optional fields for different volunteer types
         var wwcNumber: String?
-        var wwcExpiryDate: Date?
+        var wwcExpiry: Date?
         var companyName: String?
         var companyPosition: String?
         var companyEmail: String?
@@ -92,7 +102,13 @@ enum AppModels {
              stats: UserStats = UserStats(),
              hasFoodSafetyRegistration: Bool = false,
              authProvider: String? = nil,
-             company: String? = nil) {
+             company: String? = nil,
+             dob: Date? = nil,
+             wwcNumber: String? = nil,
+             wwcExpiry: Date? = nil,
+             companyName: String? = nil,
+             companyPosition: String? = nil,
+             companyEmail: String? = nil) {
             self.id = id
             self.firstName = firstName
             self.lastName = lastName
@@ -106,6 +122,12 @@ enum AppModels {
             self.hasFoodSafetyRegistration = hasFoodSafetyRegistration
             self.authProvider = authProvider
             self.company = company
+            self.dob = dob
+            self.wwcNumber = wwcNumber
+            self.wwcExpiry = wwcExpiry
+            self.companyName = companyName
+            self.companyPosition = companyPosition
+            self.companyEmail = companyEmail
         }
         
         func isValid() -> Bool {
@@ -118,7 +140,7 @@ enum AppModels {
         }
         
         var isWWCVerified: Bool {
-            guard let expiryDate = wwcExpiryDate else { return false }
+            guard let expiryDate = wwcExpiry else { return false }
             return expiryDate > Date()
         }
         

@@ -123,12 +123,12 @@ class ImpactService: ObservableObject {
             let post = ImpactPost(
                 id: "sample\(i)",
                 userId: userIds[i % userIds.count],
+                message: messages[i % messages.count],
                 date: Calendar.current.date(byAdding: .day, value: -i, to: Date()) ?? Date(),
                 tags: Array(sampleTags.prefix(2 + (i % 3))),
-                message: messages[i % messages.count],
-                imageData: nil, // No actual image data in samples
                 views: Int.random(in: 5...20),
-                shares: Int.random(in: 0...10)
+                shares: Int.random(in: 0...10),
+                imageData: nil // No actual image data in samples
             )
             
             impactPosts.append(post)

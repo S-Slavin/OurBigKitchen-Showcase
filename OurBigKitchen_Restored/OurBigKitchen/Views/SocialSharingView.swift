@@ -447,9 +447,24 @@ struct SocialSharingView: View {
                     .bold()
                 
                 HStack(spacing: 20) {
-                    ImpactStat(value: "\(viewModel.userImpact?.hoursContributed ?? 0)", label: "Hours")
-                    ImpactStat(value: "\(viewModel.userImpact?.mealsProvided ?? 0)", label: "Meals")
-                    ImpactStat(value: "\(viewModel.userImpact?.eventsAttended ?? 0)", label: "Events")
+                    ImpactStat(
+                        icon: "clock.fill",
+                        color: ThemeManager.Colors.hoursContributed,
+                        value: "\(viewModel.userImpact?.hoursContributed ?? 0)",
+                        label: "Hours"
+                    )
+                    ImpactStat(
+                        icon: "fork.knife",
+                        color: ThemeManager.Colors.mealsServed,
+                        value: "\(viewModel.userImpact?.mealsProvided ?? 0)",
+                        label: "Meals"
+                    )
+                    ImpactStat(
+                        icon: "calendar",
+                        color: ThemeManager.Colors.accent,
+                        value: "\(viewModel.userImpact?.eventsAttended ?? 0)",
+                        label: "Events"
+                    )
                 }
             }
             .padding()

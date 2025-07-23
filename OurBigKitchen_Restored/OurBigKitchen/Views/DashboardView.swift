@@ -2,7 +2,7 @@ import SwiftUI
 
 struct DashboardView: View {
     @StateObject private var viewModel = MainViewModel()
-    @EnvironmentObject private var authViewModel: AuthViewModel
+    @StateObject private var contentViewModel = ContentViewModel()
     @State private var showingSocialSharingView = false
     @State private var showingWebView = false
     @State private var showingLoginSheet = false
@@ -44,7 +44,7 @@ struct DashboardView: View {
             }
             .sheet(isPresented: $showingLoginSheet, onDismiss: {
                 // Refresh auth state when login sheet is dismissed
-                authViewModel.checkAuthentication()
+                contentViewModel.checkAuthentication()
                 print("DashboardView login sheet dismissed")
             }) {
                 // Use our independent login wrapper
@@ -251,5 +251,4 @@ struct DashboardView: View {
 
 #Preview {
     DashboardView()
-        .environmentObject(AuthViewModel())
 } 

@@ -72,12 +72,12 @@ class ImpactViewModel: ObservableObject {
             let testImpact = ImpactPost(
                 id: "test-impact",
                 userId: userManager.currentUserId ?? "guest",
+                message: "This is a test impact post",
                 date: Date(),
                 tags: ["Testing", "Demo"],
-                message: "This is a test impact post",
-                imageData: imageData,
                 views: 10,
-                shares: 5
+                shares: 5,
+                imageData: imageData
             )
             
             // Set as selected impact
@@ -107,12 +107,12 @@ class ImpactViewModel: ObservableObject {
         let newImpact = ImpactPost(
             id: UUID().uuidString,
             userId: userManager.currentUserId ?? "guest",
+            message: customMessage,
             date: Date(),
             tags: Array(selectedTags),
-            message: customMessage,
-            imageData: imageData,
             views: 0,
-            shares: 0
+            shares: 0,
+            imageData: imageData
         )
         
         // Save the impact post
@@ -248,95 +248,21 @@ class ImpactViewModel: ObservableObject {
     }
     
     private func loadUpcomingSessions() {
-        // In a real app, you would fetch from a server or database
-        // For now, just use sample data
-        self.upcomingSessions = UpcomingSession.samples
-        
-        // Example of how to load from network in a real app:
-        /* 
-        EventManager.shared.getUserEvents(userId: userManager.currentUserId ?? "guest")
-            .receive(on: DispatchQueue.main)
-            .sink(
-                receiveCompletion: { [weak self] completion in
-                    if case .failure(let error) = completion {
-                        print("Error loading upcoming sessions: \(error)")
-                        // Fall back to sample data
-                        self?.upcomingSessions = UpcomingSession.samples
-                    }
-                },
-                receiveValue: { [weak self] events in
-                    // Convert events to sessions
-                    self?.upcomingSessions = events.map { event in
-                        UpcomingSession(
-                            id: event.id,
-                            title: event.title,
-                            date: event.date,
-                            location: event.location,
-                            duration: event.duration,
-                            type: self?.mapEventTypeToSessionType(event.type) ?? .other
-                        )
-                    }
-                }
+        // For demo purposes, create some sample upcoming sessions
+        upcomingSessions = [
+            UpcomingSession(
+                id: "1",
+                title: "Morning Kitchen Shift",
+                date: Calendar.current.date(byAdding: .day, value: 2, to: Date()) ?? Date(),
+                duration: 3600 * 3 // 3 hours
+            ),
+            UpcomingSession(
+                id: "2",
+                title: "Afternoon Delivery Run",
+                date: Calendar.current.date(byAdding: .day, value: 3, to: Date()) ?? Date(),
+                duration: 3600 * 2 // 2 hours
             )
-            .store(in: &cancellables)
-        */
-    }
-    
-    // Helper function to map event types to session types
-    private func mapEventTypeToSessionType(_ eventType: Event.EventType) -> UpcomingSession.SessionType {
-        switch eventType {
-        case .cooking:
-            return .cooking
-        case .distribution:
-            return .delivery
-        case .training:
-            return .volunteering
-        case .other:
-            return .other
-        }
-    }
-    
-    private func createSharingImage(image: UIImage, tags: [String], message: String) -> some View {
-        VStack(spacing: 12) {
-            Image(uiImage: image)
-                .resizable()
-                .scaledToFit()
-                .cornerRadius(12)
-            
-            if !tags.isEmpty {
-                HStack {
-                    ForEach(tags.prefix(3), id: \.self) { tag in
-                        Text("#\(tag)")
-                            .font(.caption)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(Color.blue.opacity(0.2))
-                            .cornerRadius(8)
-                    }
-                    if tags.count > 3 {
-                        Text("+\(tags.count - 3) more")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                }
-            }
-            
-            if !message.isEmpty {
-                Text(message)
-                    .font(.body)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal)
-            }
-            
-            Text("Shared via Our Big Kitchen App")
-                .font(.caption)
-                .foregroundColor(.secondary)
-                .padding(.top, 4)
-        }
-        .padding()
-        .background(Color.white)
-        .cornerRadius(16)
-        .shadow(radius: 5)
+        ]
     }
     
     private func showError(title: String, message: String) {
@@ -345,57 +271,67 @@ class ImpactViewModel: ObservableObject {
         showAlert = true
     }
     
+    private func createSharingImage(image: UIImage, tags: [String], message: String) -> some View {
+        VStack(spacing: 16) {
+            Image(uiImage: image)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(maxHeight: 300)
+            
+            Text(message)
+                .font(.body)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
+            
+            FlowLayout(spacing: 8) {
+                ForEach(tags, id: \.self) { tag in
+                    Text("#\(tag)")
+                        .font(.caption)
+                        .foregroundColor(.blue)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color.blue.opacity(0.1))
+                        )
+                }
+            }
+            .padding(.horizontal)
+            
+            Text("Shared via Our Big Kitchen")
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+        .padding()
+        .background(Color.white)
+    }
+    
     private func shareToFacebook(impact: ImpactPost) {
-        // For now, use the standard share sheet
-        // A real implementation would use the Facebook SDK
+        // TODO: Implement Facebook sharing
         shareImpact()
     }
     
     private func shareToTwitter(impact: ImpactPost) {
-        // For now, use the standard share sheet
-        // A real implementation would use the Twitter SDK or API
+        // TODO: Implement Twitter sharing
         shareImpact()
     }
     
     private func shareToInstagram(impact: ImpactPost) {
-        // For now, use the standard share sheet
-        // A real implementation would use the Instagram SDK or API
+        // TODO: Implement Instagram sharing
         shareImpact()
     }
 }
 
 // MARK: - Supporting Types
 
-struct ImpactPost: Identifiable, Equatable {
-    let id: String
-    let userId: String
-    let date: Date
-    let tags: [String]
-    let message: String
-    let imageData: Data?
-    var views: Int
-    var shares: Int
-}
-
-struct UserImpactStats {
-    let totalImpacts: Int
-    let totalShares: Int
-    let totalViews: Int
-}
-
-// MARK: - Share Sheet
-
 struct ImpactShareSheet: UIViewControllerRepresentable {
     let items: [Any]
     
     func makeUIViewController(context: Context) -> UIActivityViewController {
-        let controller = UIActivityViewController(activityItems: items, applicationActivities: nil)
-        return controller
+        UIActivityViewController(activityItems: items, applicationActivities: nil)
     }
     
-    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {
-        // Nothing to update
-    }
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }
 
 // MARK: - Image Renderer for iOS 15+

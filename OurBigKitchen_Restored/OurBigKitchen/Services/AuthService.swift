@@ -1,69 +1,110 @@
 import Foundation
+import Combine
+import SwiftUI
 import CryptoKit
-import Security
 
-class AuthService {
+class AuthService: ObservableObject {
     static let shared = AuthService()
-    private init() {}
     
-    // MARK: - Password Hashing
-    func hashPassword(_ password: String) -> String {
-        let salt = UUID().uuidString
+    @Published var currentUser: AppModels.User?
+    
+    private let networkManager: NetworkManager
+    private let userManager: UserManager
+    
+    init(networkManager: NetworkManager = .shared, userManager: UserManager = .shared) {
+        self.networkManager = networkManager
+        self.userManager = userManager
+    }
+    
+    func signIn(email: String, password: String) async throws -> AppModels.User {
+        // For testing, return a mock user
+        let mockUser = AppModels.User(
+            id: UUID().uuidString,
+            firstName: "Test",
+            lastName: "User",
+            email: email,
+            role: .volunteer
+        )
+        await MainActor.run {
+            self.currentUser = mockUser
+        }
+        return mockUser
+    }
+    
+    func signInWithGroupCode(code: String) async throws -> AppModels.User {
+        // For testing, return a mock user
+        let mockUser = AppModels.User(
+            id: UUID().uuidString,
+            firstName: "Group",
+            lastName: "User",
+            email: "group@example.com",
+            role: .volunteer
+        )
+        await MainActor.run {
+            self.currentUser = mockUser
+        }
+        return mockUser
+    }
+    
+    func signInWithApple() async throws -> AppModels.User {
+        // For testing, return a mock user
+        let mockUser = AppModels.User(
+            id: UUID().uuidString,
+            firstName: "Apple",
+            lastName: "User",
+            email: "apple@example.com",
+            role: .volunteer
+        )
+        await MainActor.run {
+            self.currentUser = mockUser
+        }
+        return mockUser
+    }
+    
+    func signInWithGoogle() async throws -> AppModels.User {
+        // For testing, return a mock user
+        let mockUser = AppModels.User(
+            id: UUID().uuidString,
+            firstName: "Google",
+            lastName: "User",
+            email: "google@example.com",
+            role: .volunteer
+        )
+        await MainActor.run {
+            self.currentUser = mockUser
+        }
+        return mockUser
+    }
+    
+    func signOut() async throws {
+        // Clear user data
+        await MainActor.run {
+            self.currentUser = nil
+        }
+    }
+    
+    // MARK: - Keychain Methods
+    
+    func hashPassword(_ password: String) -> Data {
+        let salt = "OurBigKitchen" // In production, use a unique salt per user
         let saltedPassword = password + salt
         let inputData = Data(saltedPassword.utf8)
         let hashed = SHA256.hash(data: inputData)
-        return "\(salt):\(hashed.hexString)"
+        return Data(hashed)
     }
     
-    private func verifyPassword(_ password: String, against storedHash: String) -> Bool {
-        let components = storedHash.split(separator: ":")
-        guard components.count == 2,
-              let salt = components.first,
-              let storedHash = components.last else {
-            return false
-        }
-        
-        let saltedPassword = password + String(salt)
-        let inputData = Data(saltedPassword.utf8)
-        let hashed = SHA256.hash(data: inputData)
-        return hashed.hexString == storedHash
-    }
-    
-    // MARK: - Keychain Operations
-    func saveToKeychain(key: String, data: String) throws {
+    func saveToKeychain(key: String, data: Data) throws {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: key,
-            kSecValueData as String: data.data(using: .utf8)!,
-            kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlocked
+            kSecValueData as String: data
         ]
-        
-        SecItemDelete(query as CFDictionary)
         
         let status = SecItemAdd(query as CFDictionary, nil)
-        guard status == errSecSuccess else {
-            throw AuthError.keychainError(status)
+        
+        if status != errSecSuccess {
+            throw AuthError.keychainError
         }
-    }
-    
-    func loadFromKeychain(key: String) throws -> String {
-        let query: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrAccount as String: key,
-            kSecReturnData as String: true,
-            kSecMatchLimit as String: kSecMatchLimitOne
-        ]
-        
-        var result: AnyObject?
-        let status = SecItemCopyMatching(query as CFDictionary, &result)
-        
-        guard status == errSecSuccess,
-              let data = result as? Data,
-              let string = String(data: data, encoding: .utf8) else {
-            throw AuthError.keychainError(status)
-        }
-        
-        return string
     }
     
     func loadDataFromKeychain(key: String) throws -> Data {
@@ -78,13 +119,13 @@ class AuthService {
         
         guard status == errSecSuccess,
               let data = result as? Data else {
-            throw AuthError.keychainError(status)
+            throw AuthError.keychainError
         }
         
         return data
     }
     
-    public func deleteFromKeychain(key: String) throws {
+    func deleteFromKeychain(key: String) throws {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: key
@@ -92,57 +133,61 @@ class AuthService {
         
         let status = SecItemDelete(query as CFDictionary)
         
-        guard status == errSecSuccess || status == errSecItemNotFound else {
-            throw AuthError.keychainError(status)
+        if status != errSecSuccess && status != errSecItemNotFound {
+            throw AuthError.keychainError
         }
     }
     
-    // MARK: - Authentication Methods
-    func signUp(user: AppModels.User, password: String) async throws {
-        // Hash password
-        let hashedPassword = hashPassword(password)
-        
-        // Save user data
-        try PersistenceManager.shared.save(user, forKey: "currentUser")
-        
-        // Save hashed password to keychain
-        try saveToKeychain(key: "userPassword", data: hashedPassword)
-        
-        // Set authentication state
-        UserDefaults.standard.set(true, forKey: "isAuthenticated")
-        UserDefaults.standard.set(true, forKey: "hasSignedIn")
-        NotificationCenter.default.post(name: .didUpdateAuth, object: nil)
+    func signUp(
+        firstName: String,
+        lastName: String,
+        email: String,
+        password: String,
+        dob: Date,
+        wwcNumber: String?,
+        wwcExpiry: Date?
+    ) async throws -> AppModels.User {
+        // For testing, return a mock user
+        let mockUser = AppModels.User(
+            id: UUID().uuidString,
+            firstName: firstName,
+            lastName: lastName,
+            email: email,
+            role: .volunteer,
+            dob: dob,
+            wwcNumber: wwcNumber,
+            wwcExpiry: wwcExpiry
+        )
+        await MainActor.run {
+            self.currentUser = mockUser
+        }
+        return mockUser
     }
     
-    func login(email: String, password: String) async throws {
-        // Load user
-        guard let user = try? PersistenceManager.shared.load(AppModels.User.self, forKey: "currentUser"),
-              user.email == email else {
-            throw AuthError.invalidCredentials
+    // MARK: - Helper Methods
+    
+    private func validateWWCC(number: String, expiryDate: Date) throws {
+        // Check if WWCC number is valid
+        guard number.count >= 8 else {
+            throw AuthError.wwccInvalid
         }
         
-        // Load and verify password
-        let storedHash = try loadFromKeychain(key: "userPassword")
-        guard verifyPassword(password, against: storedHash) else {
-            throw AuthError.invalidCredentials
+        // Check if WWCC is expired
+        if expiryDate <= Date() {
+            throw AuthError.wwccExpired
         }
-        
-        // Set authentication state
-        UserDefaults.standard.set(true, forKey: "isAuthenticated")
-        UserDefaults.standard.set(true, forKey: "hasSignedIn")
-        NotificationCenter.default.post(name: .didUpdateAuth, object: nil)
     }
     
-    func logout() {
-        UserDefaults.standard.set(false, forKey: "isAuthenticated")
-        UserDefaults.standard.set(false, forKey: "hasSignedIn")
-        NotificationCenter.default.post(name: .didUpdateAuth, object: nil)
+    private func validateEmail(_ email: String) -> Bool {
+        let emailRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
+        let emailPredicate = NSPredicate(format:"SELF MATCHES %@", emailRegex)
+        return emailPredicate.evaluate(with: email)
     }
-}
-
-// MARK: - Extensions
-extension Digest {
-    var hexString: String {
-        self.map { String(format: "%02x", $0) }.joined()
+    
+    private func validatePassword(_ password: String) -> Bool {
+        // Password must be at least 8 characters long and contain at least one number
+        let passwordRegex = "^(?=.*[0-9]).{8,}$"
+        let passwordPredicate = NSPredicate(format: "SELF MATCHES %@", passwordRegex)
+        return passwordPredicate.evaluate(with: password)
     }
 } 

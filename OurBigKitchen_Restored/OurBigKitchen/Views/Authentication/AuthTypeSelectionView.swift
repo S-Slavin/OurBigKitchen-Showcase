@@ -108,11 +108,13 @@ struct AuthTypeSelectionView: View {
     
     @ViewBuilder
     private var destinationView: some View {
-        switch selectedType {
-        case .volunteer:
-            SimpleSignInView()
-        case .corporate:
-            CorporateSignInView()
+        RegistrationSignupSlidesView { volunteerType in
+            switch volunteerType {
+            case .individual:
+                SimpleSignInView()
+            case .corporate:
+                CorporateSignInView()
+            }
         }
     }
 }

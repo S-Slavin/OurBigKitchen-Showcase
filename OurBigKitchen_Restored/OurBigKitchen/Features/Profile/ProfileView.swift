@@ -1,327 +1,179 @@
 import SwiftUI
 
 struct ProfileView: View {
-    @EnvironmentObject var authService: AuthenticationService
-    @EnvironmentObject var impactService: ImpactService
+    @EnvironmentObject var authService: AuthService
     @EnvironmentObject var sessionService: SessionService
+    @EnvironmentObject var impactService: ImpactService
+    @StateObject private var viewModel = ImpactViewModel()
     
     var body: some View {
-        NavigationView {
-            ScrollView {
-                VStack(spacing: 25) {
-                    // Profile Header
-                    ProfileHeaderView()
+        ScrollView {
+            VStack(spacing: 20) {
+                // Profile Header
+                VStack {
+                    if let imageURL = authService.currentUser?.profileImageURL,
+                       let url = URL(string: imageURL) {
+                        AsyncImage(url: url) { image in
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(width: 120, height: 120)
+                                .clipShape(Circle())
+                        } placeholder: {
+                            Circle()
+                                .fill(Color.gray.opacity(0.2))
+                                .frame(width: 120, height: 120)
+                        }
+                    } else {
+                        Circle()
+                            .fill(Color.gray.opacity(0.2))
+                            .frame(width: 120, height: 120)
+                    }
                     
-                    // Statistics Section
-                    StatisticsView()
+                    Text(authService.currentUser?.fullName ?? "Guest")
+                        .font(.title2)
+                        .bold()
                     
-                    // Recent Activity
-                    RecentActivityView()
-                    
-                    // Achievements
-                    AchievementsView()
-                    
-                    Spacer()
+                    if let bio = authService.currentUser?.bio {
+                        Text(bio)
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                    }
                 }
                 .padding()
-            }
-            .background(Color(.systemGroupedBackground))
-            .navigationTitle("Profile")
-            .navigationBarTitleDisplayMode(.large)
-        }
-    }
-}
-
-struct ProfileHeaderView: View {
-    @EnvironmentObject var authService: AuthenticationService
-    
-    var body: some View {
-        VStack(spacing: 20) {
-            // Profile Image
-            Button(action: {
-                // Handle profile image change
-            }) {
-                ZStack {
-                    Circle()
-                        .fill(LinearGradient(
-                            gradient: Gradient(colors: [Color.blue, Color.purple]),
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ))
-                        .frame(width: 120, height: 120)
-                    
-                    Image(systemName: "person.fill")
-                        .font(.system(size: 60))
-                        .foregroundColor(.white)
-                }
-                .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 5)
-            }
-            
-            // User Info
-            VStack(spacing: 8) {
-                Text(authService.currentUser?.name ?? "John Doe")
-                    .font(.title2)
-                    .fontWeight(.bold)
                 
-                Text(authService.currentUser?.email ?? "john.doe@example.com")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                
-                // Edit Profile Button
-                Button(action: {
-                    // Handle edit profile
-                }) {
-                    HStack {
-                        Image(systemName: "pencil")
-                        Text("Edit Profile")
+                // Stats Section
+                if let stats = authService.currentUser?.stats {
+                    HStack(spacing: 30) {
+                        VStack {
+                            Text("\(stats.hoursVolunteered)")
+                                .font(.title)
+                                .bold()
+                            Text("Hours")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        
+                        VStack {
+                            Text("\(stats.mealsPrepared)")
+                                .font(.title)
+                                .bold()
+                            Text("Meals")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        
+                        VStack {
+                            Text("\(stats.eventsAttended)")
+                                .font(.title)
+                                .bold()
+                            Text("Events")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
                     }
-                    .font(.caption)
-                    .foregroundColor(.blue)
-                    .padding(.horizontal, 15)
-                    .padding(.vertical, 8)
-                    .background(Color.blue.opacity(0.1))
-                    .cornerRadius(20)
+                    .padding()
+                    .background(
+                        RoundedRectangle(cornerRadius: ThemeManager.CornerRadius.medium)
+                            .fill(Color.white)
+                            .shadow(radius: ThemeManager.Shadow.small)
+                    )
+                    .padding(.horizontal)
+                }
+                
+                // Achievements Section
+                if let achievements = authService.currentUser?.achievements, !achievements.isEmpty {
+                    VStack(alignment: .leading) {
+                        Text("Achievements")
+                            .font(.headline)
+                            .padding(.horizontal)
+                        
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 15) {
+                                ForEach(achievements) { achievement in
+                                    VStack(alignment: .leading) {
+                                        Text(achievement.title)
+                                            .font(.subheadline)
+                                            .bold()
+                                        Text(achievement.description)
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                        Text(achievement.dateAchieved, style: .date)
+                                            .font(.caption2)
+                                            .foregroundColor(.secondary)
+                                    }
+                                    .padding()
+                                    .frame(width: 200)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: ThemeManager.CornerRadius.small)
+                                            .fill(Color.white)
+                                            .shadow(radius: ThemeManager.Shadow.small)
+                                    )
+                                }
+                            }
+                            .padding(.horizontal)
+                        }
+                    }
+                }
+                
+                // Recent Activities Section
+                VStack(alignment: .leading) {
+                    Text("Recent Activities")
+                        .font(.headline)
+                        .padding(.horizontal)
+                    
+                    if !impactService.impactPosts.isEmpty {
+                        ForEach(impactService.impactPosts) { post in
+                            ImpactPostCard(post: post)
+                        }
+                    } else {
+                        Text("No recent activities")
+                            .foregroundColor(.secondary)
+                            .padding()
+                    }
                 }
             }
         }
-        .padding()
-        .background(Color(.systemBackground))
-        .cornerRadius(20)
-        .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 5)
+        .navigationTitle("Profile")
     }
 }
 
-struct StatisticsView: View {
-    @EnvironmentObject var impactService: ImpactService
-    @EnvironmentObject var sessionService: SessionService
+struct ImpactPostCard: View {
+    let post: ImpactPost
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 15) {
-            Text("Your Statistics")
-                .font(.headline)
-                .fontWeight(.semibold)
+        VStack(alignment: .leading, spacing: 8) {
+            Text(post.message)
+                .font(.body)
             
-            LazyVGrid(columns: [
-                GridItem(.flexible()),
-                GridItem(.flexible())
-            ], spacing: 15) {
-                StatisticCard(
-                    icon: "calendar",
-                    title: "Total Sessions",
-                    value: "\(sessionService.sessions.count)",
-                    color: .blue
-                )
-                
-                StatisticCard(
-                    icon: "clock",
-                    title: "Hours Volunteered",
-                    value: String(format: "%.1f", impactService.impacts.reduce(0) { $0 + $1.hours }),
-                    color: .green
-                )
-                
-                StatisticCard(
-                    icon: "fork.knife",
-                    title: "Meals Served",
-                    value: "\(impactService.totalMealsServed)",
-                    color: .orange
-                )
-                
-                StatisticCard(
-                    icon: "heart",
-                    title: "Impact Score",
-                    value: "\(impactService.livesTouched)",
-                    color: .red
-                )
-            }
-        }
-        .padding()
-        .background(Color(.systemBackground))
-        .cornerRadius(20)
-        .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 5)
-    }
-}
-
-struct StatisticCard: View {
-    let icon: String
-    let title: String
-    let value: String
-    let color: Color
-    
-    var body: some View {
-        VStack(spacing: 12) {
-            Image(systemName: icon)
-                .font(.title2)
-                .foregroundColor(color)
-                .frame(width: 40, height: 40)
-                .background(color.opacity(0.1))
-                .cornerRadius(12)
-            
-            VStack(spacing: 4) {
-                Text(value)
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .foregroundColor(color)
-                
-                Text(title)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
-            }
-        }
-        .frame(maxWidth: .infinity)
-        .padding()
-        .background(Color(.systemBackground))
-        .cornerRadius(15)
-        .overlay(
-            RoundedRectangle(cornerRadius: 15)
-                .stroke(color.opacity(0.2), lineWidth: 1)
-        )
-    }
-}
-
-struct RecentActivityView: View {
-    @EnvironmentObject var impactService: ImpactService
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 15) {
             HStack {
-                Text("Recent Activity")
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                
-                Spacer()
-                
-                Button("View All") {
-                    // Navigate to full activity list
+                ForEach(post.tags, id: \.self) { tag in
+                    Text("#\(tag)")
+                        .font(.caption)
+                        .foregroundColor(ThemeManager.Colors.accent)
                 }
+            }
+            
+            Text(post.date, style: .date)
                 .font(.caption)
-                .foregroundColor(.blue)
-            }
+                .foregroundColor(.secondary)
             
-            if impactService.impacts.isEmpty {
-                VStack(spacing: 10) {
-                    Image(systemName: "clock")
-                        .font(.title)
-                        .foregroundColor(.gray)
-                    
-                    Text("No recent activity")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(30)
-            } else {
-                LazyVStack(spacing: 10) {
-                    ForEach(impactService.impacts.prefix(3)) { impact in
-                        ActivityRowView(impact: impact)
-                    }
-                }
+            HStack {
+                Label("\(post.views)", systemImage: "eye.fill")
+                Label("\(post.shares)", systemImage: "square.and.arrow.up")
             }
+            .font(.caption)
+            .foregroundColor(.secondary)
         }
         .padding()
-        .background(Color(.systemBackground))
-        .cornerRadius(20)
-        .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 5)
-    }
-}
-
-struct ActivityRowView: View {
-    let impact: Impact
-    
-    var body: some View {
-        HStack(spacing: 12) {
-            Circle()
-                .fill(Color.green)
-                .frame(width: 8, height: 8)
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text(impact.description)
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                
-                HStack {
-                    Text(impact.location)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    
-                    Spacer()
-                    
-                    Text("\(impact.hours, specifier: "%.1f")h")
-                        .font(.caption)
-                        .foregroundColor(.blue)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 2)
-                        .background(Color.blue.opacity(0.1))
-                        .cornerRadius(4)
-                }
-            }
-        }
-        .padding(.vertical, 8)
-    }
-}
-
-struct AchievementsView: View {
-    var body: some View {
-        VStack(alignment: .leading, spacing: 15) {
-            Text("Achievements")
-                .font(.headline)
-                .fontWeight(.semibold)
-            
-            LazyVGrid(columns: [
-                GridItem(.flexible()),
-                GridItem(.flexible()),
-                GridItem(.flexible())
-            ], spacing: 15) {
-                AchievementBadge(
-                    icon: "star.fill",
-                    title: "First Volunteer",
-                    earned: true,
-                    color: .yellow
-                )
-                
-                AchievementBadge(
-                    icon: "flame.fill",
-                    title: "10 Hours",
-                    earned: false,
-                    color: .orange
-                )
-                
-                AchievementBadge(
-                    icon: "heart.fill",
-                    title: "Community Hero",
-                    earned: false,
-                    color: .red
-                )
-            }
-        }
-        .padding()
-        .background(Color(.systemBackground))
-        .cornerRadius(20)
-        .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 5)
-    }
-}
-
-struct AchievementBadge: View {
-    let icon: String
-    let title: String
-    let earned: Bool
-    let color: Color
-    
-    var body: some View {
-        VStack(spacing: 8) {
-            Image(systemName: icon)
-                .font(.title2)
-                .foregroundColor(earned ? color : .gray)
-                .frame(width: 40, height: 40)
-                .background((earned ? color : Color.gray).opacity(0.1))
-                .cornerRadius(20)
-            
-            Text(title)
-                .font(.caption2)
-                .fontWeight(.medium)
-                .foregroundColor(earned ? .primary : .secondary)
-                .multilineTextAlignment(.center)
-        }
-        .opacity(earned ? 1.0 : 0.6)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: ThemeManager.CornerRadius.medium)
+                .fill(Color.white)
+                .shadow(radius: ThemeManager.Shadow.small)
+        )
+        .padding(.horizontal)
     }
 } 
