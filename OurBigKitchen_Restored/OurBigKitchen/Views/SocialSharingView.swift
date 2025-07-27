@@ -87,6 +87,24 @@ struct SocialSharingView: View {
             .navigationTitle("Share Your Journey to Create a Ripple Effect of Change")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        HStack {
+                            Image(systemName: "arrow.right.circle.fill")
+                                .font(.system(size: 18))
+                            Text("SKIP FOR DEMO")
+                                .font(.headline)
+                                .fontWeight(.bold)
+                        }
+                        .foregroundColor(.white)
+                        .padding(.vertical, 12)
+                        .padding(.horizontal, 20)
+                        .background(Color.orange)
+                        .cornerRadius(12)
+                    }
+                }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
                         dismiss()
@@ -113,9 +131,26 @@ struct SocialSharingView: View {
                 }
             }
             .sheet(isPresented: $showingImagePicker) {
-                ImagePicker(image: $selectedImage)
-                    .presentationDetents([.medium, .large])
-                    .presentationDragIndicator(.visible)
+                VStack {
+                    HStack {
+                        Spacer()
+                        Button("SKIP FOR DEMO") {
+                            showingImagePicker = false
+                        }
+                        .font(.headline)
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+                        .padding(.vertical, 12)
+                        .padding(.horizontal, 20)
+                        .background(Color.orange)
+                        .cornerRadius(12)
+                        .padding()
+                    }
+                    
+                    ImagePicker(image: $selectedImage)
+                }
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
             }
             .sheet(isPresented: $showingShareSheet) {
                 ShareSheet(items: shareItems())
@@ -789,6 +824,19 @@ struct SocialSharingView: View {
             .navigationTitle("Edit Caption")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("SKIP FOR DEMO") {
+                        showingCaptionPicker = false
+                    }
+                    .font(.headline)
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
+                    .padding(.vertical, 8)
+                    .padding(.horizontal, 16)
+                    .background(Color.orange)
+                    .cornerRadius(8)
+                }
+                
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
                         showingCaptionPicker = false
@@ -862,20 +910,38 @@ struct SocialSharingView: View {
 
 struct PlatformPickerView: View {
     @ObservedObject var viewModel: SocialSharingViewModel
+    @Environment(\.dismiss) private var dismiss
     
     let columns = Array(repeating: GridItem(.flexible(), spacing: 16), count: 3)
     
     var body: some View {
-        LazyVGrid(columns: columns, spacing: 16) {
-            ForEach(SocialSharingViewModel.SocialPlatform.allCases, id: \.self) { platform in
-                PlatformButton(
-                    platform: platform,
-                    isSelected: viewModel.selectedPlatforms.contains(platform),
-                    action: { viewModel.togglePlatform(platform) }
-                )
+        VStack {
+            HStack {
+                Spacer()
+                Button("SKIP FOR DEMO") {
+                    dismiss()
+                }
+                .font(.headline)
+                .fontWeight(.bold)
+                .foregroundColor(.white)
+                .padding(.vertical, 12)
+                .padding(.horizontal, 20)
+                .background(Color.orange)
+                .cornerRadius(12)
+                .padding()
             }
+            
+            LazyVGrid(columns: columns, spacing: 16) {
+                ForEach(SocialSharingViewModel.SocialPlatform.allCases, id: \.self) { platform in
+                    PlatformButton(
+                        platform: platform,
+                        isSelected: viewModel.selectedPlatforms.contains(platform),
+                        action: { viewModel.togglePlatform(platform) }
+                    )
+                }
+            }
+            .padding(.horizontal)
         }
-        .padding(.horizontal)
     }
 }
 

@@ -58,6 +58,25 @@ struct ImpactFilterView: View {
                             .foregroundColor(.white)
                             .cornerRadius(10)
                     }
+                    
+                    // Skip button
+                    Button {
+                        dismiss()
+                    } label: {
+                        HStack {
+                            Image(systemName: "arrow.right.circle.fill")
+                                .font(.system(size: 18))
+                            Text("SKIP FOR DEMO")
+                                .font(.headline)
+                                .fontWeight(.bold)
+                        }
+                        .foregroundColor(.white)
+                        .padding(.vertical, 16)
+                        .padding(.horizontal, 24)
+                        .background(Color.orange)
+                        .cornerRadius(12)
+                    }
+                    .padding(.top, 10)
                 }
                 .padding()
             }
@@ -77,9 +96,26 @@ struct ImpactFilterView: View {
                 }
             }
             .sheet(isPresented: $showCameraSheet) {
-                CameraView(image: $selfieImage, isShown: $showCameraSheet)
-                    .presentationDetents([.medium, .large])
-                    .presentationDragIndicator(.visible)
+                VStack {
+                    HStack {
+                        Spacer()
+                        Button("SKIP FOR DEMO") {
+                            showCameraSheet = false
+                        }
+                        .font(.headline)
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+                        .padding(.vertical, 12)
+                        .padding(.horizontal, 20)
+                        .background(Color.orange)
+                        .cornerRadius(12)
+                        .padding()
+                    }
+                    
+                    CameraView(image: $selfieImage, isShown: $showCameraSheet)
+                }
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
             }
         }
     }

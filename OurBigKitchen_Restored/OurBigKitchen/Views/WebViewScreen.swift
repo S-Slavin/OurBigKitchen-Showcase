@@ -19,6 +19,19 @@ struct WebViewScreen: View {
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("SKIP FOR DEMO") {
+                        dismiss()
+                    }
+                    .font(.headline)
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
+                    .padding(.vertical, 8)
+                    .padding(.horizontal, 16)
+                    .background(Color.orange)
+                    .cornerRadius(8)
+                }
+                
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Close") {
                         dismiss()
