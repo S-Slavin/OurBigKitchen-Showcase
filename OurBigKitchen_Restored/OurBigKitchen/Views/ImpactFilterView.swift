@@ -65,18 +65,20 @@ struct ImpactFilterView: View {
                     } label: {
                         HStack {
                             Image(systemName: "arrow.right.circle.fill")
-                                .font(.system(size: 18))
+                                .font(.system(size: 20))
                             Text("SKIP FOR DEMO")
-                                .font(.headline)
+                                .font(.title2)
                                 .fontWeight(.bold)
                         }
                         .foregroundColor(.white)
-                        .padding(.vertical, 16)
-                        .padding(.horizontal, 24)
+                        .padding(.vertical, 20)
+                        .padding(.horizontal, 30)
                         .background(Color.orange)
-                        .cornerRadius(12)
+                        .cornerRadius(15)
+                        .shadow(color: .black.opacity(0.3), radius: 5, x: 0, y: 2)
                     }
-                    .padding(.top, 10)
+                    .padding(.top, 20)
+                    .padding(.bottom, 10)
                 }
                 .padding()
             }
@@ -102,13 +104,14 @@ struct ImpactFilterView: View {
                         Button("SKIP FOR DEMO") {
                             showCameraSheet = false
                         }
-                        .font(.headline)
+                        .font(.title2)
                         .fontWeight(.bold)
                         .foregroundColor(.white)
-                        .padding(.vertical, 12)
-                        .padding(.horizontal, 20)
+                        .padding(.vertical, 16)
+                        .padding(.horizontal, 24)
                         .background(Color.orange)
-                        .cornerRadius(12)
+                        .cornerRadius(15)
+                        .shadow(color: .black.opacity(0.3), radius: 5, x: 0, y: 2)
                         .padding()
                     }
                     

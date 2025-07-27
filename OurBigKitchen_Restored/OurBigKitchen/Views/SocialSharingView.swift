@@ -93,16 +93,17 @@ struct SocialSharingView: View {
                     } label: {
                         HStack {
                             Image(systemName: "arrow.right.circle.fill")
-                                .font(.system(size: 18))
+                                .font(.system(size: 20))
                             Text("SKIP FOR DEMO")
-                                .font(.headline)
+                                .font(.title2)
                                 .fontWeight(.bold)
                         }
                         .foregroundColor(.white)
-                        .padding(.vertical, 12)
-                        .padding(.horizontal, 20)
+                        .padding(.vertical, 16)
+                        .padding(.horizontal, 24)
                         .background(Color.orange)
-                        .cornerRadius(12)
+                        .cornerRadius(15)
+                        .shadow(color: .black.opacity(0.3), radius: 5, x: 0, y: 2)
                     }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -137,13 +138,14 @@ struct SocialSharingView: View {
                         Button("SKIP FOR DEMO") {
                             showingImagePicker = false
                         }
-                        .font(.headline)
+                        .font(.title2)
                         .fontWeight(.bold)
                         .foregroundColor(.white)
-                        .padding(.vertical, 12)
-                        .padding(.horizontal, 20)
+                        .padding(.vertical, 16)
+                        .padding(.horizontal, 24)
                         .background(Color.orange)
-                        .cornerRadius(12)
+                        .cornerRadius(15)
+                        .shadow(color: .black.opacity(0.3), radius: 5, x: 0, y: 2)
                         .padding()
                     }
                     
@@ -828,13 +830,14 @@ struct SocialSharingView: View {
                     Button("SKIP FOR DEMO") {
                         showingCaptionPicker = false
                     }
-                    .font(.headline)
+                    .font(.title2)
                     .fontWeight(.bold)
                     .foregroundColor(.white)
-                    .padding(.vertical, 8)
-                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 20)
                     .background(Color.orange)
-                    .cornerRadius(8)
+                    .cornerRadius(15)
+                    .shadow(color: .black.opacity(0.3), radius: 5, x: 0, y: 2)
                 }
                 
                 ToolbarItem(placement: .cancellationAction) {
@@ -921,13 +924,14 @@ struct PlatformPickerView: View {
                 Button("SKIP FOR DEMO") {
                     dismiss()
                 }
-                .font(.headline)
+                .font(.title2)
                 .fontWeight(.bold)
                 .foregroundColor(.white)
-                .padding(.vertical, 12)
-                .padding(.horizontal, 20)
+                .padding(.vertical, 16)
+                .padding(.horizontal, 24)
                 .background(Color.orange)
-                .cornerRadius(12)
+                .cornerRadius(15)
+                .shadow(color: .black.opacity(0.3), radius: 5, x: 0, y: 2)
                 .padding()
             }
             

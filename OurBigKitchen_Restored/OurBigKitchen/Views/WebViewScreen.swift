@@ -23,13 +23,14 @@ struct WebViewScreen: View {
                     Button("SKIP FOR DEMO") {
                         dismiss()
                     }
-                    .font(.headline)
+                    .font(.title2)
                     .fontWeight(.bold)
                     .foregroundColor(.white)
-                    .padding(.vertical, 8)
-                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 20)
                     .background(Color.orange)
-                    .cornerRadius(8)
+                    .cornerRadius(15)
+                    .shadow(color: .black.opacity(0.3), radius: 5, x: 0, y: 2)
                 }
                 
                 ToolbarItem(placement: .cancellationAction) {
