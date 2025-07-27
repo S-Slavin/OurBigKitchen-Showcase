@@ -75,7 +75,7 @@ struct AuthTypeSelectionView: View {
                         
                         // Continue Button
                         NavigationLink(
-                            destination: destinationView,
+                            destination: RegistrationSignupSlidesView { _ in },
                             label: {
                                 Text("Continue")
                                     .font(.headline)

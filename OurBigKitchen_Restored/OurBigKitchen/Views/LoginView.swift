@@ -304,17 +304,15 @@ struct LoginView: View {
                         .progressViewStyle(CircularProgressViewStyle())
                 }
                 
-                // Error alert
-                .alert("Error", isPresented: $viewModel.showError) {
-                    Button("OK") { }
-                } message: {
-                    Text(viewModel.errorMessage)
-                }
-                
                 Spacer()
             }
             .background(backgroundColor.ignoresSafeArea())
             .navigationBarHidden(true)
+            .alert("Error", isPresented: $viewModel.showError) {
+                Button("OK") { }
+            } message: {
+                Text(viewModel.errorMessage)
+            }
         }
     }
 }
