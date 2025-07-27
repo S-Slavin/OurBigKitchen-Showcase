@@ -5,7 +5,7 @@ class PasswordResetService {
     private init() {}
     
     // MARK: - Password Reset Methods
-    func requestPasswordReset(email: String) async throws {
+    func requestPasswordReset(email: String) throws {
         // TODO: In a real app, this would make an API call to your backend
         // For now, we'll simulate the process
         
@@ -38,7 +38,7 @@ class PasswordResetService {
         print("Password reset token for \(email): \(resetToken)")
     }
     
-    func resetPassword(email: String, token: String, newPassword: String) async throws {
+    func resetPassword(email: String, token: String, newPassword: String) throws {
         // Load reset request
         guard let resetRequest = try? PersistenceManager.shared.load(PasswordResetRequest.self, forKey: "passwordReset_\(email)") else {
             throw PasswordResetError.invalidToken
