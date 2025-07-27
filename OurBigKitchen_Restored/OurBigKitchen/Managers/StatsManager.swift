@@ -77,7 +77,7 @@ class StatsManager {
     
     func getTodayStats() async -> AnyPublisher<DailyStats, Error> {
         // First try to get from persistence
-        if let cachedStats = try? await persistenceManager.getObject(forKey: statsKey, as: DailyStats.self) {
+        if let cachedStats = try? persistenceManager.getObject(forKey: statsKey, as: DailyStats.self) {
             return Just(cachedStats)
                 .setFailureType(to: Error.self)
                 .eraseToAnyPublisher()
@@ -87,7 +87,7 @@ class StatsManager {
         return networkManager.get(endpoint: "/stats/daily/\(dateFormatter.string(from: Date()))")
             .handleEvents(receiveOutput: { [weak self] stats in
                 Task {
-                    try? await self?.persistenceManager.save(stats, forKey: self?.statsKey ?? "")
+                    try? self?.persistenceManager.save(stats, forKey: self?.statsKey ?? "")
                 }
             })
             .eraseToAnyPublisher()
@@ -101,12 +101,12 @@ class StatsManager {
         return getDailyStats(from: timeframe.startDate, to: timeframe.endDate)
     }
     
-    func updateDailyStats(_ stats: DailyStats) async -> AnyPublisher<DailyStats, Error> {
+    func updateDailyStats(_ stats: DailyStats) -> AnyPublisher<DailyStats, Error> {
         return networkManager.put(endpoint: "/stats/daily/\(stats.id)", body: stats)
             .handleEvents(receiveOutput: { [weak self] updatedStats in
                 Task {
                     if Calendar.current.isDateInToday(updatedStats.date) {
-                        try? await self?.persistenceManager.save(updatedStats, forKey: self?.statsKey ?? "")
+                        try? self?.persistenceManager.save(updatedStats, forKey: self?.statsKey ?? "")
                     }
                 }
             })
@@ -189,7 +189,7 @@ class StatsManager {
                         donationsReceived: currentStats.donationsReceived
                     )
                     
-                    return await self.updateDailyStats(newStats)
+                    return self.updateDailyStats(newStats)
                 } else {
                     // For historical entries, we'd need to get the stats for that date and update them
                     // For simplicity in this implementation, we'll just return the current stats
@@ -229,7 +229,7 @@ class StatsManager {
                     donationsReceived: currentStats.donationsReceived
                 )
                 
-                return await self.updateDailyStats(newStats)
+                return self.updateDailyStats(newStats)
             }
             .eraseToAnyPublisher()
     }
@@ -237,6 +237,6 @@ class StatsManager {
     // MARK: - Helper Methods
     
     func clearStatsCache() async {
-        await persistenceManager.remove(forKey: statsKey)
+        persistenceManager.remove(forKey: statsKey)
     }
 } 

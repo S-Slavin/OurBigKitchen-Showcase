@@ -107,6 +107,6 @@ class EventManager {
     // MARK: - Cache Management
     
     func clearCache() {
-        try? persistenceManager.remove(forKey: upcomingEventsKey)
+        persistenceManager.remove(forKey: upcomingEventsKey)
     }
 } 
