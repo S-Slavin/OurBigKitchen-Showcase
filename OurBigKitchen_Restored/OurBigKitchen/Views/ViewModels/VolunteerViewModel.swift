@@ -229,6 +229,7 @@ class VolunteerViewModel: ObservableObject {
                 }
                 .store(in: &cancellables)
         }
+    }
     
     func cancelRegistration(_ registrationId: UUID) {
         registrations.removeAll { $0.id == registrationId }

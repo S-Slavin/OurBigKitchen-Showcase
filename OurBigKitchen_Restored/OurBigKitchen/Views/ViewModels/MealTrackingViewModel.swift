@@ -81,6 +81,7 @@ class MealTrackingViewModel: ObservableObject {
                 }
                 .store(in: &cancellables)
         }
+    }
     
     func selectDish(_ dish: String) {
         mealEntry.dishName = dish
