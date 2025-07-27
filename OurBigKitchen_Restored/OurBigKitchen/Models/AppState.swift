@@ -37,7 +37,7 @@ class AppState: ObservableObject {
         Task.detached {
             // Load saved state instead of resetting
             // Initialize terms status
-            let termsAccepted = self.termsManager.checkTermsStatus() || UserDefaults.standard.bool(forKey: "hasAcceptedTerms")
+            let termsAccepted = await MainActor.run { self.termsManager.checkTermsStatus() } || UserDefaults.standard.bool(forKey: "hasAcceptedTerms")
             
             // Initialize health protocols status
             let healthProtocolsAccepted = UserDefaults.standard.bool(forKey: "hasAcceptedHealthProtocols")
