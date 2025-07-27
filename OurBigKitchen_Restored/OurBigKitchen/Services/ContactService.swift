@@ -119,7 +119,7 @@ class ContactService {
     
     // MARK: - Message Sending
     
-    func sendMessage(_ message: AppModels.ContactMessage) -> AnyPublisher<Void, Error> {
+    func sendMessage(_ message: ContactMessage) -> AnyPublisher<Void, Error> {
         // In a real app, this would send the message to a backend service
         // For now, we'll simulate a successful send
         return Just(())
