@@ -61,7 +61,7 @@ class PasswordResetService {
         
         // Update password
         let hashedPassword = AuthService.shared.hashPassword(newPassword)
-        try await AuthService.shared.saveToKeychain(key: "userPassword", data: hashedPassword)
+        try AuthService.shared.saveToKeychain(key: "userPassword", data: hashedPassword)
         
         // Delete reset request
         try await PersistenceManager.shared.remove(forKey: "passwordReset_\(email)")

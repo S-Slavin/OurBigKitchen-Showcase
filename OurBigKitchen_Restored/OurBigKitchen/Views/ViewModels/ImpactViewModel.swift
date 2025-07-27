@@ -227,7 +227,7 @@ class ImpactViewModel: ObservableObject {
     }
     
     private func loadRecentImpacts() {
-        let userId = userManager.currentUserId ?? "guest"
+        let userId = userManager?.currentUserId ?? "guest"
         
         impactService.getRecentImpactPosts(userId: userId, limit: 10)
             .receive(on: DispatchQueue.main)
