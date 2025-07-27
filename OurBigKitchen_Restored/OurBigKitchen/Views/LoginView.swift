@@ -305,12 +305,10 @@ struct LoginView: View {
                 }
                 
                 // Error alert
-                .alert(isPresented: $viewModel.showError) {
-                    Alert(
-                        title: Text("Error"),
-                        message: Text(viewModel.errorMessage),
-                        dismissButton: .default(Text("OK"))
-                    )
+                .alert("Error", isPresented: $viewModel.showError) {
+                    Button("OK") { }
+                } message: {
+                    Text(viewModel.errorMessage)
                 }
                 
                 Spacer()

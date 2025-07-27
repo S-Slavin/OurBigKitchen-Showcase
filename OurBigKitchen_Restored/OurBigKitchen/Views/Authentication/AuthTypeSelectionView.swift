@@ -111,9 +111,9 @@ struct AuthTypeSelectionView: View {
         RegistrationSignupSlidesView { volunteerType in
             switch volunteerType {
             case .individual:
-                SimpleSignInView()
+                return SimpleSignInView()
             case .corporate:
-                CorporateSignInView()
+                return CorporateSignInView()
             }
         }
     }
