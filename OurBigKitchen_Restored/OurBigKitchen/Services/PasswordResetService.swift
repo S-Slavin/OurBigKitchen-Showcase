@@ -64,7 +64,7 @@ class PasswordResetService {
         try AuthService.shared.saveToKeychain(key: "userPassword", data: hashedPassword)
         
         // Delete reset request
-        try await PersistenceManager.shared.remove(forKey: "passwordReset_\(email)")
+        try PersistenceManager.shared.remove(forKey: "passwordReset_\(email)")
     }
 }
 
