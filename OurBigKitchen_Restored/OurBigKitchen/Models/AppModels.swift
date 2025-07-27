@@ -522,4 +522,22 @@ struct VolunteerOpportunity: Identifiable, Codable {
         let hours = Int(duration / 3600)
         return "\(hours) \(hours == 1 ? "hour" : "hours")"
     }
+}
+
+// MARK: - Contact Models
+
+struct ContactMessage: Identifiable, Codable {
+    let id: String
+    let name: String
+    let email: String
+    let message: String
+    let timestamp: Date
+    
+    init(name: String, email: String, message: String, timestamp: Date = Date()) {
+        self.id = UUID().uuidString
+        self.name = name
+        self.email = email
+        self.message = message
+        self.timestamp = timestamp
+    }
 } 

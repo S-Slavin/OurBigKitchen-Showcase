@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import Combine // Added for AnyPublisher
 
 @MainActor
 class ContactService {
@@ -114,5 +115,15 @@ class ContactService {
         case .events:
             return .purple
         }
+    }
+    
+    // MARK: - Message Sending
+    
+    func sendMessage(_ message: AppModels.ContactMessage) -> AnyPublisher<Void, Error> {
+        // In a real app, this would send the message to a backend service
+        // For now, we'll simulate a successful send
+        return Just(())
+            .setFailureType(to: Error.self)
+            .eraseToAnyPublisher()
     }
 } 
