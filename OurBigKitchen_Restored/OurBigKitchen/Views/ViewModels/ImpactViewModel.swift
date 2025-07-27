@@ -252,16 +252,20 @@ class ImpactViewModel: ObservableObject {
         // For demo purposes, create some sample upcoming sessions
         upcomingSessions = [
             UpcomingSession(
-                id: "1",
+                id: UUID(),
                 title: "Morning Kitchen Shift",
                 date: Calendar.current.date(byAdding: .day, value: 2, to: Date()) ?? Date(),
-                duration: 3600 * 3 // 3 hours
+                location: "Main Kitchen",
+                duration: 3600 * 3, // 3 hours
+                type: .cooking
             ),
             UpcomingSession(
-                id: "2",
+                id: UUID(),
                 title: "Afternoon Delivery Run",
                 date: Calendar.current.date(byAdding: .day, value: 3, to: Date()) ?? Date(),
-                duration: 3600 * 2 // 2 hours
+                location: "Distribution Center",
+                duration: 3600 * 2, // 2 hours
+                type: .delivery
             )
         ]
     }

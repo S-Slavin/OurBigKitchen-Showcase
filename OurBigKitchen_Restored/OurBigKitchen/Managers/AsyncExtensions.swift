@@ -7,7 +7,7 @@ extension UserManager {
         do {
             // Try to get from network using the existing methods
             return try await withCheckedThrowingContinuation { continuation in
-                self.getCurrentUser() // Calls the Combine version
+                self.fetchUserProfile() // Calls the Combine version
                     .sink(
                         receiveCompletion: { completion in
                             if case .failure(let error) = completion {
@@ -42,18 +42,21 @@ extension StatsManager {
         do {
             // Try to get from network using the existing methods
             return try await withCheckedThrowingContinuation { continuation in
-                self.getTodayStats() // Calls the Combine version
-                    .sink(
-                        receiveCompletion: { completion in
-                            if case .failure(let error) = completion {
-                                continuation.resume(throwing: error)
+                Task { @MainActor in
+                    let publisher = await self.getTodayStats() // Calls the async version
+                    publisher
+                        .sink(
+                            receiveCompletion: { completion in
+                                if case .failure(let error) = completion {
+                                    continuation.resume(throwing: error)
+                                }
+                            },
+                            receiveValue: { stats in
+                                continuation.resume(returning: stats)
                             }
-                        },
-                        receiveValue: { stats in
-                            continuation.resume(returning: stats)
-                        }
-                    )
-                    .store(in: &AnyCancellable.temporaryStore)
+                        )
+                        .store(in: &AnyCancellable.temporaryStore)
+                }
             }
         } catch {
             // Return dummy stats for demonstration purposes

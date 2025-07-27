@@ -81,15 +81,18 @@ class HomeDashboardViewModel: ObservableObject {
             .store(in: &cancellables)
         
         // Load today's stats
-        statsManager.getTodayStats()
-            .sink { [weak self] completion in
-                if case .failure(let error) = completion {
-                    self?.error = error
+        Task {
+            let statsPublisher = await statsManager.getTodayStats()
+            statsPublisher
+                .sink { [weak self] completion in
+                    if case .failure(let error) = completion {
+                        self?.error = error
+                    }
+                } receiveValue: { [weak self] (stats: DailyStats) in
+                    self?.todayStats = stats
                 }
-            } receiveValue: { [weak self] (stats: DailyStats) in
-                self?.todayStats = stats
-            }
-            .store(in: &cancellables)
+                .store(in: &cancellables)
+        }
         
         // Load upcoming events
         eventManager.getUpcomingEvents()
