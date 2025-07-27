@@ -12,9 +12,9 @@ class AuthService: ObservableObject {
     private let networkManager: NetworkManager
     private let userManager: UserManager
     
-    init(networkManager: NetworkManager = NetworkManager.shared, userManager: UserManager = UserManager.shared) {
-        self.networkManager = networkManager
-        self.userManager = userManager
+    init(networkManager: NetworkManager? = nil, userManager: UserManager? = nil) {
+        self.networkManager = networkManager ?? NetworkManager.shared
+        self.userManager = userManager ?? UserManager.shared
     }
     
     func signIn(email: String, password: String) async throws -> AppModels.User {

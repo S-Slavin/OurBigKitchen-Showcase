@@ -151,15 +151,18 @@ class AppState: ObservableObject {
             
             // Save authentication state to UserDefaults for persistence - only if changed
             if newAuthState && !isAuthenticatedInDefaults {
-                // Use debouncer to prevent rapid consecutive writes
-                self.saveAuthStateDebouncer?.cancel()
-                self.saveAuthStateDebouncer = Just(())
-                    .delay(for: .milliseconds(200), scheduler: RunLoop.main)
-                    .sink { _ in
-                        UserDefaults.standard.set(true, forKey: "isAuthenticated")
-                        UserDefaults.standard.set(true, forKey: "hasSignedIn")
-                        // No synchronize needed
-                    }
+                // Update UI on main thread and handle debouncer
+                await MainActor.run {
+                    // Use debouncer to prevent rapid consecutive writes
+                    self.saveAuthStateDebouncer?.cancel()
+                    self.saveAuthStateDebouncer = Just(())
+                        .delay(for: .milliseconds(200), scheduler: RunLoop.main)
+                        .sink { _ in
+                            UserDefaults.standard.set(true, forKey: "isAuthenticated")
+                            UserDefaults.standard.set(true, forKey: "hasSignedIn")
+                            // No synchronize needed
+                        }
+                }
             }
             
             // Update UI on main thread
@@ -266,8 +269,8 @@ class AppState: ObservableObject {
         defer { isLoading = false }
         
         do {
-            // Use async() extension on the publisher to get the User
-            let user = try await authManager.loginPublisher(email: email, password: password).async()
+            // Use the regular login method
+            let user = try await authManager.login(email: email, password: password).async()
             
             // Update state after successful login
             isAuthenticated = true
@@ -286,7 +289,7 @@ class AppState: ObservableObject {
         defer { isLoading = false }
         
         do {
-            // Use async() extension on the publisher to get the User
+            // Use the regular login method
             let user = try await authManager.loginWithApplePublisher().async()
             
             // Update state after successful login
@@ -306,7 +309,7 @@ class AppState: ObservableObject {
         defer { isLoading = false }
         
         do {
-            // Use async() extension on the publisher to get the User
+            // Use the regular login method
             let user = try await authManager.loginWithGmailPublisher().async()
             
             // Update state after successful login
