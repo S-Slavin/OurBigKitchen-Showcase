@@ -25,10 +25,8 @@ class FoodSafetyService: ObservableObject {
     init(networkManager: NetworkManager = NetworkManager.shared, userManager: UserManager = UserManager.shared) {
         self.networkManager = networkManager
         self.userManager = userManager
-        Task { @MainActor in
-            loadCompanies()
-            loadRegistrations()
-        }
+        loadCompanies()
+        loadRegistrations()
     }
     
     // MARK: - Data Loading

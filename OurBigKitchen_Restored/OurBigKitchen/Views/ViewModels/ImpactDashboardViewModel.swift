@@ -167,16 +167,19 @@ class ImpactDashboardViewModel: ObservableObject {
     
     private func loadUserImpact() {
         if isUserSignedIn {
-            statsManager.getUserImpact()
-                .receive(on: RunLoop.main)
-                .sink { [weak self] completion in
-                    if case .failure(let error) = completion {
-                        self?.handleError(error)
+            Task {
+                let impactPublisher = await statsManager.getUserImpact()
+                impactPublisher
+                    .receive(on: RunLoop.main)
+                    .sink { [weak self] completion in
+                        if case .failure(let error) = completion {
+                            self?.handleError(error)
+                        }
+                    } receiveValue: { [weak self] impact in
+                        self?.userImpact = impact
                     }
-                } receiveValue: { [weak self] impact in
-                    self?.userImpact = impact
-                }
-                .store(in: &cancellables)
+                    .store(in: &cancellables)
+            }
         } else {
             // Create a default, empty impact for users not signed in
             userImpact = Impact(id: UUID().uuidString, userId: "", timeSpent: 0, mealsMade: 0)
