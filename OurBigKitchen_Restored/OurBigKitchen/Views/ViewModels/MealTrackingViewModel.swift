@@ -53,33 +53,34 @@ class MealTrackingViewModel: ObservableObject {
         // Update stats via StatsManager
         Task {
             let statsPublisher = await statsManager.addMealEntry(entryToSubmit)
-            .receive(on: RunLoop.main)
-            .sink { [weak self] completion in
-                self?.isLoading = false
-                
-                if case .failure(let error) = completion {
-                    self?.error = error
+            statsPublisher
+                .receive(on: RunLoop.main)
+                .sink { [weak self] completion in
+                    self?.isLoading = false
+                    
+                    if case .failure(let error) = completion {
+                        self?.error = error
+                    }
+                } receiveValue: { [weak self] _ in
+                    guard let self = self else { return }
+                    
+                    // Add entry to recent entries
+                    self.recentEntries.insert(entryToSubmit, at: 0)
+                    
+                    // Save to persistent storage
+                    self.saveRecentEntries()
+                    
+                    // Reset form and show success
+                    self.mealEntry = .empty
+                    self.showSuccessMessage = true
+                    
+                    // Hide success message after delay
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                        self.showSuccessMessage = false
+                    }
                 }
-            } receiveValue: { [weak self] _ in
-                guard let self = self else { return }
-                
-                // Add entry to recent entries
-                self.recentEntries.insert(entryToSubmit, at: 0)
-                
-                // Save to persistent storage
-                self.saveRecentEntries()
-                
-                // Reset form and show success
-                self.mealEntry = .empty
-                self.showSuccessMessage = true
-                
-                // Hide success message after delay
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                    self.showSuccessMessage = false
-                }
-            }
-            .store(in: &cancellables)
-    }
+                .store(in: &cancellables)
+        }
     
     func selectDish(_ dish: String) {
         mealEntry.dishName = dish

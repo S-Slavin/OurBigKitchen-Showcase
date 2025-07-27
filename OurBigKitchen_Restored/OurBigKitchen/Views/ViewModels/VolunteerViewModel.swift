@@ -202,32 +202,33 @@ class VolunteerViewModel: ObservableObject {
         // Update stats via StatsManager
         Task {
             let statsPublisher = await statsManager.addVolunteerRegistration(registration)
-            .receive(on: RunLoop.main)
-            .sink { [weak self] completion in
-                if case .failure(let error) = completion {
-                    self?.error = error
-                    self?.isLoading = false
+            statsPublisher
+                .receive(on: RunLoop.main)
+                .sink { [weak self] completion in
+                    if case .failure(let error) = completion {
+                        self?.error = error
+                        self?.isLoading = false
+                    }
+                } receiveValue: { [weak self] _ in
+                    guard let self = self else { return }
+                    
+                    // Add to registrations
+                    self.registrations.append(registration)
+                    
+                    // Save to persistent storage
+                    self.saveRegistrations()
+                    
+                    // Show success message
+                    self.showSuccessMessage = true
+                    self.isLoading = false
+                    
+                    // Hide success message after delay
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                        self.showSuccessMessage = false
+                    }
                 }
-            } receiveValue: { [weak self] _ in
-                guard let self = self else { return }
-                
-                // Add to registrations
-                self.registrations.append(registration)
-                
-                // Save to persistent storage
-                self.saveRegistrations()
-                
-                // Show success message
-                self.showSuccessMessage = true
-                self.isLoading = false
-                
-                // Hide success message after delay
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                    self.showSuccessMessage = false
-                }
-            }
-            .store(in: &cancellables)
-    }
+                .store(in: &cancellables)
+        }
     
     func cancelRegistration(_ registrationId: UUID) {
         registrations.removeAll { $0.id == registrationId }
@@ -269,25 +270,5 @@ class VolunteerViewModel: ObservableObject {
         } catch {
             self.error = error
         }
-    }
-}
-
-// MARK: - Models
-
-struct VolunteerRegistration: Identifiable, Codable {
-    let id: UUID
-    let opportunityId: UUID
-    let opportunityTitle: String
-    let date: Date
-    let duration: TimeInterval
-    let name: String
-    let email: String
-    let phone: String
-    let notes: String
-    let registrationDate: Date
-    
-    var formattedDuration: String {
-        let hours = Int(duration / 3600)
-        return "\(hours) \(hours == 1 ? "hour" : "hours")"
     }
 } 

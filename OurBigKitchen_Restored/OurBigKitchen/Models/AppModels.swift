@@ -479,4 +479,47 @@ extension UpcomingSession {
             type: .other
         )
     ]
+}
+
+// MARK: - Volunteer Models
+
+struct VolunteerRegistration: Identifiable, Codable {
+    let id: UUID
+    let opportunityId: UUID
+    let opportunityTitle: String
+    let date: Date
+    let duration: TimeInterval
+    let name: String
+    let email: String
+    let phone: String
+    let notes: String
+    let registrationDate: Date
+    
+    var formattedDuration: String {
+        let hours = Int(duration / 3600)
+        return "\(hours) \(hours == 1 ? "hour" : "hours")"
+    }
+}
+
+struct VolunteerOpportunity: Identifiable, Codable {
+    let id: UUID
+    let title: String
+    let organization: String
+    let description: String
+    let date: Date
+    let duration: TimeInterval
+    let location: String
+    let category: String
+    let spotsTotal: Int
+    let spotsTaken: Int
+    let imageURL: String?
+    
+    var spotsAvailable: Int {
+        spotsTotal - spotsTaken
+    }
+    
+    var formattedDuration: String {
+        let hours = Int(duration / 3600)
+        return "\(hours) \(hours == 1 ? "hour" : "hours")"
+    }
 } 
