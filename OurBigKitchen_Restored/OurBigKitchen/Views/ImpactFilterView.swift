@@ -65,20 +65,24 @@ struct ImpactFilterView: View {
                     } label: {
                         HStack {
                             Image(systemName: "arrow.right.circle.fill")
-                                .font(.system(size: 20))
+                                .font(.system(size: 24))
                             Text("SKIP FOR DEMO")
-                                .font(.title2)
-                                .fontWeight(.bold)
+                                .font(.title)
+                                .fontWeight(.black)
                         }
                         .foregroundColor(.white)
-                        .padding(.vertical, 20)
-                        .padding(.horizontal, 30)
+                        .padding(.vertical, 24)
+                        .padding(.horizontal, 36)
                         .background(Color.orange)
-                        .cornerRadius(15)
-                        .shadow(color: .black.opacity(0.3), radius: 5, x: 0, y: 2)
+                        .cornerRadius(20)
+                        .shadow(color: .black.opacity(0.5), radius: 8, x: 0, y: 4)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 20)
+                                .stroke(Color.white, lineWidth: 2)
+                        )
                     }
-                    .padding(.top, 20)
-                    .padding(.bottom, 10)
+                    .padding(.top, 30)
+                    .padding(.bottom, 20)
                 }
                 .padding()
             }
