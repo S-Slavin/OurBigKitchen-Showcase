@@ -75,8 +75,8 @@ class MealTrackingViewModel: ObservableObject {
                     self.showSuccessMessage = true
                     
                     // Hide success message after delay
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                        self.showSuccessMessage = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
+                        self?.showSuccessMessage = false
                     }
                 }
                 .store(in: &cancellables)
