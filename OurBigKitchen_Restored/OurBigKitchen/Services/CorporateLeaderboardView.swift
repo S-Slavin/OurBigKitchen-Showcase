@@ -186,9 +186,10 @@ class CorporateLeaderboardViewModel: ObservableObject {
         try? await Task.sleep(nanoseconds: 1_000_000_000)
         
         // Generate sample impact data
-        impactData = (0..<6).map { index in
-            ImpactData(
-                date: Calendar.current.date(byAdding: .month, value: -index, to: Date())!,
+        impactData = (0..<6).compactMap { index in
+            guard let date = Calendar.current.date(byAdding: .month, value: -index, to: Date()) else { return nil }
+            return ImpactData(
+                date: date,
                 value: Double.random(in: 100...1000)
             )
         }.reversed()

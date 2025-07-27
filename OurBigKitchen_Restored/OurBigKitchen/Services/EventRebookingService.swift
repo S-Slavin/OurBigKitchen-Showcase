@@ -30,32 +30,24 @@ class EventRebookingService: ObservableObject {
     }
     
     // Available booking options
-    lazy var bookingOptions: [BookingOption] = [
-        BookingOption(
-            title: "Team Building",
-            description: "Cook and bond with your team while making a difference.",
-            imageName: "person.3.fill",
-            url: URL(string: teamBuildingURL)!
-        ),
-        BookingOption(
-            title: "Private Events",
-            description: "Host your next corporate event in our kitchen spaces.",
-            imageName: "building.2.fill",
-            url: URL(string: privateEventURL)!
-        ),
-        BookingOption(
-            title: "Charity Events",
-            description: "Make meals for a cause with your corporate group.",
-            imageName: "heart.fill",
-            url: URL(string: charityEventURL)!
-        ),
-        BookingOption(
-            title: "Workshops",
-            description: "Learn new culinary skills while giving back.",
-            imageName: "book.fill",
-            url: URL(string: workshopURL)!
-        )
-    ]
+    lazy var bookingOptions: [BookingOption] = {
+        let options = [
+            (title: "Team Building", description: "Cook and bond with your team while making a difference.", imageName: "person.3.fill", urlString: teamBuildingURL),
+            (title: "Private Events", description: "Host your next corporate event in our kitchen spaces.", imageName: "building.2.fill", urlString: privateEventURL),
+            (title: "Charity Events", description: "Make meals for a cause with your corporate group.", imageName: "heart.fill", urlString: charityEventURL),
+            (title: "Workshops", description: "Learn new culinary skills while giving back.", imageName: "book.fill", urlString: workshopURL)
+        ]
+        
+        return options.compactMap { option in
+            guard let url = URL(string: option.urlString) else { return nil }
+            return BookingOption(
+                title: option.title,
+                description: option.description,
+                imageName: option.imageName,
+                url: url
+            )
+        }
+    }()
     
     // Open URL in Safari or in-app browser
     func openBookingURL(_ url: URL) {

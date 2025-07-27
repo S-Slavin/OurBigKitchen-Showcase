@@ -62,10 +62,10 @@ struct PhotoSharingView: View {
                     }
                 }
                 
-                if selectedImage != nil {
+                if let image = selectedImage {
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Button {
-                            viewModel.shareToAllPlatforms(image: selectedImage!, caption: caption, tags: viewModel.selectedTags)
+                            viewModel.shareToAllPlatforms(image: image, caption: caption, tags: viewModel.selectedTags)
                             showShareSheet = true
                         } label: {
                             Text("Share")

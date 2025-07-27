@@ -53,7 +53,7 @@ struct WebViewScreen: View {
 
 #Preview {
     WebViewScreen(
-        url: URL(string: "https://www.ourbigkitchen.org/contact-us/")!,
+        url: URL(string: "https://www.ourbigkitchen.org/contact-us/") ?? URL(string: "https://ourbigkitchen.org")!,
         title: "Contact OBK"
     )
 } 

@@ -179,9 +179,12 @@ class SocialSharingService: ObservableObject {
     
     // MARK: - Platform-Specific Sharing
     
-    func shareToLinkedIn(message: String, url: URL = URL(string: "https://ourbigkitchen.org")!) {
+    func shareToLinkedIn(message: String, url: URL? = nil) {
+        let defaultUrl = URL(string: "https://ourbigkitchen.org") ?? URL(string: "https://ourbigkitchen.org")!
+        let targetUrl = url ?? defaultUrl
+        
         guard let encodedText = message.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-              let encodedUrl = url.absoluteString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
+              let encodedUrl = targetUrl.absoluteString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
             return
         }
         
@@ -192,9 +195,12 @@ class SocialSharingService: ObservableObject {
         }
     }
     
-    func shareToFacebook(message: String, url: URL = URL(string: "https://ourbigkitchen.org")!) {
+    func shareToFacebook(message: String, url: URL? = nil) {
+        let defaultUrl = URL(string: "https://ourbigkitchen.org") ?? URL(string: "https://ourbigkitchen.org")!
+        let targetUrl = url ?? defaultUrl
+        
         guard let encodedText = message.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-              let encodedUrl = url.absoluteString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
+              let encodedUrl = targetUrl.absoluteString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
             return
         }
         
@@ -205,9 +211,12 @@ class SocialSharingService: ObservableObject {
         }
     }
     
-    func shareToTwitter(message: String, url: URL = URL(string: "https://ourbigkitchen.org")!) {
+    func shareToTwitter(message: String, url: URL? = nil) {
+        let defaultUrl = URL(string: "https://ourbigkitchen.org") ?? URL(string: "https://ourbigkitchen.org")!
+        let targetUrl = url ?? defaultUrl
+        
         guard let encodedText = message.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-              let encodedUrl = url.absoluteString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
+              let encodedUrl = targetUrl.absoluteString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
             return
         }
         
@@ -221,14 +230,17 @@ class SocialSharingService: ObservableObject {
     // Platform detection helpers
     
     func isLinkedInInstalled() -> Bool {
-        return UIApplication.shared.canOpenURL(URL(string: "linkedin://")!)
+        guard let linkedInUrl = URL(string: "linkedin://") else { return false }
+        return UIApplication.shared.canOpenURL(linkedInUrl)
     }
     
     func isFacebookInstalled() -> Bool {
-        return UIApplication.shared.canOpenURL(URL(string: "fb://")!)
+        guard let facebookUrl = URL(string: "fb://") else { return false }
+        return UIApplication.shared.canOpenURL(facebookUrl)
     }
     
     func isTwitterInstalled() -> Bool {
-        return UIApplication.shared.canOpenURL(URL(string: "twitter://")!)
+        guard let twitterUrl = URL(string: "twitter://") else { return false }
+        return UIApplication.shared.canOpenURL(twitterUrl)
     }
 }
