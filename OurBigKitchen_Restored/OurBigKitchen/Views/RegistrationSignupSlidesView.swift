@@ -295,7 +295,7 @@ struct RegistrationSignupSlidesView: View {
         // Attempt to save user and complete registration
         Task {
             do {
-                try await viewModel.registerUser(user, password: password)
+                viewModel.submitRegistration()
                 await MainActor.run {
                     isLoading = false
                     onComplete(type)
