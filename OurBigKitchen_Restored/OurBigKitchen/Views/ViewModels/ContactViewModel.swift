@@ -84,6 +84,8 @@ class ContactViewModel: ObservableObject {
             return URL(string: "https://ourbigkitchen.org/partnerships")
         case .feedback:
             return URL(string: "https://ourbigkitchen.org/feedback")
+        case .events:
+            return URL(string: "https://ourbigkitchen.org/events")
         }
     }
     
@@ -104,6 +106,8 @@ class ContactViewModel: ObservableObject {
             return .purple
         case .feedback:
             return .red
+        case .events:
+            return .yellow
         }
     }
 } 
