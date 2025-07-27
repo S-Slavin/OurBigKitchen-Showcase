@@ -2,6 +2,7 @@ import Foundation
 import Combine
 
 // MARK: - Network Protocol
+@preconcurrency
 protocol NetworkManaging {
     func get<T: Decodable>(endpoint: String) -> AnyPublisher<T, Error>
     func post<T: Encodable, U: Decodable>(endpoint: String, body: T) -> AnyPublisher<U, Error>

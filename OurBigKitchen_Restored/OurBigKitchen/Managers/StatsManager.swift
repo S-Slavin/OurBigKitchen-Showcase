@@ -57,6 +57,7 @@ struct CorporateRanking: Codable {
 
 // DailyStats model is imported from Models/DailyStats.swift
 
+@MainActor
 class StatsManager {
     static let shared = StatsManager()
     
@@ -65,8 +66,8 @@ class StatsManager {
     private let statsKey = "today_stats"
     private let dateFormatter: ISO8601DateFormatter
     
-    init(networkManager: NetworkManager = .shared,
-                persistenceManager: PersistenceManager = .shared) {
+    init(networkManager: NetworkManager = NetworkManager.shared,
+                persistenceManager: PersistenceManager = PersistenceManager.shared) {
         self.networkManager = networkManager
         self.persistenceManager = persistenceManager
         self.dateFormatter = ISO8601DateFormatter()
@@ -74,9 +75,9 @@ class StatsManager {
     
     // MARK: - Daily Stats Operations
     
-    func getTodayStats() -> AnyPublisher<DailyStats, Error> {
+    func getTodayStats() async -> AnyPublisher<DailyStats, Error> {
         // First try to get from persistence
-        if let cachedStats = try? persistenceManager.getObject(forKey: statsKey, as: DailyStats.self) {
+        if let cachedStats = try? await persistenceManager.getObject(forKey: statsKey, as: DailyStats.self) {
             return Just(cachedStats)
                 .setFailureType(to: Error.self)
                 .eraseToAnyPublisher()
@@ -85,7 +86,9 @@ class StatsManager {
         // If not in persistence, fetch from network
         return networkManager.get(endpoint: "/stats/daily/\(dateFormatter.string(from: Date()))")
             .handleEvents(receiveOutput: { [weak self] stats in
-                try? self?.persistenceManager.save(stats, forKey: self?.statsKey ?? "")
+                Task {
+                    try? await self?.persistenceManager.save(stats, forKey: self?.statsKey ?? "")
+                }
             })
             .eraseToAnyPublisher()
     }
@@ -98,11 +101,13 @@ class StatsManager {
         return getDailyStats(from: timeframe.startDate, to: timeframe.endDate)
     }
     
-    func updateDailyStats(_ stats: DailyStats) -> AnyPublisher<DailyStats, Error> {
+    func updateDailyStats(_ stats: DailyStats) async -> AnyPublisher<DailyStats, Error> {
         return networkManager.put(endpoint: "/stats/daily/\(stats.id)", body: stats)
             .handleEvents(receiveOutput: { [weak self] updatedStats in
-                if Calendar.current.isDateInToday(updatedStats.date) {
-                    try? self?.persistenceManager.save(updatedStats, forKey: self?.statsKey ?? "")
+                Task {
+                    if Calendar.current.isDateInToday(updatedStats.date) {
+                        try? await self?.persistenceManager.save(updatedStats, forKey: self?.statsKey ?? "")
+                    }
                 }
             })
             .eraseToAnyPublisher()
@@ -120,8 +125,8 @@ class StatsManager {
     
     // MARK: - User Impact Operations
     
-    func getUserImpact() -> AnyPublisher<Impact, Error> {
-        guard let userId = UserManager.shared.currentUserId else {
+    func getUserImpact() async -> AnyPublisher<Impact, Error> {
+        guard let userId = await UserManager.shared.currentUserId else {
             // Return a default impact if no user is logged in
             let impact = Impact(id: UUID().uuidString, userId: "", timeSpent: 0, mealsMade: 0)
             return Just(impact)
@@ -229,7 +234,7 @@ class StatsManager {
     
     // MARK: - Helper Methods
     
-    func clearStatsCache() {
-        try? persistenceManager.remove(forKey: statsKey)
+    func clearStatsCache() async {
+        await persistenceManager.remove(forKey: statsKey)
     }
 } 
