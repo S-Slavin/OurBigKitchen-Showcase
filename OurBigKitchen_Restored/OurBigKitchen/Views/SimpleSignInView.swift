@@ -72,7 +72,6 @@ struct SimpleSignInView: View {
                             .opacity(animateButtons ? 1.0 : 0.0)
                         
                         // Skip option for development
-                        #if DEBUG
                         Button(action: {
                             authenticateUser(skipValidation: true)
                         }) {
@@ -84,7 +83,6 @@ struct SimpleSignInView: View {
                         .buttonStyle(PlainButtonStyle())
                         .padding(.top, 10)
                         .opacity(animateButtons ? 0.7 : 0.0)
-                        #endif
                         
                         Spacer()
                     }
@@ -133,22 +131,22 @@ struct SimpleSignInView: View {
     
     // Start animation sequence
     private func startAnimations() {
-        // Staggered animation sequence
-        withAnimation(.easeOut(duration: 0.6)) {
+        // Simplified animation sequence for better performance
+        withAnimation(.easeOut(duration: 0.3)) {
             animateIn = true
         }
         
-        withAnimation(.spring(response: 0.6, dampingFraction: 0.7).delay(0.2)) {
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.8).delay(0.1)) {
             animateFields = true
         }
         
-        withAnimation(.spring(response: 0.6, dampingFraction: 0.7).delay(0.4)) {
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.8).delay(0.2)) {
             animateButtons = true
         }
         
-        // Background animation
-        withAnimation(.easeInOut(duration: 7).repeatForever(autoreverses: true)) {
-            animationAmount = 1.03
+        // Reduced background animation for better performance
+        withAnimation(.easeInOut(duration: 10).repeatForever(autoreverses: true)) {
+            animationAmount = 1.01
         }
     }
     
@@ -447,8 +445,8 @@ struct SimpleSignInView: View {
                 generator.impactOccurred()
                 
                 isLoading = true
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    authenticateUser()
+                authenticateUser()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                     isLoading = false
                 }
             }) {

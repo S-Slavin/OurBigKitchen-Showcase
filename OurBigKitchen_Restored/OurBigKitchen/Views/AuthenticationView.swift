@@ -516,7 +516,6 @@ struct AuthenticationView: View {
                 Spacer(minLength: 20)
                 
                 // Skip authentication button for testing
-                #if DEBUG
                 Button {
                     // Force authentication to proceed
                     appState.isAuthenticated = true
@@ -529,7 +528,6 @@ struct AuthenticationView: View {
                 }
                 .padding(.bottom, 10)
                 .buttonStyle(ButtonStyles.scale)
-                #endif
             }
             .padding()
             .disabled(viewModel.isLoading)

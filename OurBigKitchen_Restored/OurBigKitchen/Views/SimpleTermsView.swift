@@ -125,7 +125,6 @@ struct SimpleTermsView: View {
                         .contentShape(Rectangle())
                         
                         // Skip button - clear and prominent
-                        #if DEBUG
                         Button(action: {
                             acceptTerms()
                         }) {
