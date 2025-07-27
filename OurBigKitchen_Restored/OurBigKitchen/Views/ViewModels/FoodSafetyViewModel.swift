@@ -26,14 +26,14 @@ class FoodSafetyViewModel: ObservableObject {
     private let authManager: AuthManager
     private let termsManager: TermsManager
     
-    init(foodSafetyService: FoodSafetyService = FoodSafetyService.shared, 
-         userManager: UserManager = UserManager.shared,
-         authManager: AuthManager = AuthManager.shared,
-         termsManager: TermsManager = TermsManager.shared) {
-        self.foodSafetyService = foodSafetyService
-        self.userManager = userManager
-        self.authManager = authManager
-        self.termsManager = termsManager
+    init(foodSafetyService: FoodSafetyService? = nil, 
+         userManager: UserManager? = nil,
+         authManager: AuthManager? = nil,
+         termsManager: TermsManager? = nil) {
+        self.foodSafetyService = foodSafetyService ?? FoodSafetyService.shared
+        self.userManager = userManager ?? UserManager.shared
+        self.authManager = authManager ?? AuthManager.shared
+        self.termsManager = termsManager ?? TermsManager.shared
         prefillUserData()
     }
     

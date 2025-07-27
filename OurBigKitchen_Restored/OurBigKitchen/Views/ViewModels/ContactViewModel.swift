@@ -22,9 +22,9 @@ class ContactViewModel: ObservableObject {
     private let contactService: ContactService
     private var cancellables = Set<AnyCancellable>()
     
-    init(userManager: UserManager = UserManager.shared, contactService: ContactService = ContactService.shared) {
-        self.userManager = userManager
-        self.contactService = contactService
+    init(userManager: UserManager? = nil, contactService: ContactService? = nil) {
+        self.userManager = userManager ?? UserManager.shared
+        self.contactService = contactService ?? ContactService.shared
         loadUserDetails()
     }
     

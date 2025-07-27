@@ -51,7 +51,8 @@ class MealTrackingViewModel: ObservableObject {
         )
         
         // Update stats via StatsManager
-        statsManager.addMealEntry(entryToSubmit)
+        Task {
+            let statsPublisher = await statsManager.addMealEntry(entryToSubmit)
             .receive(on: RunLoop.main)
             .sink { [weak self] completion in
                 self?.isLoading = false

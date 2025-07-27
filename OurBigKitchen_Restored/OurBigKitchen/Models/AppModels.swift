@@ -25,6 +25,18 @@ enum AppModels {
             self.darkMode = darkMode
             self.language = language
         }
+        
+        mutating func update(with preferences: [String: Any]) {
+            if let notificationsEnabled = preferences["notificationsEnabled"] as? Bool {
+                self.notificationsEnabled = notificationsEnabled
+            }
+            if let darkMode = preferences["darkMode"] as? Bool {
+                self.darkMode = darkMode
+            }
+            if let language = preferences["language"] as? String {
+                self.language = language
+            }
+        }
     }
 
     struct UserStats: Codable {

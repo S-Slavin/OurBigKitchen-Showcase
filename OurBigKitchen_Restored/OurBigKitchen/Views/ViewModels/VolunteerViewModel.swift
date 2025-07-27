@@ -21,8 +21,8 @@ class VolunteerViewModel: ObservableObject {
         "Administrative", "Event", "Other"
     ]
     
-    init(statsManager: StatsManager = StatsManager.shared) {
-        self.statsManager = statsManager
+    init(statsManager: StatsManager? = nil) {
+        self.statsManager = statsManager ?? StatsManager.shared
         loadOpportunities()
         loadRegistrations()
         
@@ -200,7 +200,8 @@ class VolunteerViewModel: ObservableObject {
         )
         
         // Update stats via StatsManager
-        statsManager.addVolunteerRegistration(registration)
+        Task {
+            let statsPublisher = await statsManager.addVolunteerRegistration(registration)
             .receive(on: RunLoop.main)
             .sink { [weak self] completion in
                 if case .failure(let error) = completion {
