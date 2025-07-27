@@ -101,23 +101,19 @@ struct OnboardingView: View {
                 HStack {
                     Spacer()
                     
-                    Button("Skip") {
+                    Button("SKIP FOR DEMO") {
                         // Add a graceful exit animation
                         withAnimation(.easeOut(duration: 0.5)) {
                             hasCompletedOnboarding = true
                             dismiss()
                         }
                     }
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(primaryColor)
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(.white)
                     .padding(.horizontal, 25)
                     .padding(.vertical, 12)
-                    .background(
-                        Capsule()
-                            .stroke(primaryColor.opacity(0.4), lineWidth: 1.5)
-                            .background(Color.white.opacity(0.3))
-                            .clipShape(Capsule())
-                    )
+                    .background(Color.orange)
+                    .cornerRadius(12)
                     .padding(.trailing)
                     .padding(.top, 20)
                     .buttonStyle(ButtonStyles.scale)

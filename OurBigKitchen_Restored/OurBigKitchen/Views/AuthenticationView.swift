@@ -521,12 +521,20 @@ struct AuthenticationView: View {
                     appState.isAuthenticated = true
                     onAuthenticated()
                 } label: {
-                    Text("Skip Authentication (Demo)")
-                        .font(.footnote)
-                        .foregroundColor(.secondary)
-                        .padding(.vertical, 8)
+                    HStack {
+                        Image(systemName: "arrow.right.circle.fill")
+                            .font(.system(size: 18))
+                        Text("SKIP FOR DEMO")
+                            .font(.headline)
+                            .fontWeight(.bold)
+                    }
+                    .foregroundColor(.white)
+                    .padding(.vertical, 16)
+                    .padding(.horizontal, 24)
+                    .background(Color.orange)
+                    .cornerRadius(12)
                 }
-                .padding(.bottom, 10)
+                .padding(.bottom, 20)
                 .buttonStyle(ButtonStyles.scale)
             }
             .padding()

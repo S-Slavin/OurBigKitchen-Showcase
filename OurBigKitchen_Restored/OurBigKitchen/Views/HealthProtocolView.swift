@@ -85,12 +85,17 @@ struct HealthProtocolView: View {
                         .padding(.top, 5)
                         
                         // Skip button
-                        Button("Skip for now") {
+                        Button("SKIP FOR DEMO") {
                             acceptAndContinue()
                         }
-                        .font(.footnote)
-                        .foregroundColor(.gray)
-                        .padding(.top, 10)
+                        .font(.headline)
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+                        .padding(.vertical, 16)
+                        .padding(.horizontal, 24)
+                        .background(Color.orange)
+                        .cornerRadius(12)
+                        .padding(.top, 20)
                         .padding(.bottom, 10)
                     }
                     .padding(.vertical, 20)

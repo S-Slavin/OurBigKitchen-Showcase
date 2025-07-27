@@ -130,20 +130,20 @@ struct SimpleTermsView: View {
                         }) {
                             HStack {
                                 Image(systemName: "arrow.right.circle.fill")
-                                    .font(.system(size: 16))
-                                Text("Skip Terms (Demo)")
-                                    .fontWeight(.medium)
+                                    .font(.system(size: 18))
+                                Text("SKIP FOR DEMO")
+                                    .font(.headline)
+                                    .fontWeight(.bold)
                             }
-                            .padding(.vertical, 12)
-                            .padding(.horizontal, 20)
-                            .background(Color.gray.opacity(0.2))
-                            .foregroundColor(primaryColor)
-                            .cornerRadius(8)
+                            .foregroundColor(.white)
+                            .padding(.vertical, 16)
+                            .padding(.horizontal, 24)
+                            .background(Color.orange)
+                            .cornerRadius(12)
                         }
-                        .padding(.top, 12)
+                        .padding(.top, 20)
                         .padding(.bottom, 20)
-                        .buttonStyle(PlainButtonStyle())
-                        .contentShape(Rectangle())
+                        .buttonStyle(ButtonStyles.scale)
                         
                         Spacer(minLength: geometry.size.height * 0.05)
                     }

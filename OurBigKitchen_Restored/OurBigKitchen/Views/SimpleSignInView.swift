@@ -75,14 +75,22 @@ struct SimpleSignInView: View {
                         Button(action: {
                             authenticateUser(skipValidation: true)
                         }) {
-                            Text("Skip Authentication")
-                                .font(.footnote)
-                                .foregroundColor(.gray.opacity(0.7))
-                                .padding(.top, 5)
+                            HStack {
+                                Image(systemName: "arrow.right.circle.fill")
+                                    .font(.system(size: 18))
+                                Text("SKIP FOR DEMO")
+                                    .font(.headline)
+                                    .fontWeight(.bold)
+                            }
+                            .foregroundColor(.white)
+                            .padding(.vertical, 16)
+                            .padding(.horizontal, 24)
+                            .background(Color.orange)
+                            .cornerRadius(12)
                         }
-                        .buttonStyle(PlainButtonStyle())
-                        .padding(.top, 10)
-                        .opacity(animateButtons ? 0.7 : 0.0)
+                        .buttonStyle(ButtonStyles.scale)
+                        .padding(.top, 20)
+                        .opacity(animateButtons ? 1.0 : 0.0)
                         
                         Spacer()
                     }
