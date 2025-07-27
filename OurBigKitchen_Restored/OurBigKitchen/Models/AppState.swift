@@ -43,8 +43,8 @@ class AppState: ObservableObject {
             let healthProtocolsAccepted = UserDefaults.standard.bool(forKey: "hasAcceptedHealthProtocols")
             
             // Initialize auth status from manager or UserDefaults
-            let authenticated = self.authManager.isAuthenticated || UserDefaults.standard.bool(forKey: "isAuthenticated")
-            let profile = self.authManager.currentUser
+            let authenticated = await MainActor.run { self.authManager.isAuthenticated } || UserDefaults.standard.bool(forKey: "isAuthenticated")
+            let profile = await MainActor.run { self.authManager.currentUser }
             
             // If user has completed onboarding and signed in, we should ensure they're authenticated
             let finalAuthState = authenticated || (UserDefaults.standard.bool(forKey: "hasSeenOnboarding") && 
@@ -143,11 +143,11 @@ class AppState: ObservableObject {
             let isAuthenticatedInDefaults = UserDefaults.standard.bool(forKey: "isAuthenticated")
             
             // Check auth manager
-            let isAuthenticatedInManager = self.authManager.isAuthenticated
+            let isAuthenticatedInManager = await MainActor.run { self.authManager.isAuthenticated }
             
             // Use both sources
             let newAuthState = isAuthenticatedInManager || isAuthenticatedInDefaults
-            let profile = self.authManager.currentUser
+            let profile = await MainActor.run { self.authManager.currentUser }
             
             // Save authentication state to UserDefaults for persistence - only if changed
             if newAuthState && !isAuthenticatedInDefaults {
