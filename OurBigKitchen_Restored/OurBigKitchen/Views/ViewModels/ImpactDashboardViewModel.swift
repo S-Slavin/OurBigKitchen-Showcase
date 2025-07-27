@@ -85,12 +85,12 @@ class ImpactDashboardViewModel: ObservableObject {
     // MARK: - Initialization
     
     init(
-        statsManager: StatsManager = StatsManager.shared,
-        userManager: UserManager = UserManager.shared,
+        statsManager: StatsManager? = nil,
+        userManager: UserManager? = nil,
         socialSharingService: SocialSharingService
     ) {
-        self.statsManager = statsManager
-        self.userManager = userManager
+        self.statsManager = statsManager ?? StatsManager.shared
+        self.userManager = userManager ?? UserManager.shared
         self.socialSharingService = socialSharingService
         
         // Initialize with empty values

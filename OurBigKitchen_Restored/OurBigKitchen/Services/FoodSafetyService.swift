@@ -22,9 +22,9 @@ class FoodSafetyService: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     private let registrationsKey = "food_safety_registrations"
     
-    init(networkManager: NetworkManager = NetworkManager.shared, userManager: UserManager = UserManager.shared) {
-        self.networkManager = networkManager
-        self.userManager = userManager
+    init(networkManager: NetworkManager? = nil, userManager: UserManager? = nil) {
+        self.networkManager = networkManager ?? NetworkManager.shared
+        self.userManager = userManager ?? UserManager.shared
         loadCompanies()
         loadRegistrations()
     }
