@@ -36,27 +36,7 @@ struct MealEntry: Identifiable, Codable {
 }
 
 // MARK: - VolunteerOpportunity
-struct VolunteerOpportunity: Identifiable, Codable {
-    let id: UUID
-    let title: String
-    let organization: String
-    let description: String
-    let date: Date
-    let duration: TimeInterval
-    let location: String
-    let category: String
-    let spotsTotal: Int
-    let spotsTaken: Int
-    let imageURL: String?
-    
-    var spotsAvailable: Int {
-        spotsTotal - spotsTaken
-    }
-    
-    var isFull: Bool {
-        spotsTaken >= spotsTotal
-    }
-}
+// Moved to AppModels.swift to avoid duplication
 
 // MARK: - UI Achievement (for in-memory UI use only)
 // This is different from the model Achievement in UserManager

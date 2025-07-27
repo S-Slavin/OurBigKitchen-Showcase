@@ -24,8 +24,8 @@ class MealTrackingViewModel: ObservableObject {
         "EVENT005", "OUTREACH006", "OTHER999"
     ]
     
-    init(statsManager: StatsManager = StatsManager.shared) {
-        self.statsManager = statsManager
+    init(statsManager: StatsManager? = nil) {
+        self.statsManager = statsManager ?? StatsManager.shared
         loadRecentEntries()
     }
     

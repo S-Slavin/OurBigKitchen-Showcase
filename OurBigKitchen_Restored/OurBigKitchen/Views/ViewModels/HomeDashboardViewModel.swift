@@ -54,14 +54,14 @@ class HomeDashboardViewModel: ObservableObject {
     private let eventManager: EventManager
     private let activityManager: ActivityManager
     
-    init(userManager: UserManager = UserManager.shared,
-         statsManager: StatsManager = StatsManager.shared,
-         eventManager: EventManager = EventManager.shared,
-         activityManager: ActivityManager = ActivityManager.shared) {
-        self.userManager = userManager
-        self.statsManager = statsManager
-        self.eventManager = eventManager
-        self.activityManager = activityManager
+    init(userManager: UserManager? = nil,
+         statsManager: StatsManager? = nil,
+         eventManager: EventManager? = nil,
+         activityManager: ActivityManager? = nil) {
+        self.userManager = userManager ?? UserManager.shared
+        self.statsManager = statsManager ?? StatsManager.shared
+        self.eventManager = eventManager ?? EventManager.shared
+        self.activityManager = activityManager ?? ActivityManager.shared
         
         loadData()
     }

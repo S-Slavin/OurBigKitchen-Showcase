@@ -50,11 +50,11 @@ class ImpactViewModel: ObservableObject {
     // MARK: - Initialization
     
     init(
-        impactService: ImpactService = ImpactService.shared,
-        userManager: UserManager = UserManager.shared
+        impactService: ImpactService? = nil,
+        userManager: UserManager? = nil
     ) {
-        self.impactService = impactService
-        self.userManager = userManager
+        self.impactService = impactService ?? ImpactService.shared
+        self.userManager = userManager ?? UserManager.shared
         
         loadUserData()
         
