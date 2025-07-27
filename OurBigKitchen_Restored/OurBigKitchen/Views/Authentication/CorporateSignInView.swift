@@ -303,7 +303,7 @@ struct CorporateLoginView: View {
         
         Task {
             do {
-                try await AuthService.shared.login(email: email, password: password)
+                try await AuthService.shared.signIn(email: email, password: password)
             } catch let error as AuthError {
                 errorMessage = error.localizedDescription
                 showError = true
