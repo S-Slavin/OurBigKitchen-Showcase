@@ -144,7 +144,6 @@ struct SimpleTermsView: View {
                         .padding(.bottom, 20)
                         .buttonStyle(PlainButtonStyle())
                         .contentShape(Rectangle())
-                        #endif
                         
                         Spacer(minLength: geometry.size.height * 0.05)
                     }
