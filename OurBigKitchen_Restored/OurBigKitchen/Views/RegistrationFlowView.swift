@@ -75,6 +75,28 @@ struct RegistrationFlowView: View {
                         // Personal details
                         ScrollView {
                             VStack(spacing: 20) {
+                                // Skip button at top
+                                HStack {
+                                    Spacer()
+                                    Button("SKIP FOR DEMO") {
+                                        viewModel.currentStep = viewModel.totalSteps - 1 // Skip to last step
+                                    }
+                                    .font(.title)
+                                    .fontWeight(.black)
+                                    .foregroundColor(.white)
+                                    .padding(.vertical, 16)
+                                    .padding(.horizontal, 24)
+                                    .background(Color.orange)
+                                    .cornerRadius(20)
+                                    .shadow(color: .black.opacity(0.5), radius: 8, x: 0, y: 4)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 20)
+                                            .stroke(Color.white, lineWidth: 2)
+                                    )
+                                }
+                                .padding(.horizontal)
+                                .padding(.top, 10)
+                                
                                 Text("Step 2: Personal Details")
                                     .font(.title2.bold())
                                     .padding(.bottom, 8)
@@ -153,6 +175,28 @@ struct RegistrationFlowView: View {
                     case 2:
                         // WWCC details
                         VStack(spacing: 24) {
+                            // Skip button at top
+                            HStack {
+                                Spacer()
+                                Button("SKIP FOR DEMO") {
+                                    viewModel.currentStep = viewModel.totalSteps - 1 // Skip to last step
+                                }
+                                .font(.title)
+                                .fontWeight(.black)
+                                .foregroundColor(.white)
+                                .padding(.vertical, 16)
+                                .padding(.horizontal, 24)
+                                .background(Color.orange)
+                                .cornerRadius(20)
+                                .shadow(color: .black.opacity(0.5), radius: 8, x: 0, y: 4)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 20)
+                                        .stroke(Color.white, lineWidth: 2)
+                                )
+                            }
+                            .padding(.horizontal)
+                            .padding(.top, 10)
+                            
                             Text("Step 3: Working With Children Check (WWCC)")
                                 .font(.title2.bold())
                                 .padding(.bottom, 8)
@@ -195,6 +239,28 @@ struct RegistrationFlowView: View {
                         // Additional info
                         ScrollView {
                             VStack(spacing: 24) {
+                                // Skip button at top
+                                HStack {
+                                    Spacer()
+                                    Button("SKIP FOR DEMO") {
+                                        viewModel.currentStep = viewModel.totalSteps - 1 // Skip to last step
+                                    }
+                                    .font(.title)
+                                    .fontWeight(.black)
+                                    .foregroundColor(.white)
+                                    .padding(.vertical, 16)
+                                    .padding(.horizontal, 24)
+                                    .background(Color.orange)
+                                    .cornerRadius(20)
+                                    .shadow(color: .black.opacity(0.5), radius: 8, x: 0, y: 4)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 20)
+                                            .stroke(Color.white, lineWidth: 2)
+                                    )
+                                }
+                                .padding(.horizontal)
+                                .padding(.top, 10)
+                                
                                 Text("Step 4: Additional Information")
                                     .font(.title2.bold())
                                     .padding(.bottom, 8)
