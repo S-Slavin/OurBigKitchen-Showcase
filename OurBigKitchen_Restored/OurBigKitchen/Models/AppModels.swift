@@ -78,7 +78,7 @@ enum AppModels {
         let profileImageURL: String?
         let bio: String?
         let role: UserRole
-        let preferences: UserPreferences
+        var preferences: UserPreferences
         let achievements: [UserAchievement]
         let stats: UserStats
         let hasFoodSafetyRegistration: Bool

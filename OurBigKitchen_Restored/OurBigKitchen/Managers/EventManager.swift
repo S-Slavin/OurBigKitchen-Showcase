@@ -10,10 +10,10 @@ class EventManager {
     private let persistenceManager: PersistenceManager
     private let upcomingEventsKey = "upcoming_events"
     
-    private init(networkManager: NetworkManager = NetworkManager.shared,
-                persistenceManager: PersistenceManager = PersistenceManager.shared) {
-        self.networkManager = networkManager
-        self.persistenceManager = persistenceManager
+    private init(networkManager: NetworkManager? = nil,
+                persistenceManager: PersistenceManager? = nil) {
+        self.networkManager = networkManager ?? NetworkManager.shared
+        self.persistenceManager = persistenceManager ?? PersistenceManager.shared
     }
     
     // MARK: - Event Operations
