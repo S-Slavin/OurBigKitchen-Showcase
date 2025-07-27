@@ -152,7 +152,25 @@ struct FoodSafetyRegistrationView: View {
                 }
             }
             .sheet(isPresented: $showTermsSheet) {
-                TermsView(showTermsSheet: $showTermsSheet)
+                VStack {
+                    HStack {
+                        Spacer()
+                        Button("SKIP FOR DEMO") {
+                            showTermsSheet = false
+                        }
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+                        .padding(.vertical, 16)
+                        .padding(.horizontal, 24)
+                        .background(Color.orange)
+                        .cornerRadius(15)
+                        .shadow(color: .black.opacity(0.3), radius: 5, x: 0, y: 2)
+                        .padding()
+                    }
+                    
+                    TermsView(showTermsSheet: $showTermsSheet)
+                }
             }
         }
     }
