@@ -37,7 +37,7 @@ struct PersistenceController {
             container.persistentStoreDescriptions.first!.url = URL(fileURLWithPath: "/dev/null")
         }
         
-        container.loadPersistentStores { (storeDescription, error) in
+        container.loadPersistentStores { [container] (storeDescription, error) in
             if let error = error as NSError? {
                 // Log the error
                 print("Error loading persistent store: \(error), \(error.userInfo)")
@@ -60,9 +60,9 @@ struct PersistenceController {
                         } catch {
                             print("Failed to recreate store: \(error)")
                             // Create a new in-memory store as fallback
-                            container = NSPersistentCloudKitContainer(name: "OurBigKitchen")
-                            container.persistentStoreDescriptions.first!.url = URL(fileURLWithPath: "/dev/null")
-                            container.loadPersistentStores { (_, error) in
+                            let newContainer = NSPersistentCloudKitContainer(name: "OurBigKitchen")
+                            newContainer.persistentStoreDescriptions.first!.url = URL(fileURLWithPath: "/dev/null")
+                            newContainer.loadPersistentStores { (_, error) in
                                 if let error = error {
                                     print("Failed to create in-memory store: \(error)")
                                 }

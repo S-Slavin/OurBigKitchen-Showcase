@@ -18,7 +18,6 @@ class DataDeletionService {
             // For demo purposes, we'll simulate a network request with a delay
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                 // Create an updated service with "pending" deletion status
-                var updatedService = service
                 let mutableService = self.updateServiceWithDeletionStatus(service, status: .pending)
                 
                 // Simulate success
