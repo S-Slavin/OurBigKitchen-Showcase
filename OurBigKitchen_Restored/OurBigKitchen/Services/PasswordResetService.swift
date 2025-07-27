@@ -1,5 +1,6 @@
 import Foundation
 
+@MainActor
 class PasswordResetService {
     static let shared = PasswordResetService()
     private init() {}
