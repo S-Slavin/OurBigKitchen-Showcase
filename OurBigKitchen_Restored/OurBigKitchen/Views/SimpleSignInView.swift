@@ -587,8 +587,9 @@ struct SimpleSignInView: View {
             )
             
             // Save user to persistence
-            do {
-                try PersistenceManager.shared.save(user, forKey: "currentUser")
+            Task { @MainActor in
+                do {
+                    try PersistenceManager.shared.save(user, forKey: "currentUser")
                 
                 // Set authentication flags
                 let defaults = UserDefaults.standard
@@ -619,6 +620,7 @@ struct SimpleSignInView: View {
                 }
             }
         }
+    }
     }
 }
 

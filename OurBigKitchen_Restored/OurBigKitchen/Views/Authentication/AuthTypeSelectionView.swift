@@ -106,17 +106,7 @@ struct AuthTypeSelectionView: View {
         }
     }
     
-    @ViewBuilder
-    private var destinationView: some View {
-        RegistrationSignupSlidesView { volunteerType in
-            switch volunteerType {
-            case .individual:
-                return SimpleSignInView()
-            case .corporate:
-                return CorporateSignInView()
-            }
-        }
-    }
+    // Removed unused destinationView
 }
 
 struct AuthTypeButton: View {
