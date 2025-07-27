@@ -25,8 +25,10 @@ class FoodSafetyService: ObservableObject {
     init(networkManager: NetworkManager = NetworkManager.shared, userManager: UserManager = UserManager.shared) {
         self.networkManager = networkManager
         self.userManager = userManager
-        loadCompanies()
-        loadRegistrations()
+        Task { @MainActor in
+            loadCompanies()
+            loadRegistrations()
+        }
     }
     
     // MARK: - Data Loading
@@ -100,7 +102,7 @@ class FoodSafetyService: ObservableObject {
     private func updateUserFoodSafetyStatus(email: String) {
         // Get current user
         userManager.fetchUserProfile()
-            .compactMap { user -> AppModels.User? in
+            .map { user -> AppModels.User? in
                 // Only update if this is the current user's email
                 guard user.email.lowercased() == email.lowercased() else {
                     return nil
@@ -130,7 +132,7 @@ class FoodSafetyService: ObservableObject {
             }
             .flatMap { [weak self] updatedUser -> AnyPublisher<AppModels.User, Error> in
                 guard let self = self, let user = updatedUser else {
-                    return Fail(error: NSError(domain: "FoodSafetyService", code: 400, userInfo: [NSLocalizedDescriptionKey: "No user to update"]))
+                    return Fail(error:  NSError(domain: "FoodSafetyService", code: 400, userInfo: [NSLocalizedDescriptionKey: "No user to update"]))
                         .eraseToAnyPublisher()
                 }
                 

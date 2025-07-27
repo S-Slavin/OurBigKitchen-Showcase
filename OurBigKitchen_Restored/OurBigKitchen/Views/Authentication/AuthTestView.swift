@@ -12,18 +12,24 @@ struct AuthTestView: View {
             List {
                 Section(header: Text("Test Actions")) {
                     Button("Setup Test User") {
-                        TestUtils.createTestUser()
-                        testResults.append("Test user created successfully")
+                        Task {
+                            await TestUtils.createTestUser()
+                            testResults.append("Test user created successfully")
+                        }
                     }
                     
                     Button("Clear Test Data") {
-                        TestUtils.clearTestData()
-                        testResults.append("Test data cleared successfully")
+                        Task {
+                            await TestUtils.clearTestData()
+                            testResults.append("Test data cleared successfully")
+                        }
                     }
                     
                     Button("Show Current State") {
-                        TestUtils.printCurrentState()
-                        testResults.append("Current state printed to console")
+                        Task {
+                            await TestUtils.printCurrentState()
+                            testResults.append("Current state printed to console")
+                        }
                     }
                 }
                 
