@@ -15,7 +15,7 @@ class PasswordResetService {
         }
         
         // Check if user exists
-        guard let user = try? await PersistenceManager.shared.load(AppModels.User.self, forKey: "currentUser"),
+        guard let user = try? PersistenceManager.shared.load(AppModels.User.self, forKey: "currentUser"),
               user.email == email else {
             throw PasswordResetError.userNotFound
         }
@@ -31,7 +31,7 @@ class PasswordResetService {
             expiryDate: expiryDate
         )
         
-        try await PersistenceManager.shared.save(resetRequest, forKey: "passwordReset_\(email)")
+        try PersistenceManager.shared.save(resetRequest, forKey: "passwordReset_\(email)")
         
         // TODO: In a real app, send email with reset link
         // For now, we'll just print the token
@@ -40,7 +40,7 @@ class PasswordResetService {
     
     func resetPassword(email: String, token: String, newPassword: String) async throws {
         // Load reset request
-        guard let resetRequest = try? await PersistenceManager.shared.load(PasswordResetRequest.self, forKey: "passwordReset_\(email)") else {
+        guard let resetRequest = try? PersistenceManager.shared.load(PasswordResetRequest.self, forKey: "passwordReset_\(email)") else {
             throw PasswordResetError.invalidToken
         }
         
