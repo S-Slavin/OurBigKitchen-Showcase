@@ -47,7 +47,7 @@ class ContactViewModel: ObservableObject {
         
         isLoading = true
         
-        let contact = AppModels.ContactMessage(
+        let contact = ContactMessage(
             name: name,
             email: email,
             message: message,
