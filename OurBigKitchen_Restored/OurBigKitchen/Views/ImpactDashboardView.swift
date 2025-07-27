@@ -104,7 +104,25 @@ struct ImpactDashboardView: View {
                 }
             }
             .sheet(isPresented: $showSignInSheet) {
-                SimpleSignInView()
+                VStack {
+                    HStack {
+                        Spacer()
+                        Button("SKIP FOR DEMO") {
+                            showSignInSheet = false
+                        }
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+                        .padding(.vertical, 16)
+                        .padding(.horizontal, 24)
+                        .background(Color.orange)
+                        .cornerRadius(15)
+                        .shadow(color: .black.opacity(0.3), radius: 5, x: 0, y: 2)
+                        .padding()
+                    }
+                    
+                    SimpleSignInView()
+                }
                 .presentationDetents([.height(650), .large])
                 .presentationDragIndicator(.visible)
             }

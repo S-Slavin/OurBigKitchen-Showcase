@@ -58,19 +58,73 @@ struct AuthTestView: View {
                 dismiss()
             })
             .sheet(isPresented: $showLoginView) {
-                NavigationView {
-                    CorporateLoginView()
-                        .environmentObject(AppState())
+                VStack {
+                    HStack {
+                        Spacer()
+                        Button("SKIP FOR DEMO") {
+                            showLoginView = false
+                        }
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+                        .padding(.vertical, 16)
+                        .padding(.horizontal, 24)
+                        .background(Color.orange)
+                        .cornerRadius(15)
+                        .shadow(color: .black.opacity(0.3), radius: 5, x: 0, y: 2)
+                        .padding()
+                    }
+                    
+                    NavigationView {
+                        CorporateLoginView()
+                            .environmentObject(AppState())
+                    }
                 }
             }
             .sheet(isPresented: $showSignUpView) {
-                NavigationView {
-                    CorporateSignInView()
-                        .environmentObject(AppState())
+                VStack {
+                    HStack {
+                        Spacer()
+                        Button("SKIP FOR DEMO") {
+                            showSignUpView = false
+                        }
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+                        .padding(.vertical, 16)
+                        .padding(.horizontal, 24)
+                        .background(Color.orange)
+                        .cornerRadius(15)
+                        .shadow(color: .black.opacity(0.3), radius: 5, x: 0, y: 2)
+                        .padding()
+                    }
+                    
+                    NavigationView {
+                        CorporateSignInView()
+                            .environmentObject(AppState())
+                    }
                 }
             }
             .sheet(isPresented: $showPasswordResetView) {
-                PasswordResetView()
+                VStack {
+                    HStack {
+                        Spacer()
+                        Button("SKIP FOR DEMO") {
+                            showPasswordResetView = false
+                        }
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+                        .padding(.vertical, 16)
+                        .padding(.horizontal, 24)
+                        .background(Color.orange)
+                        .cornerRadius(15)
+                        .shadow(color: .black.opacity(0.3), radius: 5, x: 0, y: 2)
+                        .padding()
+                    }
+                    
+                    PasswordResetView()
+                }
             }
         }
     }

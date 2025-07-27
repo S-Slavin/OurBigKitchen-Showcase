@@ -32,25 +32,79 @@ struct DashboardView: View {
                 // Refresh data
             }
             .sheet(isPresented: $showingSocialSharingView) {
-                SocialSharingView()
-                    .presentationDetents([.large])
-                    .presentationDragIndicator(.visible)
+                VStack {
+                    HStack {
+                        Spacer()
+                        Button("SKIP FOR DEMO") {
+                            showingSocialSharingView = false
+                        }
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+                        .padding(.vertical, 16)
+                        .padding(.horizontal, 24)
+                        .background(Color.orange)
+                        .cornerRadius(15)
+                        .shadow(color: .black.opacity(0.3), radius: 5, x: 0, y: 2)
+                        .padding()
+                    }
+                    
+                    SocialSharingView()
+                }
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
             }
             .sheet(isPresented: $showingWebView) {
-                WebViewScreen(url: URL(string: bookingURL)!, title: webViewTitle)
-                    .edgesIgnoringSafeArea(.bottom)
-                    .presentationDetents([.large])
-                    .presentationDragIndicator(.visible)
+                VStack {
+                    HStack {
+                        Spacer()
+                        Button("SKIP FOR DEMO") {
+                            showingWebView = false
+                        }
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+                        .padding(.vertical, 16)
+                        .padding(.horizontal, 24)
+                        .background(Color.orange)
+                        .cornerRadius(15)
+                        .shadow(color: .black.opacity(0.3), radius: 5, x: 0, y: 2)
+                        .padding()
+                    }
+                    
+                    WebViewScreen(url: URL(string: bookingURL)!, title: webViewTitle)
+                        .edgesIgnoringSafeArea(.bottom)
+                }
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
             }
             .sheet(isPresented: $showingLoginSheet, onDismiss: {
                 // Refresh auth state when login sheet is dismissed
                 contentViewModel.checkAuthentication()
                 print("DashboardView login sheet dismissed")
             }) {
-                // Use our independent login wrapper
-                StandardLoginWrapper()
-                    .presentationDetents([.medium, .large])
-                    .presentationDragIndicator(.visible)
+                VStack {
+                    HStack {
+                        Spacer()
+                        Button("SKIP FOR DEMO") {
+                            showingLoginSheet = false
+                        }
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+                        .padding(.vertical, 16)
+                        .padding(.horizontal, 24)
+                        .background(Color.orange)
+                        .cornerRadius(15)
+                        .shadow(color: .black.opacity(0.3), radius: 5, x: 0, y: 2)
+                        .padding()
+                    }
+                    
+                    // Use our independent login wrapper
+                    StandardLoginWrapper()
+                }
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
             }
         }
     }
