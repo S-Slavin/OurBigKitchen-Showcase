@@ -38,7 +38,7 @@ extension UserManager {
 
 // MARK: - StatsManager Async Extensions
 extension StatsManager {
-    func getTodayStats() async throws -> DailyStats {
+    func getTodayStatsSync() async throws -> DailyStats {
         do {
             // Try to get from network using the existing methods
             return try await withCheckedThrowingContinuation { continuation in

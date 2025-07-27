@@ -72,7 +72,7 @@ class NetworkManager: NetworkManaging {
     
     // MARK: - Generic Network Methods
     
-    func get<T: Decodable>(endpoint: String) -> AnyPublisher<T, Error> {
+    nonisolated func get<T: Decodable>(endpoint: String) -> AnyPublisher<T, Error> {
         // For testing, return a mock response
         return Future<T, Error> { promise in
             // Simulate network delay
@@ -87,7 +87,7 @@ class NetworkManager: NetworkManaging {
         .eraseToAnyPublisher()
     }
     
-    func post<T: Encodable, U: Decodable>(endpoint: String, body: T) -> AnyPublisher<U, Error> {
+    nonisolated func post<T: Encodable, U: Decodable>(endpoint: String, body: T) -> AnyPublisher<U, Error> {
         // For testing, return a mock response
         return Future<U, Error> { promise in
             // Simulate network delay
@@ -102,7 +102,7 @@ class NetworkManager: NetworkManaging {
         .eraseToAnyPublisher()
     }
     
-    func put<T: Encodable, U: Decodable>(endpoint: String, body: T) -> AnyPublisher<U, Error> {
+    nonisolated func put<T: Encodable, U: Decodable>(endpoint: String, body: T) -> AnyPublisher<U, Error> {
         // For testing, return a mock response
         return Future<U, Error> { promise in
             // Simulate network delay
@@ -117,7 +117,7 @@ class NetworkManager: NetworkManaging {
         .eraseToAnyPublisher()
     }
     
-    func delete(endpoint: String) -> AnyPublisher<Void, Error> {
+    nonisolated func delete(endpoint: String) -> AnyPublisher<Void, Error> {
         // For testing, return success
         return Future<Void, Error> { promise in
             // Simulate network delay

@@ -66,10 +66,10 @@ class StatsManager {
     private let statsKey = "today_stats"
     private let dateFormatter: ISO8601DateFormatter
     
-    init(networkManager: NetworkManager = NetworkManager.shared,
-                persistenceManager: PersistenceManager = PersistenceManager.shared) {
-        self.networkManager = networkManager
-        self.persistenceManager = persistenceManager
+    init(networkManager: NetworkManager? = nil,
+                persistenceManager: PersistenceManager? = nil) {
+        self.networkManager = networkManager ?? NetworkManager.shared
+        self.persistenceManager = persistenceManager ?? PersistenceManager.shared
         self.dateFormatter = ISO8601DateFormatter()
     }
     
@@ -164,9 +164,10 @@ class StatsManager {
     
     // MARK: - Meal Tracking Operations
 
-    func addMealEntry(_ entry: MealEntry) -> AnyPublisher<DailyStats, Error> {
+    func addMealEntry(_ entry: MealEntry) async -> AnyPublisher<DailyStats, Error> {
         // First get the current daily stats
-        return getTodayStats()
+        let statsPublisher = await getTodayStats()
+        return statsPublisher
             .flatMap { [weak self] currentStats -> AnyPublisher<DailyStats, Error> in
                 guard let self = self else {
                     return Fail(error: NSError(domain: "StatsManager", code: 500, userInfo: [NSLocalizedDescriptionKey: "Self is nil"]))
@@ -188,7 +189,7 @@ class StatsManager {
                         donationsReceived: currentStats.donationsReceived
                     )
                     
-                    return self.updateDailyStats(newStats)
+                    return await self.updateDailyStats(newStats)
                 } else {
                     // For historical entries, we'd need to get the stats for that date and update them
                     // For simplicity in this implementation, we'll just return the current stats
@@ -202,9 +203,10 @@ class StatsManager {
     
     // MARK: - Volunteer Operations
 
-    func addVolunteerRegistration(_ registration: VolunteerRegistration) -> AnyPublisher<DailyStats, Error> {
+    func addVolunteerRegistration(_ registration: VolunteerRegistration) async -> AnyPublisher<DailyStats, Error> {
         // First get the current daily stats
-        return getTodayStats()
+        let statsPublisher = await getTodayStats()
+        return statsPublisher
             .flatMap { [weak self] currentStats -> AnyPublisher<DailyStats, Error> in
                 guard let self = self else {
                     return Fail(error: NSError(domain: "StatsManager", code: 500, userInfo: [NSLocalizedDescriptionKey: "Self is nil"]))
@@ -227,7 +229,7 @@ class StatsManager {
                     donationsReceived: currentStats.donationsReceived
                 )
                 
-                return self.updateDailyStats(newStats)
+                return await self.updateDailyStats(newStats)
             }
             .eraseToAnyPublisher()
     }
