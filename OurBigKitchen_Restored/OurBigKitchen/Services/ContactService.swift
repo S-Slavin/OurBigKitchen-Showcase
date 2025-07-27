@@ -21,6 +21,7 @@ class ContactService {
         case general = "General"
         case volunteering = "Volunteering"
         case donations = "Donations"
+        case partnerships = "Partnerships"
         case feedback = "Feedback"
         case events = "Events"
         
@@ -34,6 +35,8 @@ class ContactService {
                 return "Interested in volunteering? Get in touch to learn about opportunities to help in the kitchen, delivery, or administration."
             case .donations:
                 return "For inquiries related to donations, fundraising, or supporting Our Big Kitchen financially."
+            case .partnerships:
+                return "For partnership opportunities, collaborations, or corporate engagement inquiries."
             case .feedback:
                 return "Share your feedback or suggestions to help us improve our services and community impact."
             case .events:
@@ -49,6 +52,8 @@ class ContactService {
                 return "person.3"
             case .donations:
                 return "heart"
+            case .partnerships:
+                return "handshake"
             case .feedback:
                 return "star"
             case .events:
@@ -110,6 +115,8 @@ class ContactService {
             return .green
         case .donations:
             return .red
+        case .partnerships:
+            return .purple
         case .feedback:
             return .orange
         case .events:

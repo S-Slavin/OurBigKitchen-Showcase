@@ -14,6 +14,8 @@ class ContactViewModel: ObservableObject {
     @Published var name = ""
     @Published var email = ""
     @Published var message = ""
+    @Published var subject = ""
+    @Published var selectedCategory: ContactService.ContactCategory = .general
     @Published var isLoading = false
     @Published var error: Error?
     @Published var showSuccess = false
@@ -66,5 +68,42 @@ class ContactViewModel: ObservableObject {
                 self?.message = ""
             })
             .store(in: &cancellables)
+    }
+    
+    // MARK: - Contact Category Methods
+    
+    var contactURL: URL? {
+        switch selectedCategory {
+        case .general:
+            return URL(string: "https://ourbigkitchen.org/contact")
+        case .volunteering:
+            return URL(string: "https://ourbigkitchen.org/volunteer")
+        case .donations:
+            return URL(string: "https://ourbigkitchen.org/donate")
+        case .partnerships:
+            return URL(string: "https://ourbigkitchen.org/partnerships")
+        case .feedback:
+            return URL(string: "https://ourbigkitchen.org/feedback")
+        }
+    }
+    
+    func contactViaWeb() {
+        // This method can be used to track web contact attempts
+        print("User attempting to contact via web for category: \(selectedCategory)")
+    }
+    
+    func getCategoryColor(_ category: ContactService.ContactCategory) -> Color {
+        switch category {
+        case .general:
+            return .blue
+        case .volunteering:
+            return .green
+        case .donations:
+            return .orange
+        case .partnerships:
+            return .purple
+        case .feedback:
+            return .red
+        }
     }
 } 
