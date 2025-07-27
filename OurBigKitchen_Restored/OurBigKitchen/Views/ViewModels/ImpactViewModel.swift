@@ -72,7 +72,7 @@ class ImpactViewModel: ObservableObject {
         if let imageData = testImage.jpegData(compressionQuality: 1.0) {
             let testImpact = ImpactPost(
                 id: "test-impact",
-                userId: userManager.currentUserId ?? "guest",
+                userId: userManager?.currentUserId ?? "guest",
                 message: "This is a test impact post",
                 date: Date(),
                 tags: ["Testing", "Demo"],
@@ -107,7 +107,7 @@ class ImpactViewModel: ObservableObject {
         
         let newImpact = ImpactPost(
             id: UUID().uuidString,
-            userId: userManager.currentUserId ?? "guest",
+            userId: userManager?.currentUserId ?? "guest",
             message: customMessage,
             date: Date(),
             tags: Array(selectedTags),

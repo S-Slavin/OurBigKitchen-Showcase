@@ -126,7 +126,7 @@ class StatsManager {
     // MARK: - User Impact Operations
     
     func getUserImpact() async -> AnyPublisher<Impact, Error> {
-        guard let userId = await UserManager.shared.currentUserId else {
+        guard let userId = UserManager.shared.currentUserId else {
             // Return a default impact if no user is logged in
             let impact = Impact(id: UUID().uuidString, userId: "", timeSpent: 0, mealsMade: 0)
             return Just(impact)
