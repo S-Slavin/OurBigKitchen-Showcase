@@ -61,10 +61,10 @@ class LeaderboardViewModel: ObservableObject {
     private let userManager: UserManager
     private let statsManager: StatsManager
     
-    init(userManager: UserManager = UserManager.shared,
-         statsManager: StatsManager = StatsManager.shared) {
-        self.userManager = userManager
-        self.statsManager = statsManager
+    init(userManager: UserManager? = nil,
+         statsManager: StatsManager? = nil) {
+        self.userManager = userManager ?? UserManager.shared
+        self.statsManager = statsManager ?? StatsManager.shared
         loadData()
     }
     

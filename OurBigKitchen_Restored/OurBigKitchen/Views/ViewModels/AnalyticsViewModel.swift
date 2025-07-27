@@ -22,10 +22,10 @@ class AnalyticsViewModel: ObservableObject {
     private let networkManager: NetworkManager
     private var cancellables = Set<AnyCancellable>()
     
-    init(analyticsManager: AnalyticsManager = .shared,
-         networkManager: NetworkManager = .shared) {
-        self.analyticsManager = analyticsManager
-        self.networkManager = networkManager
+    init(analyticsManager: AnalyticsManager? = nil,
+         networkManager: NetworkManager? = nil) {
+        self.analyticsManager = analyticsManager ?? AnalyticsManager.shared
+        self.networkManager = networkManager ?? NetworkManager.shared
         
         loadData()
         setupObservers()

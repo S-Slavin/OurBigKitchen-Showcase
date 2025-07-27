@@ -33,8 +33,8 @@ class AnalyticsManager: ObservableObject {
     private let networkManager: NetworkManager
     private var cancellables = Set<AnyCancellable>()
     
-    private init(networkManager: NetworkManager = .shared) {
-        self.networkManager = networkManager
+    private init(networkManager: NetworkManager? = nil) {
+        self.networkManager = networkManager ?? NetworkManager.shared
     }
     
     // MARK: - Event Tracking
