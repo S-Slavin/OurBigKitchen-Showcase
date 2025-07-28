@@ -4,7 +4,7 @@ import SwiftUI
 
 class RegistrationFlowViewModel: ObservableObject {
     @Published var currentStep: Int = 0
-    let totalSteps = 7
+    let totalSteps = 5
     
     enum UserType: String, CaseIterable, Identifiable {
         case individual = "Individual Volunteer"
@@ -18,11 +18,20 @@ class RegistrationFlowViewModel: ObservableObject {
     @Published var mobile: String = ""
     @Published var dob: Date = Date()
     @Published var address: String = ""
+    @Published var city: String = ""
+    @Published var state: String = ""
+    @Published var postalCode: String = ""
     @Published var emergencyName: String = ""
     @Published var emergencyPhone: String = ""
     @Published var companyName: String = ""
     @Published var wwcNumber: String = ""
     @Published var wwcExpiry: Date = Date()
+    @Published var dietaryRestrictions: String = ""
+    @Published var medicalConditions: String = ""
+    @Published var volunteerExperience: String = ""
+    @Published var skills: String = ""
+    @Published var availability: String = ""
+    @Published var motivation: String = ""
     @Published var isDukeOfEd: Bool = false
     @Published var referralSource: String = ""
     @Published var hasAcceptedFoodSafety: Bool = false
@@ -45,7 +54,7 @@ class RegistrationFlowViewModel: ObservableObject {
         return (ageComponents.year ?? 0) >= 18
     }
     var isPersonalDetailsValid: Bool {
-        !firstName.isEmpty && !lastName.isEmpty && !email.isEmpty && !mobile.isEmpty && !address.isEmpty && !emergencyName.isEmpty && !emergencyPhone.isEmpty && (selectedUserType != .corporate || !companyName.isEmpty)
+        !firstName.isEmpty && !lastName.isEmpty && !email.isEmpty && !mobile.isEmpty
     }
     var isWWCCValid: Bool {
         if isOver18 {
@@ -54,13 +63,13 @@ class RegistrationFlowViewModel: ObservableObject {
         return true
     }
     var isAdditionalInfoValid: Bool {
-        !referralSource.isEmpty
+        true // Make this always valid for demo purposes
     }
     var isFoodSafetyValid: Bool {
-        hasAcceptedFoodSafety
+        true // Make this always valid for demo purposes
     }
     var isTermsValid: Bool {
-        hasAcceptedTerms
+        true // Make this always valid for demo purposes
     }
     var isReviewValid: Bool {
         isPersonalDetailsValid && isWWCCValid && isAdditionalInfoValid && isFoodSafetyValid && isTermsValid

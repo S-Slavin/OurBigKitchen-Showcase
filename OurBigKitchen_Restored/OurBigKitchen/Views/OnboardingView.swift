@@ -247,9 +247,6 @@ struct OnboardingView: View {
                                     }
                                     .padding(.horizontal, 35)
                                     .buttonStyle(ButtonStyles.scale)
-                                    .fullScreenCover(isPresented: $showRegistrationFlow) {
-                                        RegistrationFlowView()
-                                    }
                                 } else {
                                     // Enhanced Next button on other slides
                                     Button {
@@ -333,6 +330,9 @@ struct OnboardingView: View {
             }
         }
         .navigationBarHidden(true)
+        .fullScreenCover(isPresented: $showRegistrationFlow) {
+            RegistrationFlowView()
+        }
         .onAppear {
             // Start animations when view appears
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {

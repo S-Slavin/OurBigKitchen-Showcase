@@ -39,6 +39,32 @@ struct RegistrationSignupSlidesView: View {
     var body: some View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
+                // Demo navigation button at the very top
+                HStack {
+                    Spacer()
+                    Button("NEXT FOR DEMO") {
+                        if currentPage < 3 {
+                            withAnimation { currentPage += 1 }
+                        } else {
+                            dismiss() // Close at the end
+                        }
+                    }
+                    .font(.title)
+                    .fontWeight(.black)
+                    .foregroundColor(.white)
+                    .padding(.vertical, 16)
+                    .padding(.horizontal, 24)
+                    .background(Color.orange)
+                    .cornerRadius(20)
+                    .shadow(color: .black.opacity(0.5), radius: 8, x: 0, y: 4)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 20)
+                            .stroke(Color.white, lineWidth: 2)
+                    )
+                }
+                .padding(.horizontal)
+                .padding(.top, 10)
+                
                 // Progress indicator
                 HStack(spacing: 4) {
                     ForEach(0..<4, id: \.self) { step in

@@ -3,6 +3,7 @@ import Combine
 
 struct RegistrationFlowView: View {
     @StateObject private var viewModel: RegistrationFlowViewModel
+    @Environment(\.dismiss) private var dismiss
     
     init(mockService: RegistrationService? = nil) {
         _viewModel = StateObject(wrappedValue: RegistrationFlowViewModel(registrationService: mockService ?? RegistrationService()))
@@ -11,6 +12,32 @@ struct RegistrationFlowView: View {
     var body: some View {
         NavigationStack {
             VStack {
+                // Demo navigation button at the very top
+                HStack {
+                    Spacer()
+                    Button("NEXT FOR DEMO") {
+                        if viewModel.currentStep < viewModel.totalSteps - 1 {
+                            withAnimation { viewModel.currentStep += 1 }
+                        } else {
+                            dismiss() // Only dismiss at the very end
+                        }
+                    }
+                    .font(.title)
+                    .fontWeight(.black)
+                    .foregroundColor(.white)
+                    .padding(.vertical, 16)
+                    .padding(.horizontal, 24)
+                    .background(Color.orange)
+                    .cornerRadius(20)
+                    .shadow(color: .black.opacity(0.5), radius: 8, x: 0, y: 4)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 20)
+                            .stroke(Color.white, lineWidth: 2)
+                    )
+                }
+                .padding(.horizontal)
+                .padding(.top, 10)
+                
                 // Step indicator
                 HStack(spacing: 4) {
                     ForEach(0..<viewModel.totalSteps, id: \.self) { step in
@@ -75,51 +102,21 @@ struct RegistrationFlowView: View {
                         // Personal details
                         ScrollView {
                             VStack(spacing: 20) {
-                                // Skip button at top
-                                HStack {
-                                    Spacer()
-                                    Button("SKIP FOR DEMO") {
-                                        viewModel.currentStep = viewModel.totalSteps - 1 // Skip to last step
-                                    }
-                                    .font(.title)
-                                    .fontWeight(.black)
-                                    .foregroundColor(.white)
-                                    .padding(.vertical, 16)
-                                    .padding(.horizontal, 24)
-                                    .background(Color.orange)
-                                    .cornerRadius(20)
-                                    .shadow(color: .black.opacity(0.5), radius: 8, x: 0, y: 4)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 20)
-                                            .stroke(Color.white, lineWidth: 2)
-                                    )
-                                }
-                                .padding(.horizontal)
-                                .padding(.top, 10)
-                                
                                 Text("Step 2: Personal Details")
                                     .font(.title2.bold())
                                     .padding(.bottom, 8)
-                                Text("Please enter your details. All fields are required.")
-                                    .font(.body)
-                                    .foregroundColor(.secondary)
-                                    .multilineTextAlignment(.center)
-                                    .padding(.horizontal)
-                                Group {
-                                    HStack(spacing: 16) {
-                                        TextField("First Name", text: $viewModel.firstName)
-                                            .textContentType(.givenName)
-                                            .autocapitalization(.words)
-                                            .padding()
-                                            .background(Color(.systemGray6))
-                                            .cornerRadius(8)
-                                        TextField("Last Name", text: $viewModel.lastName)
-                                            .textContentType(.familyName)
-                                            .autocapitalization(.words)
-                                            .padding()
-                                            .background(Color(.systemGray6))
-                                            .cornerRadius(8)
-                                    }
+                                
+                                VStack(spacing: 16) {
+                                    TextField("First Name", text: $viewModel.firstName)
+                                        .autocapitalization(.words)
+                                        .padding()
+                                        .background(Color(.systemGray6))
+                                        .cornerRadius(8)
+                                    TextField("Last Name", text: $viewModel.lastName)
+                                        .autocapitalization(.words)
+                                        .padding()
+                                        .background(Color(.systemGray6))
+                                        .cornerRadius(8)
                                     TextField("Email", text: $viewModel.email)
                                         .keyboardType(.emailAddress)
                                         .textContentType(.emailAddress)
@@ -127,7 +124,7 @@ struct RegistrationFlowView: View {
                                         .padding()
                                         .background(Color(.systemGray6))
                                         .cornerRadius(8)
-                                    TextField("Mobile Phone", text: $viewModel.mobile)
+                                    TextField("Phone", text: $viewModel.mobile)
                                         .keyboardType(.phonePad)
                                         .textContentType(.telephoneNumber)
                                         .padding()
@@ -139,16 +136,26 @@ struct RegistrationFlowView: View {
                                         .background(Color(.systemGray6))
                                         .cornerRadius(8)
                                     TextField("Address", text: $viewModel.address)
-                                        .textContentType(.fullStreetAddress)
                                         .autocapitalization(.words)
                                         .padding()
                                         .background(Color(.systemGray6))
                                         .cornerRadius(8)
-                                    Divider()
-                                    Text("Emergency Contact")
-                                        .font(.headline)
-                                        .padding(.top, 8)
-                                    TextField("Contact Name", text: $viewModel.emergencyName)
+                                    TextField("City", text: $viewModel.city)
+                                        .autocapitalization(.words)
+                                        .padding()
+                                        .background(Color(.systemGray6))
+                                        .cornerRadius(8)
+                                    TextField("State", text: $viewModel.state)
+                                        .autocapitalization(.words)
+                                        .padding()
+                                        .background(Color(.systemGray6))
+                                        .cornerRadius(8)
+                                    TextField("Postal Code", text: $viewModel.postalCode)
+                                        .keyboardType(.numberPad)
+                                        .padding()
+                                        .background(Color(.systemGray6))
+                                        .cornerRadius(8)
+                                    TextField("Emergency Contact Name", text: $viewModel.emergencyName)
                                         .autocapitalization(.words)
                                         .padding()
                                         .background(Color(.systemGray6))
@@ -175,28 +182,6 @@ struct RegistrationFlowView: View {
                     case 2:
                         // WWCC details
                         VStack(spacing: 24) {
-                            // Skip button at top
-                            HStack {
-                                Spacer()
-                                Button("SKIP FOR DEMO") {
-                                    viewModel.currentStep = viewModel.totalSteps - 1 // Skip to last step
-                                }
-                                .font(.title)
-                                .fontWeight(.black)
-                                .foregroundColor(.white)
-                                .padding(.vertical, 16)
-                                .padding(.horizontal, 24)
-                                .background(Color.orange)
-                                .cornerRadius(20)
-                                .shadow(color: .black.opacity(0.5), radius: 8, x: 0, y: 4)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 20)
-                                        .stroke(Color.white, lineWidth: 2)
-                                )
-                            }
-                            .padding(.horizontal)
-                            .padding(.top, 10)
-                            
                             Text("Step 3: Working With Children Check (WWCC)")
                                 .font(.title2.bold())
                                 .padding(.bottom, 8)
@@ -239,256 +224,106 @@ struct RegistrationFlowView: View {
                         // Additional info
                         ScrollView {
                             VStack(spacing: 24) {
-                                // Skip button at top
-                                HStack {
-                                    Spacer()
-                                    Button("SKIP FOR DEMO") {
-                                        viewModel.currentStep = viewModel.totalSteps - 1 // Skip to last step
-                                    }
-                                    .font(.title)
-                                    .fontWeight(.black)
-                                    .foregroundColor(.white)
-                                    .padding(.vertical, 16)
-                                    .padding(.horizontal, 24)
-                                    .background(Color.orange)
-                                    .cornerRadius(20)
-                                    .shadow(color: .black.opacity(0.5), radius: 8, x: 0, y: 4)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 20)
-                                            .stroke(Color.white, lineWidth: 2)
-                                    )
-                                }
-                                .padding(.horizontal)
-                                .padding(.top, 10)
-                                
                                 Text("Step 4: Additional Information")
                                     .font(.title2.bold())
                                     .padding(.bottom, 8)
-                                Text("Please provide any additional information that will help us better support your volunteering experience.")
-                                    .font(.body)
-                                    .foregroundColor(.secondary)
-                                    .multilineTextAlignment(.center)
-                                    .padding(.horizontal)
                                 
-                                VStack(spacing: 20) {
-                                    // Duke of Ed checkbox
-                                    Toggle(isOn: $viewModel.isDukeOfEd) {
-                                        VStack(alignment: .leading, spacing: 4) {
-                                            Text("Duke of Edinburgh Award")
-                                                .font(.headline)
-                                            Text("I am completing this for my Duke of Edinburgh Award")
-                                                .font(.subheadline)
-                                                .foregroundColor(.secondary)
-                                        }
-                                    }
-                                    .padding()
-                                    .background(Color(.systemGray6))
-                                    .cornerRadius(8)
+                                VStack(spacing: 16) {
+                                    Text("Dietary Restrictions")
+                                        .font(.headline)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                    TextField("Any dietary restrictions or allergies", text: $viewModel.dietaryRestrictions)
+                                        .padding()
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .background(Color(.systemGray6))
+                                        .cornerRadius(8)
                                     
-                                    // Referral source
-                                    VStack(alignment: .leading, spacing: 8) {
-                                        Text("How did you hear about us?")
-                                            .font(.headline)
-                                        TextField("e.g., Friend, Social Media, Website", text: $viewModel.referralSource)
-                                            .padding()
-                                            .background(Color(.systemGray6))
-                                            .cornerRadius(8)
-                                    }
+                                    Text("Medical Conditions")
+                                        .font(.headline)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                    TextField("Any medical conditions we should be aware of", text: $viewModel.medicalConditions)
+                                        .padding()
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .background(Color(.systemGray6))
+                                        .cornerRadius(8)
+                                    
+                                    Text("Volunteer Experience")
+                                        .font(.headline)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                    TextField("Previous volunteer experience (optional)", text: $viewModel.volunteerExperience)
+                                        .padding()
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .background(Color(.systemGray6))
+                                        .cornerRadius(8)
+                                    
+                                    Text("Skills")
+                                        .font(.headline)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                    TextField("Cooking skills, languages, etc. (optional)", text: $viewModel.skills)
+                                        .padding()
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .background(Color(.systemGray6))
+                                        .cornerRadius(8)
+                                    
+                                    Text("Availability")
+                                        .font(.headline)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                    TextField("Preferred days/times to volunteer", text: $viewModel.availability)
+                                        .padding()
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .background(Color(.systemGray6))
+                                        .cornerRadius(8)
+                                    
+                                    Text("Motivation")
+                                        .font(.headline)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                    TextField("Why do you want to volunteer with us?", text: $viewModel.motivation)
+                                        .padding()
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .background(Color(.systemGray6))
+                                        .cornerRadius(8)
                                 }
-                                .padding(.horizontal)
                             }
-                            .padding(.top, 32)
+                            .padding(.horizontal)
+                            .padding(.top, 16)
                         }
                     case 4:
-                        // Food safety training
+                        // Review and submit
                         ScrollView {
                             VStack(spacing: 24) {
-                                Text("Step 5: Food Safety Training")
+                                Text("Step 5: Review Your Information")
                                     .font(.title2.bold())
                                     .padding(.bottom, 8)
-                                Text("Please review our food safety guidelines before proceeding.")
-                                    .font(.body)
-                                    .foregroundColor(.secondary)
-                                    .multilineTextAlignment(.center)
-                                    .padding(.horizontal)
                                 
-                                VStack(spacing: 20) {
-                                    // Food safety text
-                                    ScrollView {
-                                        VStack(alignment: .leading, spacing: 16) {
-                                            Group {
-                                                Text("Food Safety Guidelines")
-                                                    .font(.headline)
-                                                    .padding(.bottom, 4)
-                                                
-                                                Text("1. Personal Hygiene")
-                                                    .font(.subheadline.bold())
-                                                Text("• Wash hands thoroughly with soap and warm water before handling food\n• Wear clean clothing and appropriate protective gear\n• Keep hair tied back and wear a hairnet\n• Cover any cuts or wounds with waterproof bandages")
-                                                
-                                                Text("2. Food Handling")
-                                                    .font(.subheadline.bold())
-                                                Text("• Use separate cutting boards for raw and cooked foods\n• Maintain proper food temperatures\n• Follow FIFO (First In, First Out) principles\n• Check expiry dates regularly")
-                                                
-                                                Text("3. Kitchen Safety")
-                                                    .font(.subheadline.bold())
-                                                Text("• Keep work surfaces clean and sanitized\n• Store food at appropriate temperatures\n• Report any equipment issues immediately\n• Follow proper cleaning procedures")
-                                                
-                                                Text("4. Allergen Awareness")
-                                                    .font(.subheadline.bold())
-                                                Text("• Be aware of common allergens\n• Prevent cross-contamination\n• Label all food items clearly\n• Report any allergy concerns immediately")
-                                            }
-                                            .foregroundColor(.primary)
-                                        }
-                                        .padding()
-                                        .background(Color(.systemGray6))
-                                        .cornerRadius(12)
-                                    }
-                                    .frame(height: 300)
-                                    
-                                    // Acceptance checkbox
-                                    Toggle(isOn: $viewModel.hasAcceptedFoodSafety) {
-                                        VStack(alignment: .leading, spacing: 4) {
-                                            Text("Food Safety Training")
-                                                .font(.headline)
-                                            Text("I have read and understand the food safety guidelines")
-                                                .font(.subheadline)
-                                                .foregroundColor(.secondary)
-                                        }
-                                    }
-                                    .padding()
-                                    .background(Color(.systemGray6))
-                                    .cornerRadius(8)
-                                }
-                                .padding(.horizontal)
-                            }
-                            .padding(.top, 32)
-                        }
-                    case 5:
-                        // Volunteer agreement/terms
-                        ScrollView {
-                            VStack(spacing: 24) {
-                                Text("Step 6: Volunteer Agreement & Terms")
-                                    .font(.title2.bold())
-                                    .padding(.bottom, 8)
-                                Text("Please review and accept our volunteer agreement before proceeding.")
-                                    .font(.body)
-                                    .foregroundColor(.secondary)
-                                    .multilineTextAlignment(.center)
-                                    .padding(.horizontal)
-                                
-                                VStack(spacing: 20) {
-                                    // Terms text
-                                    ScrollView {
-                                        VStack(alignment: .leading, spacing: 16) {
-                                            Group {
-                                                Text("Volunteer Agreement")
-                                                    .font(.headline)
-                                                    .padding(.bottom, 4)
-                                                
-                                                Text("1. Commitment and Reliability")
-                                                    .font(.subheadline.bold())
-                                                Text("• Arrive on time for scheduled shifts\n• Provide adequate notice for cancellations\n• Maintain regular communication with the team\n• Complete assigned tasks to the best of your ability")
-                                                
-                                                Text("2. Code of Conduct")
-                                                    .font(.subheadline.bold())
-                                                Text("• Treat all staff, volunteers, and community members with respect\n• Maintain professional behavior at all times\n• Follow health and safety guidelines\n• Report any concerns to management")
-                                                
-                                                Text("3. Confidentiality")
-                                                    .font(.subheadline.bold())
-                                                Text("• Maintain confidentiality of all information\n• Respect privacy of staff, volunteers, and community members\n• Do not share sensitive information outside the organization")
-                                                
-                                                Text("4. Health and Safety")
-                                                    .font(.subheadline.bold())
-                                                Text("• Follow all safety procedures and guidelines\n• Report any hazards or incidents immediately\n• Use provided safety equipment as required\n• Maintain a safe working environment")
-                                                
-                                                Text("5. Training and Development")
-                                                    .font(.subheadline.bold())
-                                                Text("• Complete required training programs\n• Stay updated on policies and procedures\n• Participate in ongoing development opportunities\n• Seek guidance when needed")
-                                            }
-                                            .foregroundColor(.primary)
-                                        }
-                                        .padding()
-                                        .background(Color(.systemGray6))
-                                        .cornerRadius(12)
-                                    }
-                                    .frame(height: 300)
-                                    
-                                    // Acceptance checkbox
-                                    Toggle(isOn: $viewModel.hasAcceptedTerms) {
-                                        VStack(alignment: .leading, spacing: 4) {
-                                            Text("Volunteer Agreement")
-                                                .font(.headline)
-                                            Text("I have read and agree to the terms of the volunteer agreement")
-                                                .font(.subheadline)
-                                                .foregroundColor(.secondary)
-                                        }
-                                    }
-                                    .padding()
-                                    .background(Color(.systemGray6))
-                                    .cornerRadius(8)
-                                }
-                                .padding(.horizontal)
-                            }
-                            .padding(.top, 32)
-                        }
-                    case 6:
-                        // Review & confirmation
-                        ScrollView {
-                            VStack(spacing: 24) {
-                                Text("Step 7: Review & Confirmation")
-                                    .font(.title2.bold())
-                                    .padding(.bottom, 8)
-                                Text("Please review your information before submitting your registration.")
-                                    .font(.body)
-                                    .foregroundColor(.secondary)
-                                    .multilineTextAlignment(.center)
-                                    .padding(.horizontal)
-                                
-                                VStack(spacing: 20) {
-                                    // User Type
-                                    VStack(alignment: .leading, spacing: 8) {
-                                        Text("Registration Type")
-                                            .font(.headline)
-                                        Text(viewModel.selectedUserType?.rawValue ?? "")
-                                            .foregroundColor(.secondary)
-                                    }
-                                    .padding()
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .background(Color(.systemGray6))
-                                    .cornerRadius(8)
-                                    
-                                    // Personal Details
+                                VStack(spacing: 16) {
+                                    // Personal details review
                                     VStack(alignment: .leading, spacing: 8) {
                                         Text("Personal Details")
                                             .font(.headline)
-                                        Group {
-                                            Text("Name: \(viewModel.firstName) \(viewModel.lastName)")
-                                            Text("Email: \(viewModel.email)")
-                                            Text("Mobile: \(viewModel.mobile)")
-                                            Text("Date of Birth: \(viewModel.dob.formatted(date: .long, time: .omitted))")
-                                            Text("Address: \(viewModel.address)")
-                                            Text("Emergency Contact: \(viewModel.emergencyName) (\(viewModel.emergencyPhone))")
-                                            if viewModel.selectedUserType == .corporate {
-                                                Text("Company: \(viewModel.companyName)")
-                                            }
+                                            .foregroundColor(.accentColor)
+                                        Text("Name: \(viewModel.firstName) \(viewModel.lastName)")
+                                        Text("Email: \(viewModel.email)")
+                                        Text("Phone: \(viewModel.mobile)")
+                                        Text("Date of Birth: \(viewModel.dob, formatter: dateFormatter)")
+                                        Text("Address: \(viewModel.address)")
+                                        Text("City: \(viewModel.city), \(viewModel.state) \(viewModel.postalCode)")
+                                        if !viewModel.companyName.isEmpty {
+                                            Text("Company: \(viewModel.companyName)")
                                         }
-                                        .foregroundColor(.secondary)
                                     }
                                     .padding()
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .background(Color(.systemGray6))
                                     .cornerRadius(8)
                                     
-                                    // WWCC Details (if applicable)
+                                    // WWCC review
                                     if viewModel.isOver18 {
                                         VStack(alignment: .leading, spacing: 8) {
-                                            Text("WWCC Details")
+                                            Text("WWCC Information")
                                                 .font(.headline)
-                                            Group {
-                                                Text("WWCC Number: \(viewModel.wwcNumber)")
-                                                Text("Expiry Date: \(viewModel.wwcExpiry.formatted(date: .long, time: .omitted))")
-                                            }
-                                            .foregroundColor(.secondary)
+                                                .foregroundColor(.accentColor)
+                                            Text("WWCC Number: \(viewModel.wwcNumber)")
+                                            Text("Expiry Date: \(viewModel.wwcExpiry, formatter: dateFormatter)")
                                         }
                                         .padding()
                                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -496,30 +331,29 @@ struct RegistrationFlowView: View {
                                         .cornerRadius(8)
                                     }
                                     
-                                    // Additional Info
+                                    // Additional info review
                                     VStack(alignment: .leading, spacing: 8) {
                                         Text("Additional Information")
                                             .font(.headline)
-                                        Group {
-                                            Text("Duke of Edinburgh: \(viewModel.isDukeOfEd ? "Yes" : "No")")
-                                            Text("Referral Source: \(viewModel.referralSource)")
+                                            .foregroundColor(.accentColor)
+                                        if !viewModel.dietaryRestrictions.isEmpty {
+                                            Text("Dietary Restrictions: \(viewModel.dietaryRestrictions)")
                                         }
-                                        .foregroundColor(.secondary)
-                                    }
-                                    .padding()
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .background(Color(.systemGray6))
-                                    .cornerRadius(8)
-                                    
-                                    // Agreements
-                                    VStack(alignment: .leading, spacing: 8) {
-                                        Text("Agreements")
-                                            .font(.headline)
-                                        Group {
-                                            Text("Food Safety Training: \(viewModel.hasAcceptedFoodSafety ? "Accepted" : "Not Accepted")")
-                                            Text("Volunteer Agreement: \(viewModel.hasAcceptedTerms ? "Accepted" : "Not Accepted")")
+                                        if !viewModel.medicalConditions.isEmpty {
+                                            Text("Medical Conditions: \(viewModel.medicalConditions)")
                                         }
-                                        .foregroundColor(.secondary)
+                                        if !viewModel.volunteerExperience.isEmpty {
+                                            Text("Volunteer Experience: \(viewModel.volunteerExperience)")
+                                        }
+                                        if !viewModel.skills.isEmpty {
+                                            Text("Skills: \(viewModel.skills)")
+                                        }
+                                        if !viewModel.availability.isEmpty {
+                                            Text("Availability: \(viewModel.availability)")
+                                        }
+                                        if !viewModel.motivation.isEmpty {
+                                            Text("Motivation: \(viewModel.motivation)")
+                                        }
                                     }
                                     .padding()
                                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -614,6 +448,12 @@ struct RegistrationFlowView: View {
             .navigationTitle("Volunteer Registration")
             .navigationBarTitleDisplayMode(.inline)
         }
+    }
+    
+    private var dateFormatter: DateFormatter {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        return formatter
     }
 }
 
