@@ -32,31 +32,24 @@ struct RegistrationSignupSlidesView: View {
     var body: some View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
-                // Demo navigation button at the very top
+                // Demo navigation button - small and out of the way
                 HStack {
                     Spacer()
-                    Button("NEXT FOR DEMO") {
+                    Button("→") {
                         if currentPage < 3 {
                             withAnimation { currentPage += 1 }
                         } else {
                             dismiss() // Close at the end
                         }
                     }
-                    .font(.title)
-                    .fontWeight(.black)
+                    .font(.caption)
                     .foregroundColor(.white)
-                    .padding(.vertical, 16)
-                    .padding(.horizontal, 24)
-                    .background(Color.orange)
-                    .cornerRadius(20)
-                    .shadow(color: .black.opacity(0.5), radius: 8, x: 0, y: 4)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 20)
-                            .stroke(Color.white, lineWidth: 2)
-                    )
+                    .padding(4)
+                    .background(Color.orange.opacity(0.7))
+                    .clipShape(Circle())
                 }
                 .padding(.horizontal)
-                .padding(.top, 10)
+                .padding(.top, 5)
                 
                 // Progress indicator
                 HStack(spacing: 4) {
@@ -274,17 +267,6 @@ struct RegistrationSignupSlidesView: View {
     
     private func completeRegistration() {
         isLoading = true
-        
-        // Create user object
-        let user = AppModels.User(
-            id: UUID().uuidString,
-            firstName: firstName,
-            lastName: lastName,
-            email: email,
-            role: .volunteer, // Assuming a default role for now
-            wwcNumber: isOver18 ? wwcNumber : nil,
-            wwcExpiry: isOver18 ? wwcExpiry : nil
-        )
         
         // Attempt to save user and complete registration
         Task {

@@ -60,49 +60,38 @@ struct OurBigKitchenApp: App {
                         }
                     }
                 
-                // Reset button - always available for demo purposes
+                // Reset button - small and out of the way
                 VStack {
                     HStack {
                         Spacer()
                         
-                        VStack(spacing: 8) {
-                            Button(action: {
-                                print("DEBUG: Manual reset triggered")
-                                // Perform reset operations on background thread
-                                DispatchQueue.global(qos: .userInitiated).async {
-                                    ResetAppState.resetOnboardingFlow()
-                                    
-                                    // Return to main thread for UI updates
-                                    DispatchQueue.main.async {
-                                        appState.forceLogout()
-                                    }
-                                }
-                            }) {
-                                HStack {
-                                    Image(systemName: "arrow.counterclockwise.circle.fill")
-                                    Text("RESET TO WELCOME")
-                                }
-                                .font(.title2)
-                                .fontWeight(.bold)
-                                .foregroundColor(.white)
-                                .padding(.vertical, 12)
-                                .padding(.horizontal, 20)
-                                .background(Color.red)
-                                .clipShape(Capsule())
-                                .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
-                            }
+                        Button(action: {
+                            // Reset everything properly using the existing function
+                            ResetAppState.resetOnboardingFlow()
                             
-                            #if DEBUG
-                            Button(action: {
-                                print("DEBUG: Showing Auth Test View")
-                                let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene
-                                let window = windowScene?.windows.first
-                                let testView = UIHostingController(rootView: AuthTestView())
-                                window?.rootViewController?.present(testView, animated: true)
-                            }) {
-                                Text("Auth Test")
-                                    .font(.system(size: 15))
-                                    .foregroundColor(.white)
+                            // Force logout and reset app state
+                            appState.isAuthenticated = false
+                            appState.forceLogout()
+                        }) {
+                            Text("↻")
+                                .font(.caption)
+                                .foregroundColor(.white)
+                                .padding(4)
+                                .background(Color.red.opacity(0.7))
+                                .clipShape(Circle())
+                        }
+                        
+                        #if DEBUG
+                        Button(action: {
+                            print("DEBUG: Showing Auth Test View")
+                            let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene
+                            let window = windowScene?.windows.first
+                            let testView = UIHostingController(rootView: AuthTestView())
+                            window?.rootViewController?.present(testView, animated: true)
+                        }) {
+                            Text("T")
+                                .font(.caption)
+                                .foregroundColor(.white)
                                         .padding(8)
                                         .background(Color.blue.opacity(0.8))
                                         .clipShape(Capsule())
@@ -118,7 +107,6 @@ struct OurBigKitchenApp: App {
             }
         }
     }
-}
 
 struct RootView: View {
     @EnvironmentObject var appState: AppState

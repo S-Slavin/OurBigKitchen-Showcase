@@ -192,27 +192,20 @@ struct LoginView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 20) {
-                // Demo navigation button at the very top
+                // Demo navigation button - small and out of the way
                 HStack {
                     Spacer()
-                    Button("SKIP FOR DEMO") {
+                    Button("×") {
                         viewModel.isAuthenticated = true
                     }
-                    .font(.title)
-                    .fontWeight(.black)
+                    .font(.caption)
                     .foregroundColor(.white)
-                    .padding(.vertical, 16)
-                    .padding(.horizontal, 24)
-                    .background(Color.orange)
-                    .cornerRadius(20)
-                    .shadow(color: .black.opacity(0.5), radius: 8, x: 0, y: 4)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 20)
-                            .stroke(Color.white, lineWidth: 2)
-                    )
+                    .padding(4)
+                    .background(Color.orange.opacity(0.7))
+                    .clipShape(Circle())
                 }
                 .padding(.horizontal)
-                .padding(.top, 10)
+                .padding(.top, 5)
                 
                 // Logo and title
                 Image("AppLogo")
