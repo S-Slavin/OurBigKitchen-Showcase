@@ -9,6 +9,7 @@ struct RegistrationSignupSlidesView: View {
     @State private var lastName = ""
     @State private var email = ""
     @State private var password = ""
+    @State private var confirmPassword = ""
     @State private var dob = Date()
     @State private var wwcNumber = ""
     @State private var wwcExpiry = Date()
@@ -109,6 +110,26 @@ struct RegistrationSignupSlidesView: View {
                                     TextField("Last Name", text: $lastName)
                                         .textContentType(.familyName)
                                         .textFieldStyle(.roundedBorder)
+                                        .padding(.horizontal)
+                                    
+                                    TextField("Email", text: $email)
+                                        .textContentType(.emailAddress)
+                                        .keyboardType(.emailAddress)
+                                        .textFieldStyle(.roundedBorder)
+                                        .padding(.horizontal)
+                                    
+                                    SecureField("Password", text: $password)
+                                        .textContentType(.newPassword)
+                                        .textFieldStyle(.roundedBorder)
+                                        .padding(.horizontal)
+                                    
+                                    SecureField("Confirm Password", text: $confirmPassword)
+                                        .textContentType(.newPassword)
+                                        .textFieldStyle(.roundedBorder)
+                                        .padding(.horizontal)
+                                    
+                                    DatePicker("Date of Birth", selection: $dob, displayedComponents: .date)
+                                        .datePickerStyle(.compact)
                                         .padding(.horizontal)
                                 }
                             }
@@ -211,7 +232,7 @@ struct RegistrationSignupSlidesView: View {
                             }
                         }
                         .buttonStyle(.borderedProminent)
-                        .disabled(!canProceed)
+                        .disabled(!isStepValid)
                     } else {
                         Button(action: completeRegistration) {
                             if isLoading {
@@ -222,7 +243,7 @@ struct RegistrationSignupSlidesView: View {
                             }
                         }
                         .buttonStyle(.borderedProminent)
-                        .disabled(!canProceed || isLoading)
+                        .disabled(!isStepValid || isLoading)
                     }
                 }
                 .padding()
@@ -235,16 +256,17 @@ struct RegistrationSignupSlidesView: View {
         }
     }
     
-    private var canProceed: Bool {
+    private var isStepValid: Bool {
         switch currentPage {
         case 0:
             return !email.isEmpty && !password.isEmpty
         case 1:
-            return !firstName.isEmpty && !lastName.isEmpty
+            return !firstName.isEmpty && !lastName.isEmpty && !email.isEmpty &&
+                   !password.isEmpty && password == confirmPassword
         case 2:
             return hasScrolledToBottom && hasAcceptedTerms
         case 3:
-            return !isOver18 || (!wwcNumber.isEmpty && wwcExpiry > Date())
+            return true
         default:
             return false
         }
