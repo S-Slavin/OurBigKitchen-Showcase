@@ -5,12 +5,10 @@ struct RegistrationSignupSlidesView: View {
     @StateObject private var viewModel = RegistrationFlowViewModel()
     @State private var currentPage = 0
     @State private var hasScrolledToBottom = false
-    @State private var selectedType: VolunteerType?
     @State private var firstName = ""
     @State private var lastName = ""
     @State private var email = ""
     @State private var password = ""
-    @State private var confirmPassword = ""
     @State private var dob = Date()
     @State private var wwcNumber = ""
     @State private var wwcExpiry = Date()
@@ -18,12 +16,6 @@ struct RegistrationSignupSlidesView: View {
     @State private var isLoading = false
     @State private var errorMessage = ""
     @State private var showError = false
-    let onComplete: (VolunteerType) -> Void
-    
-    enum VolunteerType {
-        case individual
-        case corporate
-    }
     
     // Colors
     private let primaryColor = Color("OBKPrimary")
@@ -81,52 +73,28 @@ struct RegistrationSignupSlidesView: View {
                     VStack(spacing: 20) {
                         switch currentPage {
                         case 0:
-                            // Volunteer Type Selection
+                            // Sign In / Login
                             VStack(spacing: 24) {
-                                Text("Choose Volunteer Type")
+                                Text("Sign In")
                                     .font(.title2.bold())
                                     .padding(.bottom, 8)
                                 
                                 VStack(spacing: 16) {
-                                    Button(action: { selectedType = .individual }) {
-                                        HStack {
-                                            VStack(alignment: .leading) {
-                                                Text("Individual Volunteer")
-                                                    .font(.headline)
-                                                Text("Join as an individual to help in the kitchen")
-                                                    .font(.subheadline)
-                                                    .foregroundColor(.secondary)
-                                            }
-                                            Spacer()
-                                            Image(systemName: selectedType == .individual ? "checkmark.circle.fill" : "circle")
-                                        }
-                                        .padding()
-                                        .background(Color(.systemGray6))
-                                        .cornerRadius(12)
-                                    }
+                                    TextField("Email", text: $email)
+                                        .textContentType(.emailAddress)
+                                        .keyboardType(.emailAddress)
+                                        .textFieldStyle(.roundedBorder)
+                                        .padding(.horizontal)
                                     
-                                    Button(action: { selectedType = .corporate }) {
-                                        HStack {
-                                            VStack(alignment: .leading) {
-                                                Text("Corporate Group")
-                                                    .font(.headline)
-                                                Text("Register your organization for group volunteering")
-                                                    .font(.subheadline)
-                                                    .foregroundColor(.secondary)
-                                            }
-                                            Spacer()
-                                            Image(systemName: selectedType == .corporate ? "checkmark.circle.fill" : "circle")
-                                        }
-                                        .padding()
-                                        .background(Color(.systemGray6))
-                                        .cornerRadius(12)
-                                    }
+                                    SecureField("Password", text: $password)
+                                        .textContentType(.password)
+                                        .textFieldStyle(.roundedBorder)
+                                        .padding(.horizontal)
                                 }
-                                .padding(.horizontal)
                             }
                             
                         case 1:
-                            // Personal Details
+                            // Personal Details (if needed for registration)
                             VStack(spacing: 24) {
                                 Text("Personal Details")
                                     .font(.title2.bold())
@@ -141,26 +109,6 @@ struct RegistrationSignupSlidesView: View {
                                     TextField("Last Name", text: $lastName)
                                         .textContentType(.familyName)
                                         .textFieldStyle(.roundedBorder)
-                                        .padding(.horizontal)
-                                    
-                                    TextField("Email", text: $email)
-                                        .textContentType(.emailAddress)
-                                        .keyboardType(.emailAddress)
-                                        .textFieldStyle(.roundedBorder)
-                                        .padding(.horizontal)
-                                    
-                                    SecureField("Password", text: $password)
-                                        .textContentType(.newPassword)
-                                        .textFieldStyle(.roundedBorder)
-                                        .padding(.horizontal)
-                                    
-                                    SecureField("Confirm Password", text: $confirmPassword)
-                                        .textContentType(.newPassword)
-                                        .textFieldStyle(.roundedBorder)
-                                        .padding(.horizontal)
-                                    
-                                    DatePicker("Date of Birth", selection: $dob, displayedComponents: .date)
-                                        .datePickerStyle(.compact)
                                         .padding(.horizontal)
                                 }
                             }
@@ -290,10 +238,9 @@ struct RegistrationSignupSlidesView: View {
     private var canProceed: Bool {
         switch currentPage {
         case 0:
-            return selectedType != nil
+            return !email.isEmpty && !password.isEmpty
         case 1:
-            return !firstName.isEmpty && !lastName.isEmpty && !email.isEmpty &&
-                   !password.isEmpty && password == confirmPassword
+            return !firstName.isEmpty && !lastName.isEmpty
         case 2:
             return hasScrolledToBottom && hasAcceptedTerms
         case 3:
@@ -304,7 +251,6 @@ struct RegistrationSignupSlidesView: View {
     }
     
     private func completeRegistration() {
-        guard let type = selectedType else { return }
         isLoading = true
         
         // Create user object
@@ -313,7 +259,7 @@ struct RegistrationSignupSlidesView: View {
             firstName: firstName,
             lastName: lastName,
             email: email,
-            role: type == .individual ? .volunteer : .corporateVolunteer,
+            role: .volunteer, // Assuming a default role for now
             wwcNumber: isOver18 ? wwcNumber : nil,
             wwcExpiry: isOver18 ? wwcExpiry : nil
         )
@@ -324,7 +270,7 @@ struct RegistrationSignupSlidesView: View {
                 viewModel.submitRegistration()
                 await MainActor.run {
                     isLoading = false
-                    onComplete(type)
+                    dismiss() // Dismiss the view on successful registration
                 }
             } catch {
                 await MainActor.run {

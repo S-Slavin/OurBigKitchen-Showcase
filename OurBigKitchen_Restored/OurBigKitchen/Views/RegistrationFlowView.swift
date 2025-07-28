@@ -5,8 +5,14 @@ struct RegistrationFlowView: View {
     @StateObject private var viewModel: RegistrationFlowViewModel
     @Environment(\.dismiss) private var dismiss
     
-    init(mockService: RegistrationService? = nil) {
-        _viewModel = StateObject(wrappedValue: RegistrationFlowViewModel(registrationService: mockService ?? RegistrationService()))
+    init(mockService: RegistrationService? = nil, preselectedUserType: RegistrationFlowViewModel.UserType? = nil) {
+        let vm = RegistrationFlowViewModel(registrationService: mockService ?? RegistrationService())
+        
+        // Set a default user type and start at personal details (step 1)
+        vm.selectedUserType = preselectedUserType ?? .individual
+        vm.currentStep = 1 // Skip volunteer type selection - users already chose
+        
+        _viewModel = StateObject(wrappedValue: vm)
     }
     
     var body: some View {
@@ -102,7 +108,7 @@ struct RegistrationFlowView: View {
                         // Personal details
                         ScrollView {
                             VStack(spacing: 20) {
-                                Text("Step 2: Personal Details")
+                                Text("Step 1: Personal Details")
                                     .font(.title2.bold())
                                     .padding(.bottom, 8)
                                 
@@ -182,7 +188,7 @@ struct RegistrationFlowView: View {
                     case 2:
                         // WWCC details
                         VStack(spacing: 24) {
-                            Text("Step 3: Working With Children Check (WWCC)")
+                            Text("Step 2: Working With Children Check (WWCC)")
                                 .font(.title2.bold())
                                 .padding(.bottom, 8)
                             if viewModel.isOver18 {
@@ -224,7 +230,7 @@ struct RegistrationFlowView: View {
                         // Additional info
                         ScrollView {
                             VStack(spacing: 24) {
-                                Text("Step 4: Additional Information")
+                                Text("Step 3: Additional Information")
                                     .font(.title2.bold())
                                     .padding(.bottom, 8)
                                 
@@ -291,7 +297,7 @@ struct RegistrationFlowView: View {
                         // Review and submit
                         ScrollView {
                             VStack(spacing: 24) {
-                                Text("Step 5: Review Your Information")
+                                Text("Step 4: Review Your Information")
                                     .font(.title2.bold())
                                     .padding(.bottom, 8)
                                 
