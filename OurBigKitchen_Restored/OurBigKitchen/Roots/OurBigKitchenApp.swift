@@ -60,57 +60,61 @@ struct OurBigKitchenApp: App {
                         }
                     }
                 
-                // Add debug reset button
-                #if DEBUG
+                // Reset button - always available for demo purposes
                 VStack {
                     HStack {
                         Spacer()
                         
-                        if showResetButton {
-                            VStack(spacing: 8) {
-                                Button(action: {
-                                    print("DEBUG: Manual reset triggered")
-                                    // Perform reset operations on background thread
-                                    DispatchQueue.global(qos: .userInitiated).async {
-                                        ResetAppState.resetOnboardingFlow()
-                                        
-                                        // Return to main thread for UI updates
-                                        DispatchQueue.main.async {
-                                            appState.forceLogout()
-                                        }
+                        VStack(spacing: 8) {
+                            Button(action: {
+                                print("DEBUG: Manual reset triggered")
+                                // Perform reset operations on background thread
+                                DispatchQueue.global(qos: .userInitiated).async {
+                                    ResetAppState.resetOnboardingFlow()
+                                    
+                                    // Return to main thread for UI updates
+                                    DispatchQueue.main.async {
+                                        appState.forceLogout()
                                     }
-                                }) {
-                                    Text("Reset")
-                                        .font(.system(size: 15))
-                                        .foregroundColor(.white)
-                                        .padding(8)
-                                        .background(Color.red.opacity(0.8))
-                                        .clipShape(Capsule())
                                 }
-                                
-                                Button(action: {
-                                    print("DEBUG: Showing Auth Test View")
-                                    let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene
-                                    let window = windowScene?.windows.first
-                                    let testView = UIHostingController(rootView: AuthTestView())
-                                    window?.rootViewController?.present(testView, animated: true)
-                                }) {
-                                    Text("Auth Test")
-                                        .font(.system(size: 15))
-                                        .foregroundColor(.white)
+                            }) {
+                                HStack {
+                                    Image(systemName: "arrow.counterclockwise.circle.fill")
+                                    Text("RESET TO WELCOME")
+                                }
+                                .font(.title2)
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
+                                .padding(.vertical, 12)
+                                .padding(.horizontal, 20)
+                                .background(Color.red)
+                                .clipShape(Capsule())
+                                .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
+                            }
+                            
+                            #if DEBUG
+                            Button(action: {
+                                print("DEBUG: Showing Auth Test View")
+                                let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene
+                                let window = windowScene?.windows.first
+                                let testView = UIHostingController(rootView: AuthTestView())
+                                window?.rootViewController?.present(testView, animated: true)
+                            }) {
+                                Text("Auth Test")
+                                    .font(.system(size: 15))
+                                    .foregroundColor(.white)
                                         .padding(8)
                                         .background(Color.blue.opacity(0.8))
                                         .clipShape(Capsule())
-                                }
                             }
-                            .padding(.top, 40)
-                            .padding(.trailing, 20)
+                            #endif
                         }
+                        .padding(.top, 40)
+                        .padding(.trailing, 20)
                     }
                     
                     Spacer()
                 }
-                #endif
             }
         }
     }
