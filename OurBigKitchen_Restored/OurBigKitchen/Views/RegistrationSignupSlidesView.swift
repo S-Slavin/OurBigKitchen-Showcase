@@ -116,19 +116,34 @@ struct RegistrationSignupSlidesView: View {
                                     .font(.title2.bold())
                                     .padding(.bottom, 8)
                                 
-                                ScrollView {
-                                    Text(termsAndConditionsText)
-                                        .padding()
-                                        .onChange(of: geometry.frame(in: .global).minY) { _ in
-                                            DispatchQueue.main.async {
-                                                let scrollView = UIScrollView.current
-                                                if scrollView.contentOffset.y >= (scrollView.contentSize.height - scrollView.bounds.height - 20) {
+                                ScrollViewReader { proxy in
+                                    ScrollView {
+                                        VStack {
+                                            Text(termsAndConditionsText)
+                                                .padding()
+                                            
+                                            // Invisible marker at the bottom
+                                            Color.clear
+                                                .frame(height: 1)
+                                                .id("bottom")
+                                                .onAppear {
+                                                    hasScrolledToBottom = true
+                                                }
+                                        }
+                                    }
+                                    .frame(height: geometry.size.height * 0.5)
+                                    .onAppear {
+                                        // Check if content is short enough to not require scrolling
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                            proxy.scrollTo("bottom", anchor: .bottom)
+                                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                                if !hasScrolledToBottom {
                                                     hasScrolledToBottom = true
                                                 }
                                             }
                                         }
+                                    }
                                 }
-                                .frame(height: geometry.size.height * 0.5)
                                 
                                 Toggle(isOn: $hasAcceptedTerms) {
                                     Text("I have read and accept the terms and conditions")
