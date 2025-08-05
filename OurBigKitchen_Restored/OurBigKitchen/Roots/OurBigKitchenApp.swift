@@ -13,6 +13,9 @@ struct OurBigKitchenApp: App {
         return state
     }()
     
+    // Add ImpactService as a StateObject to provide it to the environment
+    @StateObject private var impactService = ImpactService.shared
+    
     // For development purposes
     #if DEBUG
     @State private var showResetButton = true // Visible by default for testing
@@ -28,6 +31,7 @@ struct OurBigKitchenApp: App {
                     // Remove the unique ID to allow view persistence
                     .environment(\.managedObjectContext, persistenceController.container.viewContext)
                     .environmentObject(appState)
+                    .environmentObject(impactService) // Add ImpactService to environment
                     .onAppear {
                         print("OurBigKitchenApp RootView appeared with persistent state")
                         // Simplified initialization to avoid main thread blocking
@@ -157,39 +161,36 @@ struct RootView: View {
             }
             .padding()
         } else if !UserDefaults.standard.bool(forKey: "hasSeenOnboarding") {
-            // Only show welcome slides if not signing up
-            if !appState.isSigningUp {
-                UserWelcomeView(onComplete: {
-                    // Optimized onboarding completion handler
-                    // First set the flag to prevent redundant processing
-                    UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
+            // Only show welcome slides - no overlapping views
+            UserWelcomeView(onComplete: {
+                // Optimized onboarding completion handler
+                // First set the flag to prevent redundant processing
+                UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
+                
+                // Then notify UI to update in a controlled sequence
+                // Use a single main thread call for better performance
+                DispatchQueue.main.async {
+                    print("DEBUG: Onboarding complete, proceeding to next screen")
                     
-                    // Then notify UI to update in a controlled sequence
-                    // Use a single main thread call for better performance
-                    DispatchQueue.main.async {
-                        print("DEBUG: Onboarding complete, proceeding to next screen")
-                        
-                        // Post relevant notifications with slight delays
-                        NotificationCenter.default.post(name: .didUpdateAuth, object: nil)
-                        
-                        // Force UI refresh with animation
-                        withAnimation(.easeInOut(duration: 0.5)) {
-                            self.isLoading = false
-                        }
+                    // Post relevant notifications with slight delays
+                    NotificationCenter.default.post(name: .didUpdateAuth, object: nil)
+                    
+                    // Force UI refresh with animation
+                    withAnimation(.easeInOut(duration: 0.5)) {
+                        self.isLoading = false
                     }
-                })
-                .onAppear {
-                    print("DEBUG: Showing UserWelcomeView")
                 }
-                .ignoresSafeArea()
+            })
+            .onAppear {
+                print("DEBUG: Showing UserWelcomeView")
             }
-            
-            // Only show sign in if truly not authenticated in all sources
-            // Use the new AuthTypeSelectionView for better user experience
+            .ignoresSafeArea()
+        } else if !appState.isAuthenticated {
+            // Show auth selection only after onboarding
             AuthTypeSelectionView()
                 .navigationViewStyle(StackNavigationViewStyle())
                 .onAppear {
-                    print("DEBUG: Showing AuthTypeSelectionView, isAuthenticated=\(appState.isAuthenticated), hasSeenOnboarding=\(UserDefaults.standard.bool(forKey: "hasSeenOnboarding"))")
+                    print("DEBUG: Showing AuthTypeSelectionView, isAuthenticated=\(appState.isAuthenticated)")
                 }
         } else if !appState.hasAcceptedTerms {
             // Terms view
