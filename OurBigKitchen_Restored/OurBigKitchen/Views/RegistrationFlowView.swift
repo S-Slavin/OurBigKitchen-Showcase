@@ -18,24 +18,26 @@ struct RegistrationFlowView: View {
     var body: some View {
         NavigationStack {
             VStack {
-                // Demo navigation button - small and out of the way
+                // Demo navigation button - bigger on top as requested
                 HStack {
                     Spacer()
-                    Button("→") {
+                    Button("NEXT →") {
                         if viewModel.currentStep < viewModel.totalSteps - 1 {
                             withAnimation { viewModel.currentStep += 1 }
                         } else {
                             dismiss() // Only dismiss at the very end
                         }
                     }
-                    .font(.caption)
+                    .font(.title2)
+                    .fontWeight(.bold)
                     .foregroundColor(.white)
-                    .padding(4)
-                    .background(Color.orange.opacity(0.7))
-                    .clipShape(Circle())
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 20)
+                    .background(Color.orange)
+                    .cornerRadius(12)
                 }
                 .padding(.horizontal)
-                .padding(.top, 5)
+                .padding(.top, 10)
                 
                 // Step indicator
                 HStack(spacing: 4) {

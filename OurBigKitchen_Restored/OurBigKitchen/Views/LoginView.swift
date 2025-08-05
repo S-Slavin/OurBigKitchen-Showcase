@@ -192,20 +192,22 @@ struct LoginView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 20) {
-                // Demo navigation button - small and out of the way
+                // Demo navigation button - bigger on top as requested
                 HStack {
                     Spacer()
-                    Button("×") {
+                    Button("SKIP LOGIN") {
                         viewModel.isAuthenticated = true
                     }
-                    .font(.caption)
+                    .font(.title2)
+                    .fontWeight(.bold)
                     .foregroundColor(.white)
-                    .padding(4)
-                    .background(Color.orange.opacity(0.7))
-                    .clipShape(Circle())
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 20)
+                    .background(Color.orange)
+                    .cornerRadius(12)
                 }
                 .padding(.horizontal)
-                .padding(.top, 5)
+                .padding(.top, 10)
                 
                 // Logo and title
                 Image("AppLogo")

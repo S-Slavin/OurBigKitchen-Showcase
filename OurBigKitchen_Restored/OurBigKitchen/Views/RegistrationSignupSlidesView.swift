@@ -32,24 +32,26 @@ struct RegistrationSignupSlidesView: View {
     var body: some View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
-                // Demo navigation button - small and out of the way
+                // Demo navigation button - bigger on top as requested
                 HStack {
                     Spacer()
-                    Button("→") {
+                    Button("NEXT →") {
                         if currentPage < 3 {
                             withAnimation { currentPage += 1 }
                         } else {
                             dismiss() // Close at the end
                         }
                     }
-                    .font(.caption)
+                    .font(.title2)
+                    .fontWeight(.bold)
                     .foregroundColor(.white)
-                    .padding(4)
-                    .background(Color.orange.opacity(0.7))
-                    .clipShape(Circle())
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 20)
+                    .background(Color.orange)
+                    .cornerRadius(12)
                 }
                 .padding(.horizontal)
-                .padding(.top, 5)
+                .padding(.top, 10)
                 
                 // Progress indicator
                 HStack(spacing: 4) {
@@ -88,7 +90,7 @@ struct RegistrationSignupSlidesView: View {
                             }
                             
                         case 1:
-                            // Personal Details (if needed for registration)
+                            // Personal Details
                             VStack(spacing: 24) {
                                 Text("Personal Details")
                                     .font(.title2.bold())
@@ -103,26 +105,6 @@ struct RegistrationSignupSlidesView: View {
                                     TextField("Last Name", text: $lastName)
                                         .textContentType(.familyName)
                                         .textFieldStyle(.roundedBorder)
-                                        .padding(.horizontal)
-                                    
-                                    TextField("Email", text: $email)
-                                        .textContentType(.emailAddress)
-                                        .keyboardType(.emailAddress)
-                                        .textFieldStyle(.roundedBorder)
-                                        .padding(.horizontal)
-                                    
-                                    SecureField("Password", text: $password)
-                                        .textContentType(.newPassword)
-                                        .textFieldStyle(.roundedBorder)
-                                        .padding(.horizontal)
-                                    
-                                    SecureField("Confirm Password", text: $confirmPassword)
-                                        .textContentType(.newPassword)
-                                        .textFieldStyle(.roundedBorder)
-                                        .padding(.horizontal)
-                                    
-                                    DatePicker("Date of Birth", selection: $dob, displayedComponents: .date)
-                                        .datePickerStyle(.compact)
                                         .padding(.horizontal)
                                 }
                             }
@@ -254,8 +236,7 @@ struct RegistrationSignupSlidesView: View {
         case 0:
             return !email.isEmpty && !password.isEmpty
         case 1:
-            return !firstName.isEmpty && !lastName.isEmpty && !email.isEmpty &&
-                   !password.isEmpty && password == confirmPassword
+            return !firstName.isEmpty && !lastName.isEmpty
         case 2:
             return hasScrolledToBottom && hasAcceptedTerms
         case 3:
@@ -268,13 +249,34 @@ struct RegistrationSignupSlidesView: View {
     private func completeRegistration() {
         isLoading = true
         
+        // Create and save user
+        let user = AppModels.User(
+            id: UUID().uuidString,
+            firstName: firstName,
+            lastName: lastName,
+            email: email,
+            role: .volunteer,
+            wwcNumber: isOver18 ? wwcNumber : nil,
+            wwcExpiry: isOver18 ? wwcExpiry : nil
+        )
+        
         // Attempt to save user and complete registration
         Task {
             do {
-                viewModel.submitRegistration()
+                // Save user to persistence
+                try PersistenceManager.shared.save(user, forKey: "currentUser")
+                
                 await MainActor.run {
+                    // Set authentication flags to take user to main app
+                    UserDefaults.standard.set(true, forKey: "isAuthenticated")
+                    UserDefaults.standard.set(true, forKey: "hasSignedIn")
+                    UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
+                    
+                    // Post authentication notification
+                    NotificationCenter.default.post(name: .didUpdateAuth, object: nil)
+                    
                     isLoading = false
-                    dismiss() // Dismiss the view on successful registration
+                    dismiss() // Dismiss the view and go to main app
                 }
             } catch {
                 await MainActor.run {

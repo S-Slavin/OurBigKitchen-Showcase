@@ -66,12 +66,17 @@ struct OurBigKitchenApp: App {
                         Spacer()
                         
                         Button(action: {
-                            // Reset everything properly using the existing function
+                            // Reset everything completely to go back to welcome slides
                             ResetAppState.resetOnboardingFlow()
                             
-                            // Force logout and reset app state
+                            // Force complete logout and state reset
                             appState.isAuthenticated = false
                             appState.forceLogout()
+                            
+                            // Force the app to re-evaluate its state
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                                appState.objectWillChange.send()
+                            }
                         }) {
                             Text("↻")
                                 .font(.caption)
