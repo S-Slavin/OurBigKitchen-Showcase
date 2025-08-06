@@ -2,6 +2,7 @@ import SwiftUI
 
 struct RegistrationSignupSlidesView: View {
     @Environment(\.dismiss) var dismiss
+    @EnvironmentObject var appState: AppState
     @StateObject private var viewModel = RegistrationFlowViewModel()
     @State private var currentPage = 0
     @State private var hasScrolledToBottom = false
@@ -286,6 +287,9 @@ struct RegistrationSignupSlidesView: View {
                     UserDefaults.standard.set(true, forKey: "isAuthenticated")
                     UserDefaults.standard.set(true, forKey: "hasSignedIn")
                     UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
+                    
+                    // Update AppState to trigger UI navigation
+                    appState.isAuthenticated = true
                     
                     // Post authentication notification
                     NotificationCenter.default.post(name: .didUpdateAuth, object: nil)
