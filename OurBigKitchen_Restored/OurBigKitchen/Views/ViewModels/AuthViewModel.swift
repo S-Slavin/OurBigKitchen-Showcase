@@ -1,0 +1,179 @@
+import Foundation
+import SwiftUI
+import Combine
+
+@MainActor
+@Observable
+class AuthViewModel: @unchecked Sendable {
+    // MARK: - Published Properties
+    var isSignUp: Bool = false
+    var email: String = ""
+    var password: String = ""
+    var firstName: String = ""
+    var lastName: String = ""
+    var confirmPassword: String = ""
+    var isLoading: Bool = false
+    var errorMessage: String = ""
+    var showError: Bool = false
+    var isAuthenticated: Bool = false
+    var rememberPassword: Bool = false
+    
+    // MARK: - Dependencies
+    private let authService: AuthenticationService
+    private let userManager: UserManager
+    private var cancellables = Set<AnyCancellable>()
+    
+    // MARK: - Initialization
+    init(authService: AuthenticationService = AuthenticationService.shared, 
+         userManager: UserManager = UserManager.shared) {
+        self.authService = authService
+        self.userManager = userManager
+        
+        // Check if user is already authenticated
+        checkAuthenticationStatus()
+    }
+    
+    // MARK: - Public Methods
+    
+    func signIn() async {
+        guard validateSignInInput() else { return }
+        
+        isLoading = true
+        errorMessage = ""
+        
+        do {
+            let user = try await authService.authenticateUser(email: email, password: password)
+            await MainActor.run {
+                self.isAuthenticated = true
+                self.isLoading = false
+                
+                // Save credentials if remember password is enabled
+                if rememberPassword {
+                    saveCredentials()
+                }
+            }
+        } catch {
+            await MainActor.run {
+                self.isLoading = false
+                self.errorMessage = error.localizedDescription
+                self.showError = true
+            }
+        }
+    }
+    
+    func signUp() async {
+        guard validateSignUpInput() else { return }
+        
+        isLoading = true
+        errorMessage = ""
+        
+        do {
+            let user = try await authService.createUser(
+                firstName: firstName,
+                lastName: lastName,
+                email: email,
+                password: password
+            )
+            await MainActor.run {
+                self.isAuthenticated = true
+                self.isLoading = false
+            }
+        } catch {
+            await MainActor.run {
+                self.isLoading = false
+                self.errorMessage = error.localizedDescription
+                self.showError = true
+            }
+        }
+    }
+    
+    func signOut() {
+        authService.signOut()
+        isAuthenticated = false
+        clearForm()
+    }
+    
+    func toggleMode() {
+        isSignUp.toggle()
+        clearForm()
+    }
+    
+    func clearError() {
+        showError = false
+        errorMessage = ""
+    }
+    
+    // MARK: - Private Methods
+    
+    private func validateSignInInput() -> Bool {
+        guard !email.isEmpty, !password.isEmpty else {
+            errorMessage = "Please fill in all fields"
+            showError = true
+            return false
+        }
+        
+        guard isValidEmail(email) else {
+            errorMessage = "Please enter a valid email address"
+            showError = true
+            return false
+        }
+        
+        return true
+    }
+    
+    private func validateSignUpInput() -> Bool {
+        guard !firstName.isEmpty, !lastName.isEmpty, !email.isEmpty, !password.isEmpty, !confirmPassword.isEmpty else {
+            errorMessage = "Please fill in all fields"
+            showError = true
+            return false
+        }
+        
+        guard isValidEmail(email) else {
+            errorMessage = "Please enter a valid email address"
+            showError = true
+            return false
+        }
+        
+        guard password == confirmPassword else {
+            errorMessage = "Passwords do not match"
+            showError = true
+            return false
+        }
+        
+        guard password.count >= 6 else {
+            errorMessage = "Password must be at least 6 characters"
+            showError = true
+            return false
+        }
+        
+        return true
+    }
+    
+    private func isValidEmail(_ email: String) -> Bool {
+        let emailRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
+        let emailPredicate = NSPredicate(format: "SELF MATCHES %@", emailRegex)
+        return emailPredicate.evaluate(with: email)
+    }
+    
+    private func clearForm() {
+        email = ""
+        password = ""
+        firstName = ""
+        lastName = ""
+        confirmPassword = ""
+        errorMessage = ""
+        showError = false
+    }
+    
+    private func checkAuthenticationStatus() {
+        // Check if user is already signed in
+        isAuthenticated = authService.isUserSignedIn()
+    }
+    
+    private func saveCredentials() {
+        // Implementation for saving credentials securely
+        // This would typically use Keychain
+        UserDefaults.standard.set(email, forKey: "saved_email")
+        UserDefaults.standard.set(rememberPassword, forKey: "remember_password")
+    }
+} 
