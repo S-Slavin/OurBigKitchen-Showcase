@@ -33,21 +33,17 @@ struct RegistrationSignupSlidesView: View {
     var body: some View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
-                // Demo navigation button - bigger on top as requested
+                // Demo skip button - matching design from other views
                 HStack {
                     Spacer()
-                    Button("NEXT →") {
-                        if currentPage < 3 {
-                            withAnimation { currentPage += 1 }
-                        } else {
-                            dismiss() // Close at the end
-                        }
+                    Button("SKIP FOR DEMO") {
+                        // Skip the entire registration and authenticate directly
+                        completeRegistration()
                     }
-                    .font(.title2)
-                    .fontWeight(.bold)
+                    .font(.system(size: 18, weight: .bold))
                     .foregroundColor(.white)
+                    .padding(.horizontal, 25)
                     .padding(.vertical, 12)
-                    .padding(.horizontal, 20)
                     .background(Color.orange)
                     .cornerRadius(12)
                 }
