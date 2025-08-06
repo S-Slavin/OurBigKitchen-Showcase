@@ -607,6 +607,9 @@ struct SimpleSignInView: View {
                 defaults.set(true, forKey: "hasSignedIn")
                 defaults.set(true, forKey: "isAuthenticated")
                 
+                // Update AppState for immediate UI response
+                self.appState.isAuthenticated = true
+                
                 // Save password if requested (for login mode only)
                 if self.isSignUp == 0 && self.rememberPassword {
                     // Note: In a real app, you would use Keychain for this
