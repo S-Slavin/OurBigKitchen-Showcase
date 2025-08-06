@@ -48,6 +48,8 @@ struct RootView: View {
             if !UserDefaults.standard.bool(forKey: "hasSeenOnboarding") {
                 UserWelcomeView(onComplete: {
                     UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
+                    // Force view refresh by updating a state variable
+                    appState.objectWillChange.send()
                 })
             } else if !appState.isAuthenticated {
                 AuthTypeSelectionView()
