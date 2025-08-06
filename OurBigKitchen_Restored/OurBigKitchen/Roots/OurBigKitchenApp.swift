@@ -5,6 +5,7 @@ struct OurBigKitchenApp: App {
     let persistenceController = PersistenceController.shared
     @StateObject private var appState = AppState()
     @StateObject private var impactService = ImpactService.shared
+    @StateObject private var authService = AuthService.shared
     
     var body: some Scene {
         WindowGroup {
@@ -12,6 +13,7 @@ struct OurBigKitchenApp: App {
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
                 .environmentObject(appState)
                 .environmentObject(impactService)
+                .environmentObject(authService)
                 .overlay(
                     VStack {
                         HStack {
