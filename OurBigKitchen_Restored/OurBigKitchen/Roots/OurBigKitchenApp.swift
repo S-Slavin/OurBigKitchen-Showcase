@@ -6,6 +6,7 @@ struct OurBigKitchenApp: App {
     @StateObject private var appState = AppState()
     @StateObject private var impactService = ImpactService.shared
     @StateObject private var authService = AuthService.shared
+    @StateObject private var sessionService = SessionService.shared
     
     var body: some Scene {
         WindowGroup {
@@ -14,6 +15,7 @@ struct OurBigKitchenApp: App {
                 .environmentObject(appState)
                 .environmentObject(impactService)
                 .environmentObject(authService)
+                .environmentObject(sessionService)
                 .overlay(
                     VStack {
                         HStack {
