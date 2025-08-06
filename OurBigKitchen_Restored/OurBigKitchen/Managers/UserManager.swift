@@ -12,17 +12,7 @@ import SwiftUI
 
 // MARK: - Models
 
-struct UserRanking: Codable {
-    let user: AppModels.User
-    let score: Int
-    let rank: Int
-}
-
-enum UserRankingCategory: String, Codable {
-    case volunteer
-    case donor
-    case impact
-}
+// UserRanking and UserRankingCategory are defined in Models/UserRanking.swift
 
 @MainActor
 final class UserManager: ObservableObject {
@@ -130,9 +120,9 @@ final class UserManager: ObservableObject {
                 }
                 
                 let mockRankings = [
-                    UserRanking(user: currentUser, score: 100, rank: 1),
-                    UserRanking(user: AppModels.User(firstName: "John", lastName: "Doe", email: "john@example.com"), score: 85, rank: 2),
-                    UserRanking(user: AppModels.User(firstName: "Jane", lastName: "Smith", email: "jane@example.com"), score: 75, rank: 3)
+                    UserRanking(rank: 1, user: currentUser, score: 100, category: .impact),
+                    UserRanking(rank: 2, user: AppModels.User(firstName: "John", lastName: "Doe", email: "john@example.com"), score: 85, category: .volunteer),
+                    UserRanking(rank: 3, user: AppModels.User(firstName: "Jane", lastName: "Smith", email: "jane@example.com"), score: 75, category: .donation)
                 ]
                 
                 promise(.success(mockRankings))

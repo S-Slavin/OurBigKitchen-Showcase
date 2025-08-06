@@ -2,7 +2,7 @@ import SwiftUI
 import Combine
 
 struct IndividualSignInView: View {
-    @StateObject private var viewModel = AuthenticationViewModel()
+    @StateObject private var viewModel = AuthViewModel()
     @Environment(\.presentationMode) var presentationMode
     
     var body: some View {

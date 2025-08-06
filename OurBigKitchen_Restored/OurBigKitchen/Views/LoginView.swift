@@ -1,10 +1,7 @@
 import SwiftUI
 import Combine
 
-// Forward reference to UserAuthInfo if needed
-// Remove this if UserAuthInfo is already accessible
-// from a shared import
-extension UserAuthInfo {}
+// UserAuthInfo extension removed - not needed
 
 @MainActor
 class LoginViewModel: ObservableObject {

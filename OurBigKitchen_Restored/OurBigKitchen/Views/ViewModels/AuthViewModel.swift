@@ -3,20 +3,20 @@ import SwiftUI
 import Combine
 
 @MainActor
-@Observable
-class AuthViewModel: @unchecked Sendable {
+class AuthViewModel: ObservableObject {
     // MARK: - Published Properties
-    var isSignUp: Bool = false
-    var email: String = ""
-    var password: String = ""
-    var firstName: String = ""
-    var lastName: String = ""
-    var confirmPassword: String = ""
-    var isLoading: Bool = false
-    var errorMessage: String = ""
-    var showError: Bool = false
-    var isAuthenticated: Bool = false
-    var rememberPassword: Bool = false
+    @Published var isSignUp: Bool = false
+    @Published var email: String = ""
+    @Published var password: String = ""
+    @Published var firstName: String = ""
+    @Published var lastName: String = ""
+    @Published var confirmPassword: String = ""
+    @Published var isLoading: Bool = false
+    @Published var errorMessage: String = ""
+    @Published var showError: Bool = false
+    @Published var isAuthenticated: Bool = false
+    @Published var rememberPassword: Bool = false
+    @Published var hasAcceptedTerms: Bool = false
     
     // MARK: - Dependencies
     private let authService: AuthenticationService
@@ -34,6 +34,13 @@ class AuthViewModel: @unchecked Sendable {
     }
     
     // MARK: - Public Methods
+    
+    func loginAsIndividual() {
+        // Handle individual login
+        Task {
+            await signIn()
+        }
+    }
     
     func signIn() async {
         guard validateSignInInput() else { return }
