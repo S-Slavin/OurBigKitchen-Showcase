@@ -21,12 +21,8 @@ struct RegistrationFlowView: View {
                 // Demo navigation button - bigger on top as requested
                 HStack {
                     Spacer()
-                    Button("NEXT →") {
-                        if viewModel.currentStep < viewModel.totalSteps - 1 {
-                            withAnimation { viewModel.currentStep += 1 }
-                        } else {
-                            dismiss() // Only dismiss at the very end
-                        }
+                    Button("SKIP FOR DEMO") {
+                        dismiss() // Skip entire registration and go to main app
                     }
                     .font(.title2)
                     .fontWeight(.bold)

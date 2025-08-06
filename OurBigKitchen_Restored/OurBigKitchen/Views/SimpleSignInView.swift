@@ -619,8 +619,7 @@ struct SimpleSignInView: View {
                     defaults.set(self.password, forKey: "savedPassword") 
                 }
                 
-                // Set UserDefaults for onboarding completion
-                UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
+                // Note: hasSeenOnboarding is only set in UserWelcomeView to prevent redundant onboarding
                 
                 // Post notifications on main thread
                 DispatchQueue.main.async {

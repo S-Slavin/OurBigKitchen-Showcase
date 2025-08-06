@@ -1,0 +1,585 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXContainerItemProxy section */
+		842335052DB12C4D004C98F6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 842334E82DB12C4A004C98F6 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 842334EF2DB12C4A004C98F6;
+			remoteInfo = OurBigKitchen;
+		};
+		8423350F2DB12C4D004C98F6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 842334E82DB12C4A004C98F6 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 842334EF2DB12C4A004C98F6;
+			remoteInfo = OurBigKitchen;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		842334F02DB12C4A004C98F6 /* OurBigKitchen.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OurBigKitchen.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		842335042DB12C4D004C98F6 /* OurBigKitchenTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OurBigKitchenTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		8423350E2DB12C4D004C98F6 /* OurBigKitchenUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OurBigKitchenUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		842335162DB12C4D004C98F6 /* Exceptions for "OurBigKitchen" folder in "OurBigKitchen" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 842334EF2DB12C4A004C98F6 /* OurBigKitchen */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		842334F22DB12C4A004C98F6 /* OurBigKitchen */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				842335162DB12C4D004C98F6 /* Exceptions for "OurBigKitchen" folder in "OurBigKitchen" target */,
+			);
+			path = OurBigKitchen;
+			sourceTree = "<group>";
+		};
+		842335072DB12C4D004C98F6 /* OurBigKitchenTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = OurBigKitchenTests;
+			sourceTree = "<group>";
+		};
+		842335112DB12C4D004C98F6 /* OurBigKitchenUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = OurBigKitchenUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		842334ED2DB12C4A004C98F6 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		842335012DB12C4D004C98F6 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8423350B2DB12C4D004C98F6 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		842334E72DB12C4A004C98F6 = {
+			isa = PBXGroup;
+			children = (
+				842334F22DB12C4A004C98F6 /* OurBigKitchen */,
+				842335072DB12C4D004C98F6 /* OurBigKitchenTests */,
+				842335112DB12C4D004C98F6 /* OurBigKitchenUITests */,
+				842334F12DB12C4A004C98F6 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		842334F12DB12C4A004C98F6 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				842334F02DB12C4A004C98F6 /* OurBigKitchen.app */,
+				842335042DB12C4D004C98F6 /* OurBigKitchenTests.xctest */,
+				8423350E2DB12C4D004C98F6 /* OurBigKitchenUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		842334EF2DB12C4A004C98F6 /* OurBigKitchen */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 842335172DB12C4D004C98F6 /* Build configuration list for PBXNativeTarget "OurBigKitchen" */;
+			buildPhases = (
+				842334EC2DB12C4A004C98F6 /* Sources */,
+				842334ED2DB12C4A004C98F6 /* Frameworks */,
+				842334EE2DB12C4A004C98F6 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				842334F22DB12C4A004C98F6 /* OurBigKitchen */,
+			);
+			name = OurBigKitchen;
+			packageProductDependencies = (
+			);
+			productName = OurBigKitchen;
+			productReference = 842334F02DB12C4A004C98F6 /* OurBigKitchen.app */;
+			productType = "com.apple.product-type.application";
+		};
+		842335032DB12C4D004C98F6 /* OurBigKitchenTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8423351C2DB12C4D004C98F6 /* Build configuration list for PBXNativeTarget "OurBigKitchenTests" */;
+			buildPhases = (
+				842335002DB12C4D004C98F6 /* Sources */,
+				842335012DB12C4D004C98F6 /* Frameworks */,
+				842335022DB12C4D004C98F6 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				842335062DB12C4D004C98F6 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				842335072DB12C4D004C98F6 /* OurBigKitchenTests */,
+			);
+			name = OurBigKitchenTests;
+			packageProductDependencies = (
+			);
+			productName = OurBigKitchenTests;
+			productReference = 842335042DB12C4D004C98F6 /* OurBigKitchenTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		8423350D2DB12C4D004C98F6 /* OurBigKitchenUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8423351F2DB12C4D004C98F6 /* Build configuration list for PBXNativeTarget "OurBigKitchenUITests" */;
+			buildPhases = (
+				8423350A2DB12C4D004C98F6 /* Sources */,
+				8423350B2DB12C4D004C98F6 /* Frameworks */,
+				8423350C2DB12C4D004C98F6 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				842335102DB12C4D004C98F6 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				842335112DB12C4D004C98F6 /* OurBigKitchenUITests */,
+			);
+			name = OurBigKitchenUITests;
+			packageProductDependencies = (
+			);
+			productName = OurBigKitchenUITests;
+			productReference = 8423350E2DB12C4D004C98F6 /* OurBigKitchenUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		842334E82DB12C4A004C98F6 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1630;
+				LastUpgradeCheck = 1630;
+				TargetAttributes = {
+					842334EF2DB12C4A004C98F6 = {
+						CreatedOnToolsVersion = 16.3;
+						ProvisioningStyle = Automatic;
+					};
+					842335032DB12C4D004C98F6 = {
+						CreatedOnToolsVersion = 16.3;
+						TestTargetID = 842334EF2DB12C4A004C98F6;
+					};
+					8423350D2DB12C4D004C98F6 = {
+						CreatedOnToolsVersion = 16.3;
+						TestTargetID = 842334EF2DB12C4A004C98F6;
+					};
+				};
+			};
+			buildConfigurationList = 842334EB2DB12C4A004C98F6 /* Build configuration list for PBXProject "OurBigKitchen" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 842334E72DB12C4A004C98F6;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 842334F12DB12C4A004C98F6 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				842334EF2DB12C4A004C98F6 /* OurBigKitchen */,
+				842335032DB12C4D004C98F6 /* OurBigKitchenTests */,
+				8423350D2DB12C4D004C98F6 /* OurBigKitchenUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		842334EE2DB12C4A004C98F6 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		842335022DB12C4D004C98F6 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8423350C2DB12C4D004C98F6 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		842334EC2DB12C4A004C98F6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		842335002DB12C4D004C98F6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8423350A2DB12C4D004C98F6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		842335062DB12C4D004C98F6 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 842334EF2DB12C4A004C98F6 /* OurBigKitchen */;
+			targetProxy = 842335052DB12C4D004C98F6 /* PBXContainerItemProxy */;
+		};
+		842335102DB12C4D004C98F6 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 842334EF2DB12C4A004C98F6 /* OurBigKitchen */;
+			targetProxy = 8423350F2DB12C4D004C98F6 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		842335182DB12C4D004C98F6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = OurBigKitchen/OurBigKitchen.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = NWD2D5Y25X;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = OurBigKitchen/Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.shaina.obk.OurBigKitchen;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		842335192DB12C4D004C98F6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = OurBigKitchen/OurBigKitchen.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = NWD2D5Y25X;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = OurBigKitchen/Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.shaina.obk.OurBigKitchen;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		8423351A2DB12C4D004C98F6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		8423351B2DB12C4D004C98F6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		8423351D2DB12C4D004C98F6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = NWD2D5Y25X;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.shaina.obk.OurBigKitchenTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/OurBigKitchen.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/OurBigKitchen";
+			};
+			name = Debug;
+		};
+		8423351E2DB12C4D004C98F6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = NWD2D5Y25X;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.shaina.obk.OurBigKitchenTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/OurBigKitchen.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/OurBigKitchen";
+			};
+			name = Release;
+		};
+		842335202DB12C4D004C98F6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = NWD2D5Y25X;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.shaina.obk.OurBigKitchenUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = OurBigKitchen;
+			};
+			name = Debug;
+		};
+		842335212DB12C4D004C98F6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = NWD2D5Y25X;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.shaina.obk.OurBigKitchenUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = OurBigKitchen;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		842334EB2DB12C4A004C98F6 /* Build configuration list for PBXProject "OurBigKitchen" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8423351A2DB12C4D004C98F6 /* Debug */,
+				8423351B2DB12C4D004C98F6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		842335172DB12C4D004C98F6 /* Build configuration list for PBXNativeTarget "OurBigKitchen" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				842335182DB12C4D004C98F6 /* Debug */,
+				842335192DB12C4D004C98F6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		8423351C2DB12C4D004C98F6 /* Build configuration list for PBXNativeTarget "OurBigKitchenTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8423351D2DB12C4D004C98F6 /* Debug */,
+				8423351E2DB12C4D004C98F6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		8423351F2DB12C4D004C98F6 /* Build configuration list for PBXNativeTarget "OurBigKitchenUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				842335202DB12C4D004C98F6 /* Debug */,
+				842335212DB12C4D004C98F6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 842334E82DB12C4A004C98F6 /* Project object */;
+}

@@ -282,7 +282,7 @@ struct RegistrationSignupSlidesView: View {
                     // Set authentication flags to take user to main app
                     UserDefaults.standard.set(true, forKey: "isAuthenticated")
                     UserDefaults.standard.set(true, forKey: "hasSignedIn")
-                    UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
+                    // Note: hasSeenOnboarding is only set in UserWelcomeView to prevent redundant onboarding
                     
                     // Update AppState to trigger UI navigation
                     appState.isAuthenticated = true
