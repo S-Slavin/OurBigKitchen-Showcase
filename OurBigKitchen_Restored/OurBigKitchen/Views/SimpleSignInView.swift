@@ -276,38 +276,24 @@ struct SimpleSignInView: View {
             }
             .buttonStyle(ButtonStyles.scale)
             
-            // Sign Up pill
-            Button(action: {
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                    isSignUp = 1
-                    appState.isSigningUp = true
-                }
-            }) {
+            // Sign Up pill - Navigate to registration slides
+            NavigationLink(destination: RegistrationSignupSlidesView()) {
                 Text("Sign Up")
                     .font(.headline)
-                    .fontWeight(isSignUp == 1 ? .semibold : .medium)
+                    .fontWeight(.semibold)
                     .padding(.vertical, 14)
                     .frame(width: UIScreen.main.bounds.width * 0.4)
-                    .foregroundColor(isSignUp == 1 ? .white : primaryColor)
+                    .foregroundColor(.white)
                     .background(
-                        ZStack {
-                            if isSignUp == 1 {
-                                // Active state
-                                Capsule()
-                                    .fill(
-                                        LinearGradient(
-                                            gradient: Gradient(colors: [primaryColor, accentColor]),
-                                            startPoint: .leading,
-                                            endPoint: .trailing
-                                        )
-                                    )
-                                    .shadow(color: primaryColor.opacity(0.3), radius: 5, x: 0, y: 3)
-                            } else {
-                                // Inactive state
-                                Capsule()
-                                    .stroke(primaryColor, lineWidth: 1)
-                            }
-                        }
+                        Capsule()
+                            .fill(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [primaryColor, accentColor]),
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .shadow(color: primaryColor.opacity(0.3), radius: 5, x: 0, y: 3)
                     )
             }
             .buttonStyle(ButtonStyles.scale)

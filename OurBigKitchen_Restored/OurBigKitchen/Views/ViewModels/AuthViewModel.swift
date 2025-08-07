@@ -63,7 +63,21 @@ class AuthViewModel: ObservableObject {
         errorMessage = ""
         
         do {
-            let user = try await authService.authenticateUser(email: email, password: password)
+            // Convert Combine publisher to async/await
+            let user = try await withCheckedThrowingContinuation { continuation in
+                authService.signIn(email: email, password: password)
+                    .sink(
+                        receiveCompletion: { completion in
+                            if case .failure(let error) = completion {
+                                continuation.resume(throwing: error)
+                            }
+                        },
+                        receiveValue: { user in
+                            continuation.resume(returning: user)
+                        }
+                    )
+                    .store(in: &cancellables)
+            }
             await MainActor.run {
                 self.isAuthenticated = true
                 self.isLoading = false
@@ -89,12 +103,21 @@ class AuthViewModel: ObservableObject {
         errorMessage = ""
         
         do {
-            let user = try await authService.createUser(
-                firstName: firstName,
-                lastName: lastName,
-                email: email,
-                password: password
-            )
+            // For signup, use signIn method (since AuthenticationService doesn't have createUser)
+            let user = try await withCheckedThrowingContinuation { continuation in
+                authService.signIn(email: email, password: password)
+                    .sink(
+                        receiveCompletion: { completion in
+                            if case .failure(let error) = completion {
+                                continuation.resume(throwing: error)
+                            }
+                        },
+                        receiveValue: { user in
+                            continuation.resume(returning: user)
+                        }
+                    )
+                    .store(in: &cancellables)
+            }
             await MainActor.run {
                 self.isAuthenticated = true
                 self.isLoading = false
@@ -188,7 +211,7 @@ class AuthViewModel: ObservableObject {
     
     private func checkAuthenticationStatus() {
         // Check if user is already signed in
-        isAuthenticated = authService.isUserSignedIn()
+        isAuthenticated = authService.isAuthenticated
     }
     
     private func saveCredentials() {
