@@ -42,6 +42,20 @@ class AuthViewModel: ObservableObject {
         }
     }
     
+    func loginWithApple() {
+        // Handle Apple Sign In
+        // For now, simulate Apple login success
+        isLoading = true
+        errorMessage = ""
+        
+        // Simulate authentication
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            self.isLoading = false
+            self.isAuthenticated = true
+            // In real implementation, would use AuthenticationServices framework
+        }
+    }
+    
     func signIn() async {
         guard validateSignInInput() else { return }
         
