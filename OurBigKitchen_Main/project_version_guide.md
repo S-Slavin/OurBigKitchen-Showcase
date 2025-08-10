@@ -1,7 +1,7 @@
 # OurBigKitchen Project Version Guide
 
 ## Active Working Version
-- Directory: `OurBigKitchen_Restored/`
+- Directory: `OurBigKitchen_Main/`
 - This is the main working version
 - Contains all the latest fixes and working components
 - Git repository: https://github.com/S-S-Slavin/OurBigKitchen.git
@@ -19,7 +19,7 @@
 - Various backup versions with timestamps
 
 ## Important Notes
-1. Always work in `OurBigKitchen_Restored/`
+1. Always work in `OurBigKitchen_Main/`
 2. Never modify `OurBigKitchen_New/` as it's our reference backup
 3. If you need to reference original files, use `OurBigKitchen_New/`
 4. All other versions can be ignored or cleaned up if needed

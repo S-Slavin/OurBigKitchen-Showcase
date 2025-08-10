@@ -78,14 +78,25 @@ class AuthViewModel: ObservableObject {
                     )
                     .store(in: &cancellables)
             }
+            
+            // Save user to persistence
+            try PersistenceManager.shared.save(user, forKey: "currentUser")
+            
             await MainActor.run {
                 self.isAuthenticated = true
                 self.isLoading = false
+                
+                // Set authentication flags
+                UserDefaults.standard.set(true, forKey: "isAuthenticated")
+                UserDefaults.standard.set(true, forKey: "hasSignedIn")
                 
                 // Save credentials if remember password is enabled
                 if rememberPassword {
                     saveCredentials()
                 }
+                
+                // Post authentication notification
+                NotificationCenter.default.post(name: .didUpdateAuth, object: nil)
             }
         } catch {
             await MainActor.run {
@@ -103,9 +114,9 @@ class AuthViewModel: ObservableObject {
         errorMessage = ""
         
         do {
-            // For signup, use signIn method (since AuthenticationService doesn't have createUser)
+            // Actually create a new user instead of trying to sign in
             let user = try await withCheckedThrowingContinuation { continuation in
-                authService.signIn(email: email, password: password)
+                authService.createUser(firstName: firstName, lastName: lastName, email: email, password: password)
                     .sink(
                         receiveCompletion: { completion in
                             if case .failure(let error) = completion {
@@ -118,9 +129,20 @@ class AuthViewModel: ObservableObject {
                     )
                     .store(in: &cancellables)
             }
+            
+            // Save user to persistence
+            try PersistenceManager.shared.save(user, forKey: "currentUser")
+            
             await MainActor.run {
                 self.isAuthenticated = true
                 self.isLoading = false
+                
+                // Set authentication flags
+                UserDefaults.standard.set(true, forKey: "isAuthenticated")
+                UserDefaults.standard.set(true, forKey: "hasSignedIn")
+                
+                // Post authentication notification
+                NotificationCenter.default.post(name: .didUpdateAuth, object: nil)
             }
         } catch {
             await MainActor.run {

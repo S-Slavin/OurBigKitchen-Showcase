@@ -37,6 +37,33 @@ class AuthenticationService: ObservableObject {
             .eraseToAnyPublisher()
     }
     
+    func createUser(firstName: String, lastName: String, email: String, password: String) -> AnyPublisher<User, Error> {
+        // Create a new user with unique ID
+        let user = User(
+            id: UUID().uuidString,
+            firstName: firstName,
+            lastName: lastName,
+            email: email,
+            profileImageURL: nil,
+            bio: nil,
+            role: .volunteer,
+            preferences: UserPreferences(),
+            achievements: [],
+            stats: UserStats(),
+            hasFoodSafetyRegistration: false,
+            authProvider: "email"
+        )
+        
+        return Just(user)
+            .setFailureType(to: Error.self)
+            .delay(for: .milliseconds(500), scheduler: DispatchQueue.main)
+            .handleEvents(receiveOutput: { [weak self] user in
+                self?.currentUser = user
+                self?.isAuthenticated = true
+            })
+            .eraseToAnyPublisher()
+    }
+    
     func signOut() {
         currentUser = nil
         isAuthenticated = false
