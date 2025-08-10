@@ -9,6 +9,7 @@ import Foundation
 import Combine
 import SwiftUI
 
+@MainActor
 class EventRebookingViewModel: ObservableObject {
     // Form Data
     @Published var selectedOption: EventRebookingService.BookingOption?

@@ -47,10 +47,6 @@ class StorageManager: ObservableObject {
         return users.first { $0.email == email }
     }
     
-    func fetchUser(by id: String) -> AppModels.User? {
-        return users.first { $0.id == id }
-    }
-    
     func updateUser(_ user: AppModels.User) {
         if let index = users.firstIndex(where: { $0.id == user.id }) {
             users[index] = user
@@ -69,12 +65,7 @@ class StorageManager: ObservableObject {
         startDate: Date,
         endDate: Date,
         location: String,
-        maxVolunteers: Int,
-        organizer: String,
-        type: Event.EventType,
-        status: Event.EventStatus = .upcoming,
-        requirements: [String] = [],
-        imageURL: URL? = nil
+        maxVolunteers: Int
     ) -> Event {
         let event = Event(
             title: title,
@@ -83,12 +74,8 @@ class StorageManager: ObservableObject {
             endDate: endDate,
             location: location,
             maxVolunteers: maxVolunteers,
-            currentVolunteers: 0,
-            status: status,
-            type: type,
-            organizer: organizer,
-            requirements: requirements,
-            imageURL: imageURL
+            type: .cooking,
+            organizer: "System"
         )
         events.append(event)
         return event
@@ -116,48 +103,42 @@ class StorageManager: ObservableObject {
     // MARK: - Impact Metric Operations
     
     func createImpactMetric(
-        type: AppModels.ImpactMetricType,
-        value: Double,
-        description: String,
-        userId: String,
-        eventId: String? = nil,
-        date: Date = Date()
-    ) -> AppModels.ImpactMetric {
-        let metric = AppModels.ImpactMetric(
-            type: type,
-            value: value,
-            description: description,
-            userId: userId,
-            eventId: eventId,
-            date: date
+        mealsServed: Int = 0,
+        peopleFed: Int = 0,
+        wasteReduced: Double = 0.0,
+        carbonFootprintReduced: Double = 0.0,
+        volunteerHours: Double = 0.0
+    ) -> ImpactMetric {
+        let metric = ImpactMetric(
+            mealsServed: mealsServed,
+            peopleFed: peopleFed,
+            wasteReduced: wasteReduced,
+            carbonFootprintReduced: carbonFootprintReduced,
+            volunteerHours: volunteerHours
         )
         impactMetrics.append(metric)
         return metric
     }
     
-    func fetchImpactMetrics(for userId: String? = nil, eventId: String? = nil) -> [AppModels.ImpactMetric] {
-        var filtered = impactMetrics
-        
-        if let userId = userId {
-            filtered = filtered.filter { $0.userId == userId }
-        }
-        
-        if let eventId = eventId {
-            filtered = filtered.filter { $0.eventId == eventId }
-        }
-        
-        return filtered
+    func fetchImpactMetrics(for userId: String? = nil, eventId: String? = nil) -> [ImpactMetric] {
+        // For now, return all metrics since ImpactMetric doesn't have userId or eventId
+        // This will be properly implemented when Core Data is fully set up
+        return impactMetrics
     }
     
-    func getTotalImpact() -> AppModels.TotalImpact {
-        let totalMeals = impactMetrics.filter { $0.type == .mealsPrepared }.reduce(0) { $0 + $1.value }
-        let totalHours = impactMetrics.filter { $0.type == .hoursVolunteered }.reduce(0) { $0 + $1.value }
-        let totalEvents = impactMetrics.filter { $0.type == .eventsAttended }.reduce(0) { $0 + $1.value }
+    func getTotalImpact() -> TotalImpact {
+        let totalMeals = impactMetrics.reduce(0) { $0 + $1.mealsServed }
+        let totalPeople = impactMetrics.reduce(0) { $0 + $1.peopleFed }
+        let totalWaste = impactMetrics.reduce(0.0) { $0 + $1.wasteReduced }
+        let totalCarbon = impactMetrics.reduce(0.0) { $0 + $1.carbonFootprintReduced }
+        let totalHours = impactMetrics.reduce(0.0) { $0 + $1.volunteerHours }
         
-        return AppModels.TotalImpact(
-            totalMeals: Int(totalMeals),
-            totalHours: Int(totalHours),
-            totalEvents: Int(totalEvents)
+        return TotalImpact(
+            totalMealsServed: totalMeals,
+            totalPeopleFed: totalPeople,
+            totalWasteReduced: totalWaste,
+            totalCarbonFootprintReduced: totalCarbon,
+            totalVolunteerHours: totalHours
         )
     }
     
@@ -166,28 +147,26 @@ class StorageManager: ObservableObject {
     func createVolunteerSession(
         userId: String,
         eventId: String,
-        startTime: Date,
-        endTime: Date? = nil,
-        status: AppModels.VolunteerSessionStatus = .active
-    ) -> AppModels.VolunteerSession {
-        let session = AppModels.VolunteerSession(
+        checkInTime: Date,
+        notes: String? = nil
+    ) -> VolunteerSession {
+        let session = VolunteerSession(
             userId: userId,
             eventId: eventId,
-            startTime: startTime,
-            endTime: endTime,
-            status: status
+            checkInTime: checkInTime,
+            notes: notes
         )
         volunteerSessions.append(session)
         return session
     }
     
-    func updateVolunteerSession(_ session: AppModels.VolunteerSession) {
+    func updateVolunteerSession(_ session: VolunteerSession) {
         if let index = volunteerSessions.firstIndex(where: { $0.id == session.id }) {
             volunteerSessions[index] = session
         }
     }
     
-    func fetchVolunteerSessions(for userId: String? = nil, eventId: String? = nil, status: String? = nil) -> [AppModels.VolunteerSession] {
+    func fetchVolunteerSessions(for userId: String? = nil, eventId: String? = nil, status: String? = nil) -> [VolunteerSession] {
         var filtered = volunteerSessions
         
         if let userId = userId {
@@ -208,18 +187,22 @@ class StorageManager: ObservableObject {
     // MARK: - Activity Operations
     
     func createActivity(
-        type: AppModels.ActivityType,
         title: String,
         description: String,
+        category: AppModels.ActivityCategory,
         userId: String,
-        date: Date = Date()
+        duration: TimeInterval,
+        eventId: String? = nil
     ) -> AppModels.Activity {
+        let impact = AppModels.ImpactMetric() // Default impact
         let activity = AppModels.Activity(
-            type: type,
+            userId: userId,
+            eventId: eventId,
             title: title,
             description: description,
-            userId: userId,
-            date: date
+            category: category,
+            duration: duration,
+            impact: impact
         )
         activities.append(activity)
         return activity
@@ -234,9 +217,9 @@ class StorageManager: ObservableObject {
     func getUserStats(for userId: String) -> AppModels.UserStats {
         let userMetrics = fetchImpactMetrics(for: userId)
         
-        let hoursVolunteered = Int(userMetrics.filter { $0.type == .hoursVolunteered }.reduce(0) { $0 + $1.value })
-        let mealsPrepared = Int(userMetrics.filter { $0.type == .mealsPrepared }.reduce(0) { $0 + $1.value })
-        let eventsAttended = Int(userMetrics.filter { $0.type == .eventsAttended }.reduce(0) { $0 + $1.value })
+        let hoursVolunteered = Int(userMetrics.reduce(0.0) { $0 + $1.volunteerHours })
+        let mealsPrepared = Int(userMetrics.reduce(0) { $0 + $1.mealsServed })
+        let eventsAttended = Int(userMetrics.reduce(0) { $0 + $1.peopleFed })
         
         return AppModels.UserStats(
             hoursVolunteered: hoursVolunteered,

@@ -8,7 +8,7 @@ class SalesforceIntegrationManager: ObservableObject {
     @Published var lastSyncDate: Date?
     
     private let salesforceService: SalesforceServiceProtocol
-    private var cancellables = Set<AnyCancellable>()
+    var cancellables = Set<AnyCancellable>()
     
     init(salesforceService: SalesforceServiceProtocol = SalesforceService()) {
         self.salesforceService = salesforceService
@@ -290,9 +290,9 @@ extension SalesforceIntegrationManager {
             mailingState: user.state,
             mailingPostalCode: user.postalCode,
             mailingCountry: user.country,
-            volunteerType: user.volunteerType?.rawValue,
+            volunteerType: user.volunteerType,
             wwccNumber: user.wwccNumber,
-            wwccExpiryDate: user.wwccExpiryDate.map { dateFormatter.string(from: $0) },
+            wwccExpiryDate: user.wwcExpiryDate.map { dateFormatter.string(from: $0) },
             volunteerStatus: "Active",
             recordTypeId: nil
         )
@@ -331,17 +331,30 @@ extension SalesforceIntegrationManager {
             firstName: contact.firstName,
             lastName: contact.lastName,
             email: contact.email,
+            profileImageURL: nil,
+            bio: nil,
+            role: .volunteer,
+            preferences: UserPreferences(),
+            achievements: [],
+            stats: UserStats(),
+            hasFoodSafetyRegistration: false,
+            authProvider: nil,
+            company: nil,
+            dob: contact.birthdate.flatMap { dateFormatter.date(from: $0) },
+            wwcNumber: contact.wwccNumber,
+            wwcExpiry: contact.wwccExpiryDate.flatMap { dateFormatter.date(from: $0) },
+            companyName: nil,
+            companyPosition: nil,
+            companyEmail: nil,
+            salesforceId: contact.id,
             phone: contact.phone,
             address: contact.mailingStreet,
             city: contact.mailingCity,
             state: contact.mailingState,
             postalCode: contact.mailingPostalCode,
             country: contact.mailingCountry,
-            dateOfBirth: contact.birthdate.flatMap { dateFormatter.date(from: $0) },
-            volunteerType: VolunteerType(rawValue: contact.volunteerType ?? ""),
-            wwccNumber: contact.wwccNumber,
-            wwccExpiryDate: contact.wwccExpiryDate.flatMap { dateFormatter.date(from: $0) },
-            salesforceId: contact.id
+            volunteerType: contact.volunteerType,
+            wwcExpiryDate: contact.wwccExpiryDate.flatMap { dateFormatter.date(from: $0) }
         )
     }
 }

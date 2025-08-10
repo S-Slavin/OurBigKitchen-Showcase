@@ -76,7 +76,7 @@ class RealAuthService: ObservableObject {
             firstName: firstName,
             lastName: lastName,
             email: email,
-            role: role,
+            role: AppModels.UserRole(rawValue: role) ?? .volunteer,
             dob: dob,
             wwcNumber: wwcNumber,
             wwcExpiry: wwcExpiryDate,
@@ -188,18 +188,15 @@ class RealAuthService: ObservableObject {
             firstName: user.firstName,
             lastName: user.lastName,
             email: user.email,
-            role: user.role,
+            profileImageURL: user.profileImageURL,
             bio: user.bio,
-            companyName: user.companyName,
-            companyPosition: user.companyPosition,
-            companyEmail: user.companyEmail,
+            role: user.role,
             dob: user.dob,
             wwcNumber: user.wwcNumber,
             wwcExpiry: user.wwcExpiry,
-            profileImageURL: user.profileImageURL,
-            isVerified: user.isVerified,
-            createdAt: user.createdAt,
-            lastActive: Date()
+            companyName: user.companyName,
+            companyPosition: user.companyPosition,
+            companyEmail: user.companyEmail
         )
         
         storageManager.updateUser(updatedUser)
@@ -219,7 +216,7 @@ class RealAuthService: ObservableObject {
         // Update user in storage
         var updatedUser = existingUser
         updatedUser.wwcNumber = wwcNumber
-        updatedUser.wwcNumber = wwcExpiryDate
+        updatedUser.wwcExpiry = wwcExpiryDate
         
         storageManager.updateUser(updatedUser)
         
@@ -384,6 +381,9 @@ enum AuthError: LocalizedError {
     case wwccInvalid
     case wwccExpired
     case keychainError
+    case invalidGroupCode
+    case appleSignInFailed
+    case googleSignInFailed
     
     var errorDescription: String? {
         switch self {
@@ -407,6 +407,12 @@ enum AuthError: LocalizedError {
             return "WWCC has expired"
         case .keychainError:
             return "Security error occurred"
+        case .invalidGroupCode:
+            return "Invalid group code"
+        case .appleSignInFailed:
+            return "Apple Sign In failed"
+        case .googleSignInFailed:
+            return "Google Sign In failed"
         }
     }
 }

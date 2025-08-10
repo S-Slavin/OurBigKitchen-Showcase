@@ -1,5 +1,43 @@
 import Foundation
 
+// MARK: - Impact Metric Types
+enum ImpactMetricType: String, Codable, CaseIterable {
+    case mealsServed
+    case peopleFed
+    case wasteReduced
+    case carbonFootprintReduced
+    case volunteerHours
+    case donations
+    case corporateParticipation
+}
+
+// MARK: - Total Impact Model
+struct TotalImpact: Codable {
+    let totalMealsServed: Int
+    let totalPeopleFed: Int
+    let totalWasteReduced: Double
+    let totalCarbonFootprintReduced: Double
+    let totalVolunteerHours: Double
+    let totalDonations: Double
+    let totalCorporateParticipation: Int
+    
+    init(totalMealsServed: Int = 0,
+         totalPeopleFed: Int = 0,
+         totalWasteReduced: Double = 0.0,
+         totalCarbonFootprintReduced: Double = 0.0,
+         totalVolunteerHours: Double = 0.0,
+         totalDonations: Double = 0.0,
+         totalCorporateParticipation: Int = 0) {
+        self.totalMealsServed = totalMealsServed
+        self.totalPeopleFed = totalPeopleFed
+        self.totalWasteReduced = totalWasteReduced
+        self.totalCarbonFootprintReduced = totalCarbonFootprintReduced
+        self.totalVolunteerHours = totalVolunteerHours
+        self.totalDonations = totalDonations
+        self.totalCorporateParticipation = totalCorporateParticipation
+    }
+}
+
 // Use the ImpactMetric defined in AppModels.swift
 typealias ImpactMetric = AppModels.ImpactMetric
 

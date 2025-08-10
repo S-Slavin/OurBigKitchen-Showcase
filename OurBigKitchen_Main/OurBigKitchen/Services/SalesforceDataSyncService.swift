@@ -265,10 +265,10 @@ extension SalesforceDataSyncService {
             firstName: user.firstName,
             lastName: user.lastName,
             email: user.email,
-            volunteerType: user.volunteerType ?? .individual,
-            dateOfBirth: user.dateOfBirth ?? Date(),
-            wwccNumber: user.wwccNumber,
-            wwccExpiryDate: user.wwccExpiryDate
+            volunteerType: VolunteerType(rawValue: user.volunteerType ?? "individual") ?? .individual,
+            dateOfBirth: user.dob ?? Date(),
+            wwccNumber: user.wwcNumber,
+            wwccExpiryDate: user.wwcExpiry
         )
     }
     
@@ -290,11 +290,11 @@ extension SalesforceDataSyncService {
     func syncImpact(_ impact: Impact) -> AnyPublisher<String, Error> {
         return salesforceManager.syncImpactMetrics(
             userId: impact.userId,
-            eventId: impact.eventId,
-            hoursVolunteered: impact.hoursVolunteered,
-            mealsServed: impact.mealsServed,
+            eventId: "",
+            hoursVolunteered: Double(impact.hoursContributed),
+            mealsServed: impact.mealsProvided,
             peopleHelped: impact.peopleHelped,
-            date: impact.date
+            date: Date()
         )
     }
     
@@ -303,14 +303,14 @@ extension SalesforceDataSyncService {
         return salesforceManager.syncCorporateAccount(
             companyName: account.companyName,
             industry: account.industry,
-            phone: account.phone,
-            address: account.address,
-            city: account.city,
-            state: account.state,
-            postalCode: account.postalCode,
-            country: account.country,
-            groupSize: account.groupSize,
-            groupType: account.groupType
+            phone: account.contactPhone,
+            address: "",
+            city: "",
+            state: "",
+            postalCode: "",
+            country: "",
+            groupSize: account.employeeCount ?? 0,
+            groupType: account.partnershipLevel.rawValue
         )
     }
 }

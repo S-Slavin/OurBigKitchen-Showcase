@@ -2,6 +2,7 @@ import Foundation
 import Combine
 import SwiftUI
 
+@MainActor
 class RegistrationFlowViewModel: ObservableObject {
     @Published var currentStep: Int = 0
     let totalSteps = 5

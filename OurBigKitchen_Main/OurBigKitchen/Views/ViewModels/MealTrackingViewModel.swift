@@ -1,6 +1,8 @@
 import Foundation
 import Combine
+import SwiftUI
 
+@MainActor
 class MealTrackingViewModel: ObservableObject {
     @Published var mealEntry: MealEntry = .empty
     @Published var recentEntries: [MealEntry] = []

@@ -26,6 +26,18 @@ struct Event: Identifiable, Codable, Hashable {
     var category: String? = nil
     var program: String? = nil
     
+    // Additional fields for Salesforce integration
+    var salesforceId: String?
+    
+    // Computed properties for compatibility
+    var startTime: Date {
+        return startDate
+    }
+    
+    var endTime: Date {
+        return endDate
+    }
+    
     enum EventType: String, Codable, CaseIterable, Hashable {
         case cooking = "cooking"
         case distribution = "distribution"
@@ -127,6 +139,17 @@ struct Event: Identifiable, Codable, Hashable {
         self.category = category
         self.program = program
     }
+}
+
+// MARK: - Event Category
+enum EventCategory: String, Codable, CaseIterable {
+    case cooking
+    case delivery
+    case fundraising
+    case community
+    case corporate
+    case youth
+    case other
 }
 
 // Sample data for previews

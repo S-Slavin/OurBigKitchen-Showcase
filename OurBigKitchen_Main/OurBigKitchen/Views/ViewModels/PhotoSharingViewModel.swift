@@ -7,10 +7,12 @@
 
 import Foundation
 import SwiftUI
+import Combine
 import UIKit
 import CoreImage
 import CoreImage.CIFilterBuiltins
 
+@MainActor
 class PhotoSharingViewModel: ObservableObject {
     @Published var includeImpactData = true
     @Published var isProcessing = false

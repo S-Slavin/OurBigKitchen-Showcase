@@ -286,6 +286,7 @@ class SalesforceService: SalesforceServiceProtocol, ObservableObject {
         
         return URLSession.shared.dataTaskPublisher(for: request)
             .map { _ in true }
+            .mapError { $0 as Error }
             .eraseToAnyPublisher()
     }
     
@@ -309,6 +310,7 @@ class SalesforceService: SalesforceServiceProtocol, ObservableObject {
         
         return URLSession.shared.dataTaskPublisher(for: request)
             .map { _ in true }
+            .mapError { $0 as Error }
             .eraseToAnyPublisher()
     }
     
@@ -332,6 +334,7 @@ class SalesforceService: SalesforceServiceProtocol, ObservableObject {
         
         return URLSession.shared.dataTaskPublisher(for: request)
             .map { _ in true }
+            .mapError { $0 as Error }
             .eraseToAnyPublisher()
     }
     
@@ -356,7 +359,8 @@ class SalesforceService: SalesforceServiceProtocol, ObservableObject {
     
     func queryAccounts(query: String) -> AnyPublisher<[SalesforceAccount], Error> {
         guard let accessToken = accessToken, let instanceURL = instanceURL else {
-            return Fail(error: SalesforceError.notAuthenticated)
+            return Just(())
+                .tryMap { _ in throw SalesforceError.notAuthenticated }
                 .eraseToAnyPublisher()
         }
         
@@ -374,7 +378,8 @@ class SalesforceService: SalesforceServiceProtocol, ObservableObject {
     
     func queryVolunteerEvents(query: String) -> AnyPublisher<[SalesforceVolunteerEvent], Error> {
         guard let accessToken = accessToken, let instanceURL = instanceURL else {
-            return Fail(error: SalesforceError.notAuthenticated)
+            return Just(())
+                .tryMap { _ in throw SalesforceError.notAuthenticated }
                 .eraseToAnyPublisher()
         }
         
@@ -392,7 +397,8 @@ class SalesforceService: SalesforceServiceProtocol, ObservableObject {
     
     func deleteRecord(objectType: String, recordId: String) -> AnyPublisher<Bool, Error> {
         guard let accessToken = accessToken, let instanceURL = instanceURL else {
-            return Fail(error: SalesforceError.notAuthenticated)
+            return Just(())
+                .tryMap { _ in throw SalesforceError.notAuthenticated }
                 .eraseToAnyPublisher()
         }
         
@@ -403,6 +409,7 @@ class SalesforceService: SalesforceServiceProtocol, ObservableObject {
         
         return URLSession.shared.dataTaskPublisher(for: request)
             .map { _ in true }
+            .mapError { $0 as Error }
             .eraseToAnyPublisher()
     }
 }

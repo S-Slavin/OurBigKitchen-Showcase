@@ -13,9 +13,34 @@ class CoreDataManager: ObservableObject {
         return nil
     }
     
-    func fetchUser(by email: String) -> AppModels.User? {
-        // For now, return nil - this will be implemented with actual Core Data later
-        return nil
+    func getAllUsers() -> [AppModels.User] {
+        // For now, return empty array - this will be implemented with actual Core Data later
+        return []
+    }
+    
+    func updateUserProfile(_ user: AppModels.User) {
+        // For now, do nothing - this will be implemented with actual Core Data later
+    }
+    
+    func updateWWCC(userId: String, wwccNumber: String, wwccExpiry: Date) {
+        // For now, do nothing - this will be implemented with actual Core Data later
+    }
+    
+    func updateFoodSafetyRegistration(userId: String, hasRegistration: Bool) {
+        // For now, do nothing - this will be implemented with actual Core Data later
+    }
+    
+    func updateProfileImage(userId: String, imageURL: String) {
+        // For now, do nothing - this will be implemented with actual Core Data later
+    }
+    
+    func updateUserPreferences(userId: String, preferences: [String: Any]) {
+        // For now, do nothing - this will be implemented with actual Core Data later
+    }
+    
+    func getAllUserMetrics() -> [String: Any] {
+        // For now, return empty dictionary - this will be implemented with actual Core Data later
+        return [:]
     }
     
     func updateUser(_ user: AppModels.User) {
@@ -31,51 +56,49 @@ class CoreDataManager: ObservableObject {
     func createEvent(
         title: String,
         description: String,
-        category: AppModels.EventCategory,
+        category: EventCategory,
         date: Date,
-        duration: TimeInterval,
         location: String,
-        maxParticipants: Int,
-        organizerId: String
-    ) -> AppModels.Event {
-        return AppModels.Event(
+        maxVolunteers: Int
+    ) -> Event {
+        return Event(
             title: title,
             description: description,
-            category: category,
-            date: date,
-            duration: duration,
+            startDate: date,
+            endDate: date.addingTimeInterval(7200), // 2 hours later
             location: location,
-            maxParticipants: maxParticipants,
-            organizerId: organizerId
+            maxVolunteers: maxVolunteers,
+            type: .other,
+            organizer: "Unknown"
         )
     }
     
-    func updateEvent(_ event: AppModels.Event) {
+    func updateEvent(_ event: Event) {
         // For now, do nothing - this will be implemented with actual Core Data later
     }
     
-    func deleteEvent(_ event: AppModels.Event) {
+    func deleteEvent(_ event: Event) {
         // For now, do nothing - this will be implemented with actual Core Data later
     }
     
-    func fetchEvents() -> [AppModels.Event] {
+    func fetchEvents() -> [Event] {
         // For now, return empty array - this will be implemented with actual Core Data later
         return []
     }
     
-    func fetchEvent(by id: String) -> AppModels.Event? {
+    func fetchEvent(by id: String) -> Event? {
         // For now, return nil - this will be implemented with actual Core Data later
         return nil
     }
     
     // MARK: - Impact Metric Management
     func createImpactMetric(
-        type: AppModels.ImpactMetricType,
+        type: ImpactMetricType,
         value: Double,
         userId: String,
         eventId: String? = nil
-    ) -> AppModels.ImpactMetric {
-        return AppModels.ImpactMetric(
+    ) -> ImpactMetric {
+        return ImpactMetric(
             mealsServed: type == .mealsServed ? Int(value) : 0,
             peopleFed: type == .peopleFed ? Int(value) : 0,
             wasteReduced: type == .wasteReduced ? value : 0.0,
@@ -84,12 +107,12 @@ class CoreDataManager: ObservableObject {
         )
     }
     
-    func fetchImpactMetrics(for userId: String? = nil, eventId: String? = nil) -> [AppModels.ImpactMetric] {
+    func fetchImpactMetrics(for userId: String? = nil, eventId: String? = nil) -> [ImpactMetric] {
         // For now, return empty array - this will be implemented with actual Core Data later
         return []
     }
     
-    func fetchImpactMetrics() -> [AppModels.ImpactMetric] {
+    func fetchImpactMetrics() -> [ImpactMetric] {
         // For now, return empty array - this will be implemented with actual Core Data later
         return []
     }
@@ -100,8 +123,8 @@ class CoreDataManager: ObservableObject {
         eventId: String,
         checkInTime: Date,
         notes: String? = nil
-    ) -> AppModels.VolunteerSession {
-        return AppModels.VolunteerSession(
+    ) -> VolunteerSession {
+        return VolunteerSession(
             userId: userId,
             eventId: eventId,
             checkInTime: checkInTime,
@@ -109,21 +132,21 @@ class CoreDataManager: ObservableObject {
         )
     }
     
-    func updateVolunteerSession(_ session: AppModels.VolunteerSession) {
+    func updateVolunteerSession(_ session: VolunteerSession) {
         // For now, do nothing - this will be implemented with actual Core Data later
     }
     
-    func fetchVolunteerSessions(for userId: String? = nil, eventId: String? = nil, status: String? = nil) -> [AppModels.VolunteerSession] {
+    func fetchVolunteerSessions(for userId: String? = nil, eventId: String? = nil, status: String? = nil) -> [VolunteerSession] {
         // For now, return empty array - this will be implemented with actual Core Data later
         return []
     }
     
-    func fetchVolunteerSessions(eventId: String) -> [AppModels.VolunteerSession] {
+    func fetchVolunteerSessions(eventId: String) -> [VolunteerSession] {
         // For now, return empty array - this will be implemented with actual Core Data later
         return []
     }
     
-    func checkOutVolunteerSession(_ session: AppModels.VolunteerSession) {
+    func checkOutVolunteerSession(_ session: VolunteerSession) {
         // For now, do nothing - this will be implemented with actual Core Data later
     }
     
@@ -139,8 +162,8 @@ class CoreDataManager: ObservableObject {
         return AppModels.UserStats()
     }
     
-    func getTotalImpact() -> AppModels.TotalImpact {
+    func getTotalImpact() -> TotalImpact {
         // For now, return default total impact - this will be implemented with actual Core Data later
-        return AppModels.TotalImpact()
+        return TotalImpact()
     }
 }

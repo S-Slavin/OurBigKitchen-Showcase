@@ -6,9 +6,11 @@
 //
 
 
+import Foundation
 import SwiftUI
+import Combine
 
-// Add the EventViewModel class
+@MainActor
 class EventViewModel: ObservableObject {
     @Published var events: [Event] = []
     @Published var categories: [String] = ["Cooking", "Delivery", "Fundraising", "Training", "Community"]

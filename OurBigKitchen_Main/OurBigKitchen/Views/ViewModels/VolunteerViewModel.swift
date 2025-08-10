@@ -1,6 +1,7 @@
 import Foundation
 import Combine
 
+@MainActor
 class VolunteerViewModel: ObservableObject {
     @Published var opportunities: [VolunteerOpportunity] = []
     @Published var filteredOpportunities: [VolunteerOpportunity] = []

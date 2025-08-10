@@ -7,7 +7,7 @@
 
 import Foundation
 import SwiftUI
-import UIKit
+import Combine
 
 @MainActor
 class ImpactFilterViewModel: ObservableObject {

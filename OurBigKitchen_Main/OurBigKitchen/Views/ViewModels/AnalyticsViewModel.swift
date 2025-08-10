@@ -10,6 +10,7 @@ import Foundation
 import Combine
 import SwiftUI
 
+@MainActor
 class AnalyticsViewModel: ObservableObject {
     @Published var analyticsData: AnalyticsData?
     @Published var socialMetrics: SocialMetrics?

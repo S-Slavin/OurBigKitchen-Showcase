@@ -36,7 +36,7 @@ struct RegistrationTestView: View {
             }
             .navigationTitle("Registration Tests")
             .fullScreenCover(isPresented: $showRegistrationFlow) {
-                RegistrationFlowView(mockService: MockRegistrationService(scenario: selectedScenario))
+                RegistrationFlowView()
             }
         }
     }

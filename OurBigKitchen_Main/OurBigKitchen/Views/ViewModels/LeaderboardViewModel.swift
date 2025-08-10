@@ -7,6 +7,7 @@
 
 
 import Foundation
+import SwiftUI
 import Combine
 
 // We'll use the types from StatsManager and from UserManager directly

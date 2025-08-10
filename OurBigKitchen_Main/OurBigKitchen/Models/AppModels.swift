@@ -72,16 +72,16 @@ enum AppModels {
 
     struct User: Identifiable, Codable {
         var id: String
-        let firstName: String
-        let lastName: String
-        let email: String
-        let profileImageURL: String?
-        let bio: String?
-        let role: UserRole
+        var firstName: String
+        var lastName: String
+        var email: String
+        var profileImageURL: String?
+        var bio: String?
+        var role: UserRole
         var preferences: UserPreferences
-        let achievements: [UserAchievement]
-        let stats: UserStats
-        let hasFoodSafetyRegistration: Bool
+        var achievements: [UserAchievement]
+        var stats: UserStats
+        var hasFoodSafetyRegistration: Bool
         var authProvider: String?
         var company: String?
         var dob: Date?
@@ -92,6 +92,17 @@ enum AppModels {
         var companyName: String?
         var companyPosition: String?
         var companyEmail: String?
+        
+        // Additional fields for Salesforce integration
+        var salesforceId: String?
+        var phone: String?
+        var address: String?
+        var city: String?
+        var state: String?
+        var postalCode: String?
+        var country: String?
+        var volunteerType: String?
+        var wwcExpiryDate: Date?
         
         init(id: String = UUID().uuidString,
              firstName: String,
@@ -111,7 +122,16 @@ enum AppModels {
              wwcExpiry: Date? = nil,
              companyName: String? = nil,
              companyPosition: String? = nil,
-             companyEmail: String? = nil) {
+             companyEmail: String? = nil,
+             salesforceId: String? = nil,
+             phone: String? = nil,
+             address: String? = nil,
+             city: String? = nil,
+             state: String? = nil,
+             postalCode: String? = nil,
+             country: String? = nil,
+             volunteerType: String? = nil,
+             wwcExpiryDate: Date? = nil) {
             self.id = id
             self.firstName = firstName
             self.lastName = lastName
@@ -131,6 +151,15 @@ enum AppModels {
             self.companyName = companyName
             self.companyPosition = companyPosition
             self.companyEmail = companyEmail
+            self.salesforceId = salesforceId
+            self.phone = phone
+            self.address = address
+            self.city = city
+            self.state = state
+            self.postalCode = postalCode
+            self.country = country
+            self.volunteerType = volunteerType
+            self.wwcExpiryDate = wwcExpiryDate
         }
         
         func isValid() -> Bool {
@@ -153,6 +182,16 @@ enum AppModels {
         
         var isWWC: Bool {
             role == .wwcVolunteer
+        }
+        
+        // Compatibility alias for dateOfBirth
+        var dateOfBirth: Date? {
+            return dob
+        }
+        
+        // Compatibility alias for wwccNumber
+        var wwccNumber: String? {
+            return self.wwcNumber
         }
     }
 
@@ -594,4 +633,10 @@ struct CorporateAccount: Identifiable, Codable {
         self.employeeCount = employeeCount
         self.partnershipLevel = partnershipLevel
     }
-} 
+}
+
+// MARK: - Event Models
+// Event, EventCategory, VolunteerSession, and related models are defined in separate files:
+// - Event.swift
+// - VolunteerSession.swift (if exists)
+// - ImpactMetric.swift (if exists) 
