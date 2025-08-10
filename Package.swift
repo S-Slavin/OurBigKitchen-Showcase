@@ -21,7 +21,7 @@ let package = Package(
                 // Add Salesforce SDK target here when ready
                 // "SalesforceMobileSDK"
             ],
-            path: "OurBigKitchen_Restored/OurBigKitchen",
+            path: "OurBigKitchen_Main/OurBigKitchen",
             resources: [
                 .process("Info.plist"),
                 .process("GoogleService-Info.plist"),
