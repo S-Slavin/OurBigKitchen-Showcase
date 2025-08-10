@@ -5,6 +5,7 @@ import Foundation
 struct RegistrationSignupSlidesView: View {
     @EnvironmentObject var appState: AppState
     @StateObject private var authViewModel = AuthViewModel()
+    @StateObject private var salesforceManager = SalesforceIntegrationManager()
     @Environment(\.dismiss) private var dismiss
     
     // Form data
@@ -29,6 +30,7 @@ struct RegistrationSignupSlidesView: View {
     @State private var showError = false
     @State private var errorMessage = ""
     @State private var animateIn = false
+    @State private var showSalesforceSync = false
     
     // Colors
     private let primaryColor = ThemeManager.Colors.primary
@@ -105,6 +107,11 @@ struct RegistrationSignupSlidesView: View {
             Button("OK", role: .cancel) {}
         } message: {
             Text(errorMessage)
+        }
+        .alert("Salesforce Sync", isPresented: $showSalesforceSync) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("Your registration has been synced to Salesforce CRM. You can now be tracked and managed through our volunteer management system.")
         }
     }
     
@@ -673,6 +680,40 @@ struct RegistrationSignupSlidesView: View {
             wwccNumber: wwccNumber.isEmpty ? nil : wwccNumber,
             wwccExpiryDate: wwccNumber.isEmpty ? nil : wwccExpiryDate
         )
+        
+        // Sync to Salesforce CRM
+        syncToSalesforce()
+    }
+    
+    // MARK: - Salesforce Integration
+    
+    private func syncToSalesforce() {
+        let wwccExpiry = wwccNumber.isEmpty ? nil : wwccExpiryDate
+        
+        salesforceManager.syncUserRegistration(
+            firstName: firstName,
+            lastName: lastName,
+            email: email,
+            volunteerType: volunteerType,
+            dateOfBirth: dateOfBirth,
+            wwccNumber: wwccNumber.isEmpty ? nil : wwccNumber,
+            wwccExpiryDate: wwccExpiry
+        )
+        .sink(
+            receiveCompletion: { completion in
+                if case .failure(let error) = completion {
+                    print("Salesforce sync failed: \(error.localizedDescription)")
+                    // Don't show error to user as this is background sync
+                }
+            },
+            receiveValue: { salesforceId in
+                print("Successfully synced to Salesforce with ID: \(salesforceId)")
+                DispatchQueue.main.async {
+                    self.showSalesforceSync = true
+                }
+            }
+        )
+        .store(in: &salesforceManager.cancellables)
     }
 }
 

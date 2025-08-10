@@ -165,6 +165,15 @@ enum AppModels {
         case delivery
         case other
     }
+    
+    enum ActivityType: String, Codable, CaseIterable {
+        case cooking
+        case cleaning
+        case serving
+        case organizing
+        case delivery
+        case other
+    }
 
     struct Activity: Identifiable, Codable {
         let id: String
@@ -539,5 +548,50 @@ struct ContactMessage: Identifiable, Codable {
         self.email = email
         self.message = message
         self.timestamp = timestamp
+    }
+}
+
+
+
+
+
+
+
+
+
+// MARK: - Corporate Account Models
+struct CorporateAccount: Identifiable, Codable {
+    let id: String
+    let companyName: String
+    let contactEmail: String
+    let contactPhone: String?
+    let industry: String?
+    let salesforceId: String?
+    let employeeCount: Int?
+    let partnershipLevel: PartnershipLevel
+    
+    enum PartnershipLevel: String, Codable, CaseIterable {
+        case bronze
+        case silver
+        case gold
+        case platinum
+    }
+    
+    init(id: String = UUID().uuidString,
+         companyName: String,
+         contactEmail: String,
+         contactPhone: String? = nil,
+         industry: String? = nil,
+         salesforceId: String? = nil,
+         employeeCount: Int? = nil,
+         partnershipLevel: PartnershipLevel = .bronze) {
+        self.id = id
+        self.companyName = companyName
+        self.contactEmail = contactEmail
+        self.contactPhone = contactPhone
+        self.industry = industry
+        self.salesforceId = salesforceId
+        self.employeeCount = employeeCount
+        self.partnershipLevel = partnershipLevel
     }
 } 

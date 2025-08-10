@@ -15,6 +15,8 @@ class RegistrationFlowViewModel: ObservableObject {
     @Published var firstName: String = ""
     @Published var lastName: String = ""
     @Published var email: String = ""
+    @Published var password: String = ""
+    @Published var confirmPassword: String = ""
     @Published var mobile: String = ""
     @Published var dob: Date = Date()
     @Published var address: String = ""
@@ -40,11 +42,11 @@ class RegistrationFlowViewModel: ObservableObject {
     @Published var showSuccessMessage: Bool = false
     @Published var errorMessage: String? = nil
     
-    private let registrationService: RegistrationService
+    private let authService = RealAuthService.shared
     private var cancellables = Set<AnyCancellable>()
     
-    init(registrationService: RegistrationService = RegistrationService()) {
-        self.registrationService = registrationService
+    init() {
+        // No need for dependency injection since we're using the shared instance
     }
     
     var isOver18: Bool {
@@ -54,7 +56,7 @@ class RegistrationFlowViewModel: ObservableObject {
         return (ageComponents.year ?? 0) >= 18
     }
     var isPersonalDetailsValid: Bool {
-        !firstName.isEmpty && !lastName.isEmpty && !email.isEmpty && !mobile.isEmpty
+        !firstName.isEmpty && !lastName.isEmpty && !email.isEmpty && !password.isEmpty && !confirmPassword.isEmpty && !mobile.isEmpty && password == confirmPassword
     }
     var isWWCCValid: Bool {
         if isOver18 {
@@ -78,43 +80,42 @@ class RegistrationFlowViewModel: ObservableObject {
     func submitRegistration() {
         isSubmitting = true
         errorMessage = nil
-        let registrationData = RegistrationData(
-            userType: selectedUserType?.rawValue ?? "",
-            firstName: firstName,
-            lastName: lastName,
-            email: email,
-            mobile: mobile,
-            dateOfBirth: dob,
-            address: address,
-            emergencyContactName: emergencyName,
-            emergencyContactPhone: emergencyPhone,
-            companyName: selectedUserType == .corporate ? companyName : nil,
-            wwccNumber: isOver18 ? wwcNumber : nil,
-            wwccExpiry: isOver18 ? wwcExpiry : nil,
-            isDukeOfEd: isDukeOfEd,
-            referralSource: referralSource,
-            hasAcceptedFoodSafety: hasAcceptedFoodSafety,
-            hasAcceptedTerms: hasAcceptedTerms
-        )
-        registrationService.submitRegistration(registrationData)
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] completion in
-                self?.isSubmitting = false
-                if case .failure(let error) = completion {
-                    switch error {
-                    case .invalidData:
-                        self?.errorMessage = "Please check your information and try again."
-                    case .networkError:
-                        self?.errorMessage = "Network error. Please check your connection and try again."
-                    case .serverError(let message):
-                        self?.errorMessage = "Server error: \(message)"
-                    case .unknown:
-                        self?.errorMessage = "An unexpected error occurred. Please try again."
-                    }
+        
+        // Convert UserType to VolunteerType for the auth service
+        let volunteerType: VolunteerType = selectedUserType == .corporate ? .corporate : .individual
+        
+        // Determine WWCC details based on age
+        let wwcNumberToUse: String? = isOver18 ? wwcNumber : nil
+        let wwcExpiryToUse: Date? = isOver18 ? wwcExpiry : nil
+        
+        Task {
+            do {
+                let user = try await authService.signUp(
+                    firstName: firstName,
+                    lastName: lastName,
+                    email: email,
+                    password: password,
+                    volunteerType: volunteerType,
+                    dob: dob,
+                    wwcNumber: wwcNumberToUse,
+                    wwcExpiryDate: wwcExpiryToUse
+                )
+                
+                await MainActor.run {
+                    self.isSubmitting = false
+                    self.showSuccessMessage = true
+                    self.errorMessage = nil
                 }
-            } receiveValue: { [weak self] _ in
-                self?.showSuccessMessage = true
+                
+                // TODO: Store additional user information (address, emergency contacts, etc.)
+                // This could be done through a separate user profile update service
+                
+            } catch {
+                await MainActor.run {
+                    self.isSubmitting = false
+                    self.errorMessage = error.localizedDescription
+                }
             }
-            .store(in: &cancellables)
+        }
     }
 } 

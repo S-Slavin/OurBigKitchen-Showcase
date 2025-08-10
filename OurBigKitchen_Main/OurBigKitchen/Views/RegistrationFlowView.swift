@@ -5,8 +5,8 @@ struct RegistrationFlowView: View {
     @StateObject private var viewModel: RegistrationFlowViewModel
     @Environment(\.dismiss) private var dismiss
     
-    init(mockService: RegistrationService? = nil, preselectedUserType: RegistrationFlowViewModel.UserType? = nil) {
-        let vm = RegistrationFlowViewModel(registrationService: mockService ?? RegistrationService())
+    init(preselectedUserType: RegistrationFlowViewModel.UserType? = nil) {
+        let vm = RegistrationFlowViewModel()
         
         // Set a default user type and start at personal details (step 1)
         vm.selectedUserType = preselectedUserType ?? .individual
@@ -118,6 +118,16 @@ struct RegistrationFlowView: View {
                                         .keyboardType(.emailAddress)
                                         .textContentType(.emailAddress)
                                         .autocapitalization(.none)
+                                        .padding()
+                                        .background(Color(.systemGray6))
+                                        .cornerRadius(8)
+                                    SecureField("Password", text: $viewModel.password)
+                                        .textContentType(.newPassword)
+                                        .padding()
+                                        .background(Color(.systemGray6))
+                                        .cornerRadius(8)
+                                    SecureField("Confirm Password", text: $viewModel.confirmPassword)
+                                        .textContentType(.newPassword)
                                         .padding()
                                         .background(Color(.systemGray6))
                                         .cornerRadius(8)
