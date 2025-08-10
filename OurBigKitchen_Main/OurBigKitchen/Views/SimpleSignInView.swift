@@ -3,45 +3,45 @@ import UIKit
 
 struct SimpleSignInView: View {
     @EnvironmentObject var appState: AppState
-    @State private var firstName = ""
-    @State private var lastName = ""
+    @StateObject private var authViewModel = AuthViewModel()
     @State private var email = ""
     @State private var password = ""
-    @State private var groupCode = ""
-    @State private var loginType = 0  // 0 = Individual, 1 = Group Code
-    @State private var isSignUp = 0   // 0 = Login, 1 = Sign Up
-    @State private var showError = false
-    @State private var errorMessage = ""
     @State private var rememberPassword = false
     @State private var isLoading = false
-    @State private var animationAmount = 1.0
+    @State private var showError = false
+    @State private var errorMessage = ""
     
     // Animation states
     @State private var animateIn = false
     @State private var animateFields = false
     @State private var animateButtons = false
     
-    // Warm color scheme to match app theme - using ThemeManager colors
+    // Colors
     private let primaryColor = ThemeManager.Colors.primary
     private let accentColor = ThemeManager.Colors.accent
-    private let backgroundColor = Color(red: 1.0, green: 0.98, blue: 0.94) // Cream
+    private let backgroundColor = Color(red: 1.0, green: 0.98, blue: 0.94)
     
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                // Background layer - enhanced with more decorative elements
-                enhancedBackground
+                // Background
+                backgroundColor
+                    .edgesIgnoringSafeArea(.all)
                 
                 ScrollView(showsIndicators: false) {
-                    // Content layer
                     VStack(spacing: 20) {
-                        // Logo with animation
-                        logoView(geometry: geometry)
+                        // Logo
+                        Image("AppLogo")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: geometry.size.width * 0.4)
+                            .padding(.top, geometry.size.height * 0.02)
+                            .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
                             .scaleEffect(animateIn ? 1.0 : 0.9)
                             .opacity(animateIn ? 1.0 : 0.0)
                         
                         // Welcome message
-                        Text(isSignUp == 0 ? "Welcome Back!" : "Join Our Community")
+                        Text("Welcome Back!")
                             .font(.system(.title, design: .rounded, weight: .bold))
                             .foregroundColor(primaryColor)
                             .padding(.top, 8)
@@ -50,9 +50,7 @@ struct SimpleSignInView: View {
                             .opacity(animateIn ? 1.0 : 0.0)
                         
                         // Subtitle
-                        Text(isSignUp == 0 ? 
-                            "Sign in to continue your journey" : 
-                            "Create an account to get started")
+                        Text("Sign in to continue your journey")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
@@ -60,42 +58,16 @@ struct SimpleSignInView: View {
                             .padding(.horizontal, 20)
                             .opacity(animateIn ? 0.8 : 0.0)
                         
-                        // Main form
-                        formCard(geometry: geometry)
+                        // Login form
+                        loginFormCard
                             .offset(y: animateFields ? 0 : 20)
                             .opacity(animateFields ? 1.0 : 0.0)
                         
-                        // Additional footer options
+                        // Footer options
                         footerView
                             .padding(.top, 15)
                             .offset(y: animateButtons ? 0 : 15)
                             .opacity(animateButtons ? 1.0 : 0.0)
-                        
-                        // Skip option for development
-                        Button(action: {
-                            authenticateUser(skipValidation: true)
-                        }) {
-                            HStack {
-                                Image(systemName: "arrow.right.circle.fill")
-                                    .font(.system(size: 24))
-                                Text("SKIP FOR DEMO")
-                                    .font(.title)
-                                    .fontWeight(.black)
-                            }
-                            .foregroundColor(.white)
-                            .padding(.vertical, 24)
-                            .padding(.horizontal, 36)
-                            .background(Color.orange)
-                            .cornerRadius(20)
-                            .shadow(color: .black.opacity(0.5), radius: 8, x: 0, y: 4)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 20)
-                                    .stroke(Color.white, lineWidth: 2)
-                            )
-                        }
-                        .padding(.top, 30)
-                        .padding(.bottom, 20)
-                        .opacity(1.0) // Always visible
                         
                         Spacer()
                     }
@@ -107,110 +79,62 @@ struct SimpleSignInView: View {
             .onAppear {
                 startAnimations()
             }
-            .onChange(of: isSignUp) { _ in
-                // Reset error state when switching between login/signup
-                showError = false
-                
-                // Re-animate fields with slight delay
-                withAnimation(.easeOut(duration: 0.2)) {
-                    animateFields = false
-                }
-                
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                    withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
-                        animateFields = true
-                    }
-                }
-            }
-            .onChange(of: loginType) { _ in
-                // Reset error state when switching between individual/group
-                showError = false
-                
-                // Re-animate fields with slight delay
-                withAnimation(.easeOut(duration: 0.2)) {
-                    animateFields = false
-                }
-                
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                    withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
-                        animateFields = true
-                    }
-                }
-            }
         }
         .navigationBarHidden(true)
         .transition(.opacity)
-    }
-    
-    // Start animation sequence
-    private func startAnimations() {
-        // Simplified animation sequence for better performance
-        withAnimation(.easeOut(duration: 0.3)) {
-            animateIn = true
-        }
-        
-        withAnimation(.spring(response: 0.4, dampingFraction: 0.8).delay(0.1)) {
-            animateFields = true
-        }
-        
-        withAnimation(.spring(response: 0.4, dampingFraction: 0.8).delay(0.2)) {
-            animateButtons = true
-        }
-        
-        // Reduced background animation for better performance
-        withAnimation(.easeInOut(duration: 10).repeatForever(autoreverses: true)) {
-            animationAmount = 1.01
-        }
-    }
-    
-    // MARK: - Enhanced Background Layer
-    
-    private var enhancedBackground: some View {
-        ZStack {
-            // Base gradient
-            LinearGradient(
-                gradient: Gradient(colors: [
-                    backgroundColor,
-                    backgroundColor.opacity(0.95),
-                    Color(red: 1.0, green: 0.92, blue: 0.86)
-                ]),
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .edgesIgnoringSafeArea(.all)
-            
-            // Animated decorative elements with transparent logo instead of circles
-            ZStack {
-                // Top left decorative element - REMOVING
-                // Bottom right decorative element - REMOVING
-                // Additional decorative elements - REMOVING
+        .onReceive(authViewModel.$isAuthenticated) { isAuthenticated in
+            if isAuthenticated {
+                // User is authenticated, now they need to choose Individual/Corporate
+                appState.isAuthenticated = true
+                appState.needsToChooseVolunteerType = true
             }
         }
+        .onReceive(authViewModel.$errorMessage) { errorMessage in
+            if !errorMessage.isEmpty {
+                self.errorMessage = errorMessage
+                self.showError = true
+            }
+        }
+        .onReceive(authViewModel.$isLoading) { isLoading in
+            self.isLoading = isLoading
+        }
+        .alert("Error", isPresented: $showError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(errorMessage)
+        }
     }
     
-    // MARK: - Logo View
+    // MARK: - Login Form Card
     
-    private func logoView(geometry: GeometryProxy) -> some View {
-        Image("AppLogo")
-            .resizable()
-            .scaledToFit()
-            .frame(width: geometry.size.width * 0.4)
-            .padding(.top, geometry.size.height * 0.02)
-            .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
-    }
-    
-    // MARK: - Form Card View
-    
-    private func formCard(geometry: GeometryProxy) -> some View {
+    private var loginFormCard: some View {
         VStack(spacing: 20) {
-            // Login/Sign Up Toggle
-            loginSignUpToggle
-            
-            // Individual/Group toggle
-            loginTypeToggle
-            
             // Form fields
-            formFields
+            VStack(spacing: 16) {
+                ModernTextField(
+                    placeholder: "Email",
+                    text: $email,
+                    icon: "envelope.fill",
+                    keyboardType: .emailAddress
+                )
+                
+                ModernSecureField(
+                    placeholder: "Password",
+                    text: $password,
+                    icon: "lock.fill"
+                )
+                
+                // Remember password
+                Toggle(isOn: $rememberPassword) {
+                    Text("Remember me")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+                .toggleStyle(SwitchToggleStyle(tint: primaryColor))
+                .padding(.horizontal, 5)
+                .padding(.top, 4)
+            }
+            .padding(.horizontal, 20)
             
             // Error message
             if showError {
@@ -223,235 +147,15 @@ struct SimpleSignInView: View {
                     .transition(.move(edge: .top).combined(with: .opacity))
             }
             
-            // Action buttons
-            actionButtons
-        }
-        .padding(.vertical, 25)
-        .padding(.horizontal, 5)
-        .background(
-            RoundedRectangle(cornerRadius: 30)
-                .fill(Color.white.opacity(0.8))
-                .shadow(color: Color.black.opacity(0.07), radius: 20, x: 0, y: 10)
-        )
-        .padding(.horizontal, 20)
-    }
-    
-    // MARK: - Login/SignUp Toggle - Enhanced with animations
-    
-    private var loginSignUpToggle: some View {
-        HStack(spacing: 0) {
-            // Login pill
+            // Sign In Button
             Button(action: {
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                    isSignUp = 0
-                    appState.isSigningUp = false
-                }
-            }) {
-                Text("Login")
-                    .font(.headline)
-                    .fontWeight(isSignUp == 0 ? .semibold : .medium)
-                    .padding(.vertical, 14)
-                    .frame(width: UIScreen.main.bounds.width * 0.4)
-                    .foregroundColor(isSignUp == 0 ? .white : primaryColor)
-                    .background(
-                        ZStack {
-                            if isSignUp == 0 {
-                                // Active state
-                                Capsule()
-                                    .fill(
-                                        LinearGradient(
-                                            gradient: Gradient(colors: [primaryColor, accentColor]),
-                                            startPoint: .leading,
-                                            endPoint: .trailing
-                                        )
-                                    )
-                                    .shadow(color: primaryColor.opacity(0.3), radius: 5, x: 0, y: 3)
-                            } else {
-                                // Inactive state
-                                Capsule()
-                                    .stroke(primaryColor, lineWidth: 1)
-                            }
-                        }
-                    )
-            }
-            .buttonStyle(ButtonStyles.scale)
-            
-            // Sign Up pill - Navigate to registration slides
-            NavigationLink(destination: RegistrationSignupSlidesView()) {
-                Text("Sign Up")
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                    .padding(.vertical, 14)
-                    .frame(width: UIScreen.main.bounds.width * 0.4)
-                    .foregroundColor(.white)
-                    .background(
-                        Capsule()
-                            .fill(
-                                LinearGradient(
-                                    gradient: Gradient(colors: [primaryColor, accentColor]),
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
-                            )
-                            .shadow(color: primaryColor.opacity(0.3), radius: 5, x: 0, y: 3)
-                    )
-            }
-            .buttonStyle(ButtonStyles.scale)
-        }
-        .padding(.horizontal, 20)
-    }
-    
-    // MARK: - Individual/Group Toggle - Enhanced with modern pill design
-    
-    private var loginTypeToggle: some View {
-        HStack(spacing: 10) {
-            Button(action: {
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                    loginType = 0
-                }
-            }) {
-                HStack(spacing: 8) {
-                    Image(systemName: "person.fill")
-                        .imageScale(.medium)
-                    Text("Individual")
-                        .font(.subheadline)
-                        .fontWeight(loginType == 0 ? .semibold : .medium)
-                }
-                .padding(.vertical, 10)
-                .padding(.horizontal, 16)
-                .foregroundColor(loginType == 0 ? .white : .secondary)
-                .background(
-                    Capsule()
-                        .fill(loginType == 0 ? 
-                            Color(red: 0.3, green: 0.7, blue: 0.3) : 
-                            Color.gray.opacity(0.15))
-                        .shadow(color: loginType == 0 ? 
-                                Color(red: 0.3, green: 0.7, blue: 0.3).opacity(0.3) :
-                                Color.clear, 
-                                radius: 5, x: 0, y: 2)
-                )
-            }
-            .buttonStyle(ButtonStyles.scale)
-            
-            Button(action: {
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                    loginType = 1
-                }
-            }) {
-                HStack(spacing: 8) {
-                    Image(systemName: "person.3.fill")
-                        .imageScale(.medium)
-                    Text("Group")
-                        .font(.subheadline)
-                        .fontWeight(loginType == 1 ? .semibold : .medium)
-                }
-                .padding(.vertical, 10)
-                .padding(.horizontal, 16)
-                .foregroundColor(loginType == 1 ? .white : .secondary)
-                .background(
-                    Capsule()
-                        .fill(loginType == 1 ? 
-                            Color(red: 0.93, green: 0.46, blue: 0.12) : 
-                            Color.gray.opacity(0.15))
-                        .shadow(color: loginType == 1 ? 
-                                Color(red: 0.93, green: 0.46, blue: 0.12).opacity(0.3) :
-                                Color.clear, 
-                                radius: 5, x: 0, y: 2)
-                )
-            }
-            .buttonStyle(ButtonStyles.scale)
-        }
-        .padding(.top, 10)
-        .padding(.bottom, 5)
-    }
-    
-    // MARK: - Form Fields - Enhanced with animations and improved styling
-    
-    private var formFields: some View {
-        VStack(spacing: 16) {
-            if isSignUp == 1 {
-                // SIGN UP FIELDS with staggered animations
-                ModernTextField(
-                    placeholder: "First Name",
-                    text: $firstName,
-                    icon: "person.fill"
-                )
-                .transition(.asymmetric(
-                    insertion: .move(edge: .trailing).combined(with: .opacity),
-                    removal: .scale.combined(with: .opacity)
-                ))
-                
-                ModernTextField(
-                    placeholder: "Last Name",
-                    text: $lastName,
-                    icon: "person.fill"
-                )
-                .transition(.asymmetric(
-                    insertion: .move(edge: .trailing).combined(with: .opacity),
-                    removal: .scale.combined(with: .opacity)
-                ))
-            }
-            
-            // Common fields
-            ModernTextField(
-                placeholder: "Email",
-                text: $email,
-                icon: "envelope.fill",
-                keyboardType: .emailAddress
-            )
-            
-            ModernSecureField(
-                placeholder: "Password",
-                text: $password,
-                icon: "lock.fill"
-            )
-            
-            if loginType == 1 {
-                ModernTextField(
-                    placeholder: "Group Code",
-                    text: $groupCode,
-                    icon: "person.3.fill"
-                )
-                .transition(.asymmetric(
-                    insertion: .move(edge: .trailing).combined(with: .opacity),
-                    removal: .scale.combined(with: .opacity)
-                ))
-            }
-            
-            if isSignUp == 0 {
-                // Remember password (login only) with improved styling
-                Toggle(isOn: $rememberPassword) {
-                    Text("Remember me")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                }
-                .toggleStyle(SwitchToggleStyle(tint: primaryColor))
-                .padding(.horizontal, 5)
-                .padding(.top, 4)
-            }
-        }
-        .padding(.horizontal, 20)
-    }
-    
-    // MARK: - Action Buttons - Enhanced with improved styling
-    
-    private var actionButtons: some View {
-        VStack(spacing: 16) {
-            // Sign In / Sign Up Button
-            Button(action: {
-                // Add haptic feedback
                 let generator = UIImpactFeedbackGenerator(style: .medium)
                 generator.impactOccurred()
                 
-                isLoading = true
-                authenticateUser()
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                    isLoading = false
-                }
+                authViewModel.signIn(email: email, password: password, rememberPassword: rememberPassword)
             }) {
                 ZStack {
-                    // Button text
-                    Text(isSignUp == 1 ? "Create Account" : "Sign In")
+                    Text("Sign In")
                         .font(.headline)
                         .fontWeight(.semibold)
                         .foregroundColor(.white)
@@ -459,7 +163,6 @@ struct SimpleSignInView: View {
                         .padding(.vertical, 16)
                         .opacity(isLoading ? 0 : 1)
                     
-                    // Loading indicator
                     if isLoading {
                         ProgressView()
                             .progressViewStyle(CircularProgressViewStyle(tint: .white))
@@ -468,10 +171,7 @@ struct SimpleSignInView: View {
                 }
                 .background(
                     LinearGradient(
-                        gradient: Gradient(colors: [
-                            primaryColor,
-                            accentColor
-                        ]),
+                        gradient: Gradient(colors: [primaryColor, accentColor]),
                         startPoint: .leading,
                         endPoint: .trailing
                     )
@@ -484,24 +184,30 @@ struct SimpleSignInView: View {
             .padding(.horizontal, 20)
             .padding(.top, 10)
         }
+        .padding(.vertical, 25)
+        .padding(.horizontal, 5)
+        .background(
+            RoundedRectangle(cornerRadius: 30)
+                .fill(Color.white.opacity(0.8))
+                .shadow(color: Color.black.opacity(0.07), radius: 20, x: 0, y: 10)
+        )
+        .padding(.horizontal, 20)
     }
     
     // MARK: - Footer View
     
     private var footerView: some View {
         VStack(spacing: 25) {
-            // Forgot password link (only for login)
-            if isSignUp == 0 {
-                Button(action: {
-                    // Handle forgot password
-                }) {
-                    Text("Forgot your password?")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                        .foregroundColor(primaryColor)
-                }
-                .buttonStyle(ButtonStyles.scale)
+            // Forgot password link
+            Button(action: {
+                // Handle forgot password
+            }) {
+                Text("Forgot your password?")
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                    .foregroundColor(primaryColor)
             }
+            .buttonStyle(ButtonStyles.scale)
             
             // Alternative sign in options
             VStack(spacing: 16) {
@@ -521,7 +227,6 @@ struct SimpleSignInView: View {
     // Social sign in button
     private func socialSignInButton(imageName: String, color: Color) -> some View {
         Button(action: {
-            // Social sign in logic
             let generator = UIImpactFeedbackGenerator(style: .light)
             generator.impactOccurred()
         }) {
@@ -538,92 +243,25 @@ struct SimpleSignInView: View {
         .buttonStyle(ButtonStyles.scale)
     }
     
-    // MARK: - Authentication Logic
+    // MARK: - Animations
     
-    private func authenticateUser(skipValidation: Bool = false) {
-        // Perform validation if not skipping
-        if !skipValidation {
-            // Validate required fields
-            if isSignUp == 1 {
-                // Sign up validation
-                if firstName.isEmpty || lastName.isEmpty {
-                    showError = true
-                    errorMessage = "Please enter your first and last name"
-                    return
-                }
-            }
-            
-            if email.isEmpty {
-                showError = true
-                errorMessage = "Please enter your email"
-                return
-            }
-            
-            if password.isEmpty {
-                showError = true
-                errorMessage = "Please enter your password"
-                return
-            }
-            
-            if loginType == 1 && groupCode.isEmpty {
-                showError = true
-                errorMessage = "Please enter a group code"
-                return
-            }
+    private func startAnimations() {
+        withAnimation(.easeOut(duration: 0.3)) {
+            animateIn = true
         }
         
-        // Run on background thread to avoid main thread I/O warning
-        DispatchQueue.global(qos: .userInitiated).async {
-            // Create user with proper firstName and lastName
-            let user = AppModels.User(
-                id: UUID().uuidString,
-                firstName: self.firstName.isEmpty ? "Test" : self.firstName,
-                lastName: self.lastName.isEmpty ? "User" : self.lastName,
-                email: self.email,
-                role: .volunteer
-            )
-            
-            // Save user to persistence
-            Task { @MainActor in
-                do {
-                    try PersistenceManager.shared.save(user, forKey: "currentUser")
-                
-                // Set authentication flags
-                let defaults = UserDefaults.standard
-                defaults.set(true, forKey: "hasSignedIn")
-                defaults.set(true, forKey: "isAuthenticated")
-                
-                // Update AppState for immediate UI response
-                self.appState.isAuthenticated = true
-                
-                // Save password if requested (for login mode only)
-                if self.isSignUp == 0 && self.rememberPassword {
-                    // Note: In a real app, you would use Keychain for this
-                    defaults.set(self.email, forKey: "savedEmail")
-                    // In a real app, never store passwords in UserDefaults - use Keychain
-                    // This is just for demonstration
-                    defaults.set(self.password, forKey: "savedPassword") 
-                }
-                
-                // Note: hasSeenOnboarding is only set in UserWelcomeView to prevent redundant onboarding
-                
-                // Post notifications on main thread
-                DispatchQueue.main.async {
-                    NotificationCenter.default.post(name: .didUpdateAuth, object: nil)
-                }
-            } catch {
-                print("Error saving user: \(error)")
-                DispatchQueue.main.async {
-                    self.showError = true
-                    self.errorMessage = "Failed to save user data"
-                }
-            }
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.8).delay(0.1)) {
+            animateFields = true
         }
-    }
+        
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.8).delay(0.2)) {
+            animateButtons = true
+        }
     }
 }
 
-// Modern text field with icon - enhanced styling
+// MARK: - Modern Text Field Components
+
 struct ModernTextField: View {
     var placeholder: String
     @Binding var text: String
@@ -665,7 +303,6 @@ struct ModernTextField: View {
     }
 }
 
-// Modern secure field with icon - enhanced styling
 struct ModernSecureField: View {
     var placeholder: String
     @Binding var text: String

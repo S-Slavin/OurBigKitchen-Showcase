@@ -2,6 +2,15 @@ import Foundation
 import SwiftUI
 import Combine
 
+// MARK: - Supporting Types
+
+enum VolunteerType {
+    case individual
+    case corporate
+}
+
+// MARK: - AuthViewModel
+
 @MainActor
 class AuthViewModel: ObservableObject {
     // MARK: - Published Properties
@@ -107,19 +116,67 @@ class AuthViewModel: ObservableObject {
         }
     }
     
-    func signUp() async {
-        guard validateSignUpInput() else { return }
-        
+    func signUp(
+        firstName: String,
+        lastName: String,
+        email: String,
+        password: String,
+        volunteerType: VolunteerType,
+        dateOfBirth: Date,
+        wwccNumber: String?,
+        wwccExpiryDate: Date?
+    ) {
         isLoading = true
         errorMessage = ""
         
-        do {
-            // Actually create a new user instead of trying to sign in
-            let user = try await withCheckedThrowingContinuation { continuation in
-                authService.createUser(firstName: firstName, lastName: lastName, email: email, password: password)
+        // Validate input
+        guard !firstName.isEmpty, !lastName.isEmpty, !email.isEmpty, !password.isEmpty else {
+            errorMessage = "Please fill in all required fields"
+            isLoading = false
+            return
+        }
+        
+        // Validate email format
+        guard isValidEmail(email) else {
+            errorMessage = "Please enter a valid email address"
+            isLoading = false
+            return
+        }
+        
+        // Validate password strength
+        guard password.count >= 8 else {
+            errorMessage = "Password must be at least 8 characters long"
+            isLoading = false
+            return
+        }
+        
+        // Check if user is 18+ and requires WWCC
+        let isAdult = Calendar.current.dateComponents([.year], from: dateOfBirth, to: Date()).year ?? 0 >= 18
+        if isAdult && (wwccNumber?.isEmpty ?? true) {
+            errorMessage = "WWCC number is required for volunteers 18 and older"
+            isLoading = false
+            return
+        }
+        
+        Task {
+            do {
+                let user = try await withCheckedThrowingContinuation { continuation in
+                    authService.createUser(
+                        firstName: firstName,
+                        lastName: lastName,
+                        email: email,
+                        password: password,
+                        volunteerType: volunteerType,
+                        dateOfBirth: dateOfBirth,
+                        wwccNumber: wwccNumber,
+                        wwccExpiryDate: wwccExpiryDate
+                    )
                     .sink(
                         receiveCompletion: { completion in
-                            if case .failure(let error) = completion {
+                            switch completion {
+                            case .finished:
+                                break
+                            case .failure(let error):
                                 continuation.resume(throwing: error)
                             }
                         },
@@ -128,27 +185,32 @@ class AuthViewModel: ObservableObject {
                         }
                     )
                     .store(in: &cancellables)
-            }
-            
-            // Save user to persistence
-            try PersistenceManager.shared.save(user, forKey: "currentUser")
-            
-            await MainActor.run {
-                self.isAuthenticated = true
-                self.isLoading = false
+                }
                 
-                // Set authentication flags
-                UserDefaults.standard.set(true, forKey: "isAuthenticated")
-                UserDefaults.standard.set(true, forKey: "hasSignedIn")
+                // Save user to persistence
+                try PersistenceManager.shared.save(user, forKey: "currentUser")
                 
-                // Post authentication notification
-                NotificationCenter.default.post(name: .didUpdateAuth, object: nil)
-            }
-        } catch {
-            await MainActor.run {
-                self.isLoading = false
-                self.errorMessage = error.localizedDescription
-                self.showError = true
+                await MainActor.run {
+                    self.isAuthenticated = true
+                    self.isLoading = false
+                    
+                    // Set authentication flags
+                    UserDefaults.standard.set(true, forKey: "isAuthenticated")
+                    UserDefaults.standard.set(true, forKey: "hasSignedIn")
+                    
+                    // Save credentials if remember password is enabled
+                    if rememberPassword {
+                        saveCredentials()
+                    }
+                    
+                    // Post authentication notification
+                    NotificationCenter.default.post(name: .didUpdateAuth, object: nil)
+                }
+            } catch {
+                await MainActor.run {
+                    self.errorMessage = error.localizedDescription
+                    self.isLoading = false
+                }
             }
         }
     }
