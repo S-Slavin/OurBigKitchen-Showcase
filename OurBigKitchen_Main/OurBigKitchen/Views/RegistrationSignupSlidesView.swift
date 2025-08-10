@@ -1,5 +1,6 @@
 import SwiftUI
 import UIKit
+import Foundation
 
 struct RegistrationSignupSlidesView: View {
     @EnvironmentObject var appState: AppState
@@ -673,13 +674,6 @@ struct RegistrationSignupSlidesView: View {
             wwccExpiryDate: wwccNumber.isEmpty ? nil : wwccExpiryDate
         )
     }
-}
-
-// MARK: - Supporting Types
-
-enum VolunteerType {
-    case individual
-    case corporate
 }
 
 struct RegistrationSignupSlidesView_Previews: PreviewProvider {

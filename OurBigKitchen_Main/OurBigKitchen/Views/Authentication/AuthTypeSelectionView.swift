@@ -70,7 +70,9 @@ struct AuthTypeSelectionView: View {
                                     primaryColor: primaryColor,
                                     accentColor: accentColor
                                 ) {
+                                    print("DEBUG: Sign In button tapped!")
                                     selectedAction = .signIn
+                                    print("DEBUG: selectedAction set to: \(selectedAction)")
                                 }
                                 
                                 AuthActionButton(
@@ -81,7 +83,9 @@ struct AuthTypeSelectionView: View {
                                     primaryColor: primaryColor,
                                     accentColor: accentColor
                                 ) {
+                                    print("DEBUG: Sign Up button tapped!")
                                     selectedAction = .signUp
+                                    print("DEBUG: selectedAction set to: \(selectedAction)")
                                 }
                             }
                         }
@@ -128,9 +132,16 @@ struct AuthTypeSelectionView: View {
                         
                         // Continue Button
                         Button(action: {
+                            print("DEBUG: Continue button tapped!")
+                            print("DEBUG: selectedAction = \(selectedAction)")
+                            print("DEBUG: showSignInView = \(showSignInView)")
+                            print("DEBUG: showSignUpView = \(showSignUpView)")
+                            
                             if selectedAction == .signIn {
+                                print("DEBUG: Setting showSignInView to true")
                                 showSignInView = true
                             } else {
+                                print("DEBUG: Setting showSignUpView to true")
                                 showSignUpView = true
                             }
                         }) {

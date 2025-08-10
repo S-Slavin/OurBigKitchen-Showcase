@@ -2,6 +2,40 @@ import Foundation
 import SwiftUI
 import Combine
 
+// MARK: - Volunteer Type
+
+public enum VolunteerType: String, CaseIterable, Codable {
+    case individual = "individual"
+    case corporate = "corporate"
+    
+    var displayName: String {
+        switch self {
+        case .individual:
+            return "Individual Volunteer"
+        case .corporate:
+            return "Corporate/Group"
+        }
+    }
+    
+    var description: String {
+        switch self {
+        case .individual:
+            return "Join as an individual volunteer to help in our community kitchen"
+        case .corporate:
+            return "Organize group volunteering events for your company or organization"
+        }
+    }
+    
+    var icon: String {
+        switch self {
+        case .individual:
+            return "person.fill"
+        case .corporate:
+            return "person.3.fill"
+        }
+    }
+}
+
 @MainActor
 class AppState: ObservableObject {
     @Published var userProfile: AppModels.User?
@@ -12,6 +46,7 @@ class AppState: ObservableObject {
     @Published var hasAcceptedHealthProtocols: Bool = false
     @Published var userType: AppModels.UserRole?
     @Published var isSigningUp = false // Track if user is in signup flow
+    @Published var needsToChooseVolunteerType = false // Track if user needs to choose volunteer type
     
     private let authManager = AuthManager.shared
     private let termsManager = TermsManager.shared

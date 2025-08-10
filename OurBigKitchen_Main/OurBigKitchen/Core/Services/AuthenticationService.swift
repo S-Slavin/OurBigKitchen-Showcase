@@ -77,7 +77,7 @@ class AuthenticationService: ObservableObject {
         UserDefaults.standard.set(userData, forKey: "user_\(user.id)_details")
         
         // Schedule WWCC renewal reminders if applicable
-        if let wwccExpiry = wwccExpiryDate, !wwccNumber.isEmpty {
+        if let wwccExpiry = wwccExpiryDate, let wwccNumber = wwccNumber, !wwccNumber.isEmpty {
             scheduleWWCCReminders(for: wwccExpiry, userId: user.id)
         }
         

@@ -152,7 +152,15 @@ struct SimpleSignInView: View {
                 let generator = UIImpactFeedbackGenerator(style: .medium)
                 generator.impactOccurred()
                 
-                authViewModel.signIn(email: email, password: password, rememberPassword: rememberPassword)
+                // Set the published properties on the view model
+                authViewModel.email = email
+                authViewModel.password = password
+                authViewModel.rememberPassword = rememberPassword
+                
+                // Call the parameterless signIn method
+                Task {
+                    await authViewModel.signIn()
+                }
             }) {
                 ZStack {
                     Text("Sign In")

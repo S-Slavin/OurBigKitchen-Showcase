@@ -2,13 +2,6 @@ import Foundation
 import SwiftUI
 import Combine
 
-// MARK: - Supporting Types
-
-enum VolunteerType {
-    case individual
-    case corporate
-}
-
 // MARK: - AuthViewModel
 
 @MainActor
