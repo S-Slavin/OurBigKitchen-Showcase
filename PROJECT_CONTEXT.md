@@ -3,10 +3,11 @@ OurBigKitchen – Project Context (Current Status)
 Last updated: 2025-08-10
 
 Overview
-- The OurBigKitchen app in `OurBigKitchen_Restored/` is the working target.
+- The OurBigKitchen app in `OurBigKitchen_Main/` is the canonical working target.
 - App builds and runs on iOS Simulator. Authentication flow cleaned and stable.
 - Custom 4-page onboarding slides are present and correct (enhanced logo + 3 feature slides).
 - WWCC is integrated into the main registration flow (18+ requires number and expiry; reminders scheduled).
+- Project structure cleaned up: old variants archived to `archive_old_versions/`.
 
 Current App Flow
 - First launch: `UserWelcomeView` → `AuthTypeSelectionView` → `SimpleSignInView`.
@@ -31,9 +32,9 @@ Known Gaps / Work Needed (high-level)
 - Testing & CI: Minimal automated tests for the restored target; CI not configured.
 
 Primary Code Locations
-- Entry: `OurBigKitchen_Restored/OurBigKitchen/Roots/OurBigKitchenApp.swift`
-- Onboarding: `OurBigKitchen_Restored/OurBigKitchen/Services/UserWelcomeView.swift`
-- Auth: `OurBigKitchen_Restored/OurBigKitchen/Views/SimpleSignInView.swift`, `Views/Authentication/AuthTypeSelectionView.swift`, `Services/AuthService.swift`, `Managers/AuthManager.swift`
+- Entry: `OurBigKitchen_Main/OurBigKitchen/Roots/OurBigKitchenApp.swift`
+- Onboarding: `OurBigKitchen_Main/OurBigKitchen/Services/UserWelcomeView.swift`
+- Auth: `OurBigKitchen_Main/OurBigKitchen/Views/SimpleSignInView.swift`, `Views/Authentication/AuthTypeSelectionView.swift`, `Services/AuthService.swift`, `Managers/AuthManager.swift`
 - Registration: `Views/RegistrationSignupSlidesView.swift`, `Views/RegistrationFlowView.swift`, `Views/ViewModels/RegistrationFlowViewModel.swift`
 - Impact & Sharing: `Services/ImageRenderingService.swift`, `Views/ViewModels/ImpactViewModel.swift`
 - Events & Volunteering: `Views/Events/`, `Views/VolunteerView.swift`, `Views/EventRebookingView.swift`, `Views/Events/CorporateEventsView.swift`

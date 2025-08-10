@@ -29,8 +29,8 @@ final class AuthManager: ObservableObject {
         self.isAuthenticated = true
         NotificationCenter.default.post(name: .didUpdateAuth, object: nil)
         
-        // Schedule WWCC reminders if applicable
-        if user.role == .wwcVolunteer {
+        // Schedule WWCC reminders if applicable (for any volunteer with WWCC details)
+        if user.wwcNumber != nil && user.wwcExpiry != nil {
             scheduleWWCCReminders(for: user)
         }
     }
