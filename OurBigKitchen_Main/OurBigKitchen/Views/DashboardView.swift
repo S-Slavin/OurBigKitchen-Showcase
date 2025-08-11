@@ -3,6 +3,8 @@ import SwiftUI
 struct DashboardView: View {
     @StateObject private var viewModel = MainViewModel()
     @StateObject private var contentViewModel = ContentViewModel()
+    @StateObject private var homeViewModel = HomeDashboardViewModel()
+    @StateObject private var impactViewModel = ImpactDashboardViewModel()
     @State private var showingSocialSharingView = false
     @State private var showingWebView = false
     @State private var showingLoginSheet = false
@@ -30,6 +32,8 @@ struct DashboardView: View {
             .navigationTitle("Dashboard")
             .refreshable {
                 // Refresh data
+                await impactViewModel.refreshDataAsync()
+                homeViewModel.refreshData()
             }
             .sheet(isPresented: $showingSocialSharingView) {
                 VStack {
@@ -244,13 +248,45 @@ struct DashboardView: View {
                 .font(.headline)
                 .frame(maxWidth: .infinity, alignment: .leading)
             
-            Text("No upcoming events. Check the Events tab to browse all available activities.")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-                .frame(maxWidth: .infinity, alignment: .center)
-                .padding()
-                .background(Color(.systemGray5))
-                .cornerRadius(8)
+            if homeViewModel.upcomingEvents.isEmpty {
+                Text("No upcoming events. Check the Events tab to browse all available activities.")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding()
+                    .background(Color(.systemGray5))
+                    .cornerRadius(8)
+            } else {
+                VStack(spacing: 8) {
+                    ForEach(homeViewModel.upcomingEvents.prefix(3)) { event in
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(event.title)
+                                    .font(.subheadline)
+                                    .fontWeight(.medium)
+                                
+                                Text(event.formattedDateRange)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            
+                            Spacer()
+                            
+                            Text("\(event.spotsRemaining) spots")
+                                .font(.caption)
+                                .foregroundColor(.blue)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Color.blue.opacity(0.1))
+                                .cornerRadius(4)
+                        }
+                        .padding(.vertical, 8)
+                        .padding(.horizontal, 12)
+                        .background(Color(.systemGray5))
+                        .cornerRadius(8)
+                    }
+                }
+            }
         }
         .padding()
         .background(Color(.systemGray6))
@@ -265,9 +301,9 @@ struct DashboardView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             
             HStack(spacing: 15) {
-                impactStat(value: "0", label: "Meals", systemImage: "fork.knife")
-                impactStat(value: "0", label: "Hours", systemImage: "clock.fill")
-                impactStat(value: "0", label: "People", systemImage: "person.2.fill")
+                impactStat(value: "\(impactViewModel.userImpact?.mealsMade ?? 0)", label: "Meals", systemImage: "fork.knife")
+                impactStat(value: "\(impactViewModel.userImpact?.timeSpent ?? 0)", label: "Hours", systemImage: "clock.fill")
+                impactStat(value: "\(homeViewModel.todayStats?.peopleServed ?? 0)", label: "People", systemImage: "person.2.fill")
             }
             
             NavigationLink(destination: ImpactDashboardView()) {
