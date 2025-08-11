@@ -47,6 +47,8 @@ class AppState: ObservableObject {
     @Published var userType: AppModels.UserRole?
     @Published var isSigningUp = false // Track if user is in signup flow
     @Published var needsToChooseVolunteerType = false // Track if user needs to choose volunteer type
+    @Published var hasCompletedRegistration = false // Track if user has completed registration
+    @Published var selectedVolunteerType: VolunteerType? // Track the selected volunteer type
     
     private let authManager = AuthManager.shared
     private let termsManager = TermsManager.shared

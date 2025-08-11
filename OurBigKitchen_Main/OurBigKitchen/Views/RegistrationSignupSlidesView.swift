@@ -88,9 +88,23 @@ struct RegistrationSignupSlidesView: View {
         }
         .onReceive(authViewModel.$isAuthenticated) { isAuthenticated in
             if isAuthenticated {
-                // User is authenticated, now they need to choose Individual/Corporate
+                // User is authenticated, update app state
                 appState.isAuthenticated = true
-                appState.needsToChooseVolunteerType = true
+                appState.hasCompletedRegistration = true
+                appState.selectedVolunteerType = volunteerType
+                
+                // Set the user type based on volunteer type
+                if volunteerType == .individual {
+                    appState.userType = .volunteer
+                } else {
+                    appState.userType = .corporate
+                }
+                
+                // Mark that user has accepted terms and health protocols
+                appState.hasAcceptedTerms = true
+                appState.hasAcceptedHealthProtocols = true
+                
+                // Dismiss this view to return to main flow
                 dismiss()
             }
         }
@@ -683,6 +697,33 @@ struct RegistrationSignupSlidesView: View {
         
         // Sync to Salesforce CRM
         syncToSalesforce()
+        
+        // Update app state with user profile
+        updateAppStateWithUserProfile()
+    }
+    
+    // MARK: - App State Integration
+    
+    private func updateAppStateWithUserProfile() {
+        // Create a user profile object
+        let userProfile = AppModels.User(
+            id: UUID().uuidString,
+            firstName: firstName,
+            lastName: lastName,
+            email: email,
+            role: volunteerType == .individual ? .volunteer : .corporate,
+            preferences: AppModels.UserPreferences(),
+            achievements: [],
+            stats: AppModels.UserStats(),
+            hasFoodSafetyRegistration: false,
+            dob: dateOfBirth,
+            wwcNumber: wwccNumber.isEmpty ? nil : wwccNumber,
+            wwcExpiry: wwccNumber.isEmpty ? nil : wwccExpiryDate,
+            companyName: volunteerType == .corporate ? "Corporate Group" : nil
+        )
+        
+        // Update the app state
+        appState.userProfile = userProfile
     }
     
     // MARK: - Salesforce Integration
