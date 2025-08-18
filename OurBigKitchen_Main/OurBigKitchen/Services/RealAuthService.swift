@@ -167,6 +167,31 @@ class RealAuthService: ObservableObject {
         return mockUser
     }
     
+    func signInWithGroupCode(code: String) async throws -> AppModels.User {
+        // For now, return a mock user - in production this would validate against a group code database
+        // Group codes should be 4-digit numbers
+        guard code.count == 4, Int(code) != nil else {
+            throw AuthError.invalidGroupCode
+        }
+        
+        let mockUser = AppModels.User(
+            id: UUID().uuidString,
+            firstName: "Group",
+            lastName: "Volunteer",
+            email: "group@example.com",
+            role: .volunteer,
+            authProvider: "groupCode"
+        )
+        
+        currentUser = mockUser
+        isAuthenticated = true
+        
+        UserDefaults.standard.set(true, forKey: "isAuthenticated")
+        UserDefaults.standard.set(true, forKey: "hasSignedIn")
+        
+        return mockUser
+    }
+    
     func signOut() async throws {
         currentUser = nil
         isAuthenticated = false

@@ -16,14 +16,14 @@ final class AuthManager: ObservableObject {
     @Published var isLoading = false
     
     // MARK: - Private Properties
-    private let authService: AuthService
+    private let authService: RealAuthService
     private let userManager: UserManager
     private var cancellables = Set<AnyCancellable>()
     
     // MARK: - Initialization
     
     private init() {
-        self.authService = AuthService.shared
+        self.authService = RealAuthService.shared
         self.userManager = UserManager.shared
     }
     
