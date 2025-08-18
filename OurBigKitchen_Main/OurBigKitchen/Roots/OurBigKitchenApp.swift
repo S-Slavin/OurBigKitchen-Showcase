@@ -36,6 +36,8 @@ struct RootView: View {
                 })
             } else if !appState.isAuthenticated {
                 AuthTypeSelectionView()
+            } else if appState.needsToChooseVolunteerType {
+                VolunteerTypeSelectionView()
             } else if !appState.hasAcceptedTerms {
                 SimpleTermsView()
             } else if !appState.hasAcceptedHealthProtocols {
