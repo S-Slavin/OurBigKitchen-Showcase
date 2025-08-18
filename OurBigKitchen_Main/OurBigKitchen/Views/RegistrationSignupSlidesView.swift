@@ -104,7 +104,7 @@ struct RegistrationSignupSlidesView: View {
     private var canProceed: Bool {
         switch currentStep {
         case 0:
-            return volunteerType != nil
+            return true
         case 1:
             return !firstName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
                    !lastName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&

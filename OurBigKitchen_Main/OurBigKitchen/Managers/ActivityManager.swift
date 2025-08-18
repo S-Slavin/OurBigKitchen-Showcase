@@ -115,6 +115,11 @@ class ActivityManager {
     // MARK: - Cache Management
     
     func clearCache() {
-        try? persistenceManager.remove(forKey: recentActivitiesKey)
+        do {
+            try persistenceManager.remove(forKey: recentActivitiesKey)
+        } catch {
+            // Log error but don't fail - cache clearing is not critical
+            print("Failed to clear cache: \(error.localizedDescription)")
+        }
     }
 }

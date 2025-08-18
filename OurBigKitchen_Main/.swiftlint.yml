@@ -1,0 +1,63 @@
+# SwiftLint Configuration for OurBigKitchen
+# Enforces Swift style and conventions
+
+disabled_rules:
+  - trailing_whitespace  # Xcode handles this
+  - line_length          # Allow longer lines for readability
+  - function_body_length # Allow longer functions for complex logic
+  - type_body_length     # Allow longer types for complex models
+  - file_length          # Allow longer files for complex features
+
+opt_in_rules:
+  - empty_count          # Prefer isEmpty over count == 0
+  - force_unwrapping     # Warn about force unwrapping
+  - implicitly_unwrapped_optional # Warn about IUOs
+  - overridden_super_call # Ensure super calls in overrides
+  - redundant_nil_coalescing # Remove unnecessary ?? nil
+  - sorted_imports       # Keep imports organized
+  - unused_import        # Remove unused imports
+  - vertical_whitespace  # Consistent spacing
+
+included:
+  - OurBigKitchen
+
+excluded:
+  - Pods
+  - Carthage
+  - .build
+  - DerivedData
+  - *.generated.swift
+
+# Custom rules
+custom_rules:
+  no_force_unwrapping:
+    name: "No Force Unwrapping"
+    regex: '!'
+    message: "Avoid force unwrapping. Use optional binding or provide a default value."
+    severity: warning
+
+  no_print_statements:
+    name: "No Print Statements"
+    regex: 'print\('
+    message: "Use proper logging instead of print statements in production code."
+    severity: warning
+
+# Line length configuration
+line_length:
+  warning: 120
+  error: 150
+
+# Function length configuration
+function_body_length:
+  warning: 50
+  error: 100
+
+# Type length configuration
+type_body_length:
+  warning: 300
+  error: 500
+
+# File length configuration
+file_length:
+  warning: 500
+  error: 1000

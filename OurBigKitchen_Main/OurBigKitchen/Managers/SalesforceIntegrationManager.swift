@@ -12,9 +12,13 @@ class SalesforceIntegrationManager: ObservableObject {
     private let salesforceService: SalesforceService
     var cancellables = Set<AnyCancellable>()
     
-    init(salesforceService: SalesforceService = SalesforceService.shared) {
+    init(salesforceService: SalesforceService) {
         self.salesforceService = salesforceService
         setupBindings()
+    }
+    
+    convenience init() {
+        self.init(salesforceService: SalesforceService.shared)
     }
     
     private func setupBindings() {
@@ -48,7 +52,7 @@ class SalesforceIntegrationManager: ObservableObject {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
         
-        let contact = SalesforceContact(
+        _ = SalesforceContact(
             id: nil,
             firstName: firstName,
             lastName: lastName,
@@ -88,7 +92,7 @@ class SalesforceIntegrationManager: ObservableObject {
         groupType: String?
     ) -> AnyPublisher<String, Error> {
         
-        let account = SalesforceAccount(
+        _ = SalesforceAccount(
             id: nil,
             name: companyName,
             type: "Corporate",

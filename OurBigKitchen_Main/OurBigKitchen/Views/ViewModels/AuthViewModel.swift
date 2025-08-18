@@ -28,12 +28,16 @@ class AuthViewModel: ObservableObject {
     
     // MARK: - Initialization
     
-    init(authService: AuthService = AuthService.shared, 
-         userManager: UserManager = UserManager.shared) {
+    init(authService: AuthService,
+         userManager: UserManager) {
         self.authService = authService
         self.userManager = userManager
         
         checkAuthenticationStatus()
+    }
+    
+    convenience init() {
+        self.init(authService: AuthService.shared, userManager: UserManager.shared)
     }
     
     // MARK: - Public Methods

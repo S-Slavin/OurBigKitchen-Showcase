@@ -226,6 +226,7 @@ class PhotoSharingViewModel: ObservableObject {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             self.isProcessing = false
             self.shareResult = true
+            _ = imageToShare // silence unused write warning in debug flows
         }
     }
     

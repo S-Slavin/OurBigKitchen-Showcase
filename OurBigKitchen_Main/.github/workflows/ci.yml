@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build-and-test:
+    runs-on: macos-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Select Xcode
+      run: sudo xcode-select -switch /Applications/Xcode.app
+      
+    - name: Build Project
+      run: |
+        xcodebuild -project OurBigKitchen.xcodeproj \
+                   -scheme OurBigKitchen \
+                   -destination 'platform=iOS Simulator,name=iPhone 16' \
+                   build
+        
+    - name: Run Tests
+      run: |
+        xcodebuild -project OurBigKitchen.xcodeproj \
+                   -scheme OurBigKitchen \
+                   -destination 'platform=iOS Simulator,name=iPhone 16' \
+                   test
+                   
+  lint:
+    runs-on: macos-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install SwiftLint
+      run: brew install swiftlint
+      
+    - name: Run SwiftLint
+      run: swiftlint lint --config .swiftlint.yml
+      
+  security:
+    runs-on: macos-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Check for hardcoded secrets
+      run: |
+        # Check for potential API keys or secrets
+        if grep -r "sk_live\|pk_live\|AKIA\|AIza\|sk_test\|pk_test" . --exclude-dir=.git --exclude-dir=DerivedData; then
+          echo "Warning: Potential secrets found in code"
+          exit 1
+        fi
+        
+    - name: Check for force unwrapping
+      run: |
+        # Count force unwrapping instances
+        FORCE_COUNT=$(grep -r "!" . --include="*.swift" --exclude-dir=.git --exclude-dir=DerivedData | wc -l)
+        echo "Found $FORCE_COUNT force unwrapping instances"
+        if [ $FORCE_COUNT -gt 10 ]; then
+          echo "Too many force unwrapping instances found"
+          exit 1
+        fi

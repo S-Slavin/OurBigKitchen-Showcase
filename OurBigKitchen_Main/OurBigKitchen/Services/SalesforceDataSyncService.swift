@@ -13,8 +13,12 @@ class SalesforceDataSyncService: ObservableObject {
     private let salesforceService: SalesforceService
     private var cancellables = Set<AnyCancellable>()
     
-    init(salesforceService: SalesforceService = SalesforceService.shared) {
+    init(salesforceService: SalesforceService) {
         self.salesforceService = salesforceService
+    }
+    
+    convenience init() {
+        self.init(salesforceService: SalesforceService.shared)
     }
     
     // MARK: - Data Synchronization
