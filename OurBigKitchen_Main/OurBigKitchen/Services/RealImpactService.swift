@@ -18,6 +18,29 @@ class RealImpactService: ObservableObject {
         loadImpactData()
     }
     
+    // MARK: - Type Conversion
+    
+    private func convertToImpactMetricType(_ appModelsType: AppModels.ImpactType) -> ImpactMetricType {
+        switch appModelsType {
+        case .mealsServed:
+            return .mealsServed
+        case .peopleFed:
+            return .peopleFed
+        case .volunteerHours:
+            return .volunteerHours
+        case .foodWasteReduced:
+            return .wasteReduced
+        case .carbonFootprintReduced:
+            return .carbonFootprintReduced
+        case .donationsCollected:
+            return .donations
+        case .eventsOrganized:
+            return .corporateParticipation
+        case .volunteer:
+            return .volunteerHours
+        }
+    }
+    
     // MARK: - Impact Tracking
     
     func recordMealPreparation(
@@ -35,7 +58,7 @@ class RealImpactService: ObservableObject {
         
         // Create impact metric
         let impactMetric = coreDataManager.createImpactMetric(
-            type: .mealsServed,
+            type: convertToImpactMetricType(.mealsServed),
             value: Double(mealsPrepared),
             userId: userId,
             eventId: eventId
@@ -43,7 +66,7 @@ class RealImpactService: ObservableObject {
         
         // Update user stats
         if let user = coreDataManager.fetchUser(by: userId) {
-            let stats = coreDataManager.getUserStats(for: userId)
+            _ = coreDataManager.getUserStats(for: userId)
             // Note: UserStats doesn't have mealsPrepared property, so we'll skip this for now
             coreDataManager.updateUser(user)
         }
@@ -69,7 +92,7 @@ class RealImpactService: ObservableObject {
         
         // Create impact metric
         let impactMetric = coreDataManager.createImpactMetric(
-            type: .volunteerHours,
+            type: convertToImpactMetricType(.volunteerHours),
             value: hours,
             userId: userId,
             eventId: eventId
@@ -77,7 +100,7 @@ class RealImpactService: ObservableObject {
         
         // Update user stats
         if let user = coreDataManager.fetchUser(by: userId) {
-            let stats = coreDataManager.getUserStats(for: userId)
+            _ = coreDataManager.getUserStats(for: userId)
             // Note: UserStats doesn't have hoursVolunteered property, so we'll skip this for now
             coreDataManager.updateUser(user)
         }
@@ -101,9 +124,9 @@ class RealImpactService: ObservableObject {
         // Validate input
         try validateDonationInput(amount: amount, donationType: donationType)
         
-        // Create impact metric - use wasteReduced for donations since ImpactMetric doesn't have donations
+        // Create impact metric - use donationsCollected for donations
         let impactMetric = coreDataManager.createImpactMetric(
-            type: .wasteReduced,
+            type: convertToImpactMetricType(.donationsCollected),
             value: amount,
             userId: userId,
             eventId: eventId
@@ -129,9 +152,9 @@ class RealImpactService: ObservableObject {
         // Validate input
         try validateFoodDonationInput(foodType: foodType, quantity: quantity, unit: unit)
         
-        // Create impact metric - use wasteReduced for food donations
+        // Create impact metric - use foodWasteReduced for food donations
         let impactMetric = coreDataManager.createImpactMetric(
-            type: .wasteReduced,
+            type: convertToImpactMetricType(.foodWasteReduced),
             value: quantity,
             userId: userId,
             eventId: eventId
@@ -195,7 +218,7 @@ class RealImpactService: ObservableObject {
         return allMetrics
     }
     
-    func getImpactByType(type: ImpactMetricType) -> [ImpactMetric] {
+    func getImpactByType(type: AppModels.ImpactType) -> [ImpactMetric] {
         let allMetrics = coreDataManager.fetchImpactMetrics()
         
         // Since ImpactMetric doesn't have type property, we'll return all metrics for now
@@ -208,10 +231,10 @@ class RealImpactService: ObservableObject {
         var userImpacts: [(userId: String, impact: Double)] = []
         
         for user in allUsers {
-            let userStats = coreDataManager.getUserStats(for: user.id ?? "")
+            _ = coreDataManager.getUserStats(for: user.id)
             // Note: UserStats doesn't have meals or hours properties, so we'll use a default value
             let impact = 0.0 // This will need to be updated when UserStats is properly implemented
-            userImpacts.append((userId: user.id ?? "", impact: impact))
+            userImpacts.append((userId: user.id, impact: impact))
         }
         
         return userImpacts.sorted { $0.impact > $1.impact }.prefix(limit).map { $0 }
@@ -232,16 +255,16 @@ class RealImpactService: ObservableObject {
         while currentDate <= endDate {
             // Since ImpactMetric doesn't have timestamp, we'll create a single trend entry
             // This will need to be updated when Core Data is properly implemented
-            let totalMeals = metrics.reduce(into: 0) { result, metric in
-                if metric.type == .mealsServed {
-                    result += Int(metric.value)
-                }
+                    let totalMeals = metrics.reduce(into: 0) { result, metric in
+            if metric.type == .mealsServed {
+                result += Int(metric.value)
             }
-            let totalPeople = metrics.reduce(into: 0) { result, metric in
-                if metric.type == .peopleFed {
-                    result += Int(metric.value)
-                }
+        }
+        let totalPeople = metrics.reduce(into: 0) { result, metric in
+            if metric.type == .peopleFed {
+                result += Int(metric.value)
             }
+        }
             
             trends.append(ImpactTrend(
                 date: currentDate,
@@ -273,7 +296,7 @@ class RealImpactService: ObservableObject {
                 breakdown.volunteerHours += metric.value
             }
             
-            if metric.type == .wasteReduced && metric.value > 0 {
+            if metric.type == .foodWasteReduced && metric.value > 0 {
                 breakdown.foodDonations += metric.value
             }
         }

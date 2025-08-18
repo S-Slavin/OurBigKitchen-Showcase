@@ -91,7 +91,7 @@ class RegistrationFlowViewModel: ObservableObject {
         
         Task {
             do {
-                let user = try await authService.signUp(
+                _ = try await authService.signUp(
                     firstName: firstName,
                     lastName: lastName,
                     email: email,

@@ -136,11 +136,31 @@ class StorageManager: ObservableObject {
     func getTotalImpact(for userId: String) -> ImpactSummary {
         let impactMetrics = getImpactMetrics(for: userId)
         
-        let totalMeals = impactMetrics.reduce(0.0) { $0 + ($1.type == .mealsServed ? $1.value : 0) }
-        let totalPeople = impactMetrics.reduce(0.0) { $0 + ($1.type == .peopleFed ? $1.value : 0) }
-        let totalWaste = impactMetrics.reduce(0.0) { $0 + ($1.type == .wasteReduced ? $1.value : 0) }
-        let totalCarbon = impactMetrics.reduce(0.0) { $0 + ($1.type == .carbonFootprintReduced ? $1.value : 0) }
-        let totalHours = impactMetrics.reduce(0.0) { $0 + ($1.type == .volunteerHours ? $1.value : 0) }
+        let totalMeals = impactMetrics.reduce(into: 0.0) { result, metric in
+            if metric.type == .mealsServed {
+                result += metric.value
+            }
+        }
+        let totalPeople = impactMetrics.reduce(into: 0.0) { result, metric in
+            if metric.type == .peopleFed {
+                result += metric.value
+            }
+        }
+        let totalWaste = impactMetrics.reduce(into: 0.0) { result, metric in
+            if metric.type == .foodWasteReduced {
+                result += metric.value
+            }
+        }
+        let totalCarbon = impactMetrics.reduce(into: 0.0) { result, metric in
+            if metric.type == .carbonFootprintReduced {
+                result += metric.value
+            }
+        }
+        let totalHours = impactMetrics.reduce(into: 0.0) { result, metric in
+            if metric.type == .volunteerHours {
+                result += metric.value
+            }
+        }
         
         return ImpactSummary(
             mealsServed: Int(totalMeals),
@@ -228,9 +248,21 @@ class StorageManager: ObservableObject {
     func getUserStats(for userId: String) -> AppModels.UserStats {
         let userMetrics = getImpactMetrics(for: userId)
         
-        let hoursVolunteered = Int(userMetrics.reduce(0.0) { $0 + ($1.type == .volunteerHours ? $1.value : 0) })
-        let mealsPrepared = Int(userMetrics.reduce(0.0) { $0 + ($1.type == .mealsServed ? $1.value : 0) })
-        let eventsAttended = Int(userMetrics.reduce(0.0) { $0 + ($1.type == .peopleFed ? $1.value : 0) })
+        let hoursVolunteered = Int(userMetrics.reduce(into: 0.0) { result, metric in
+            if metric.type == .volunteerHours {
+                result += metric.value
+            }
+        })
+        let mealsPrepared = Int(userMetrics.reduce(into: 0.0) { result, metric in
+            if metric.type == .mealsServed {
+                result += metric.value
+            }
+        })
+        let eventsAttended = Int(userMetrics.reduce(into: 0.0) { result, metric in
+            if metric.type == .peopleFed {
+                result += metric.value
+            }
+        })
         
         return AppModels.UserStats(
             hoursVolunteered: hoursVolunteered,

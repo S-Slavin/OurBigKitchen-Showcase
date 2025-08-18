@@ -104,7 +104,7 @@ struct RegistrationSignupSlidesView: View {
     private var canProceed: Bool {
         switch currentStep {
         case 0:
-            return volunteerType != VolunteerType.none
+            return volunteerType != nil
         case 1:
             return !firstName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
                    !lastName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
@@ -569,7 +569,9 @@ struct RegistrationSignupSlidesView: View {
     
     private func nextStep() {
         guard currentStep < totalSteps - 1 else {
-            createAccount()
+            Task {
+                await createAccount()
+            }
             return
         }
         
@@ -689,7 +691,7 @@ struct RegistrationSignupSlidesView: View {
     private func syncToSalesforce() async {
         let wwccExpiry = wwccNumber.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : wwccExpiryDate
         
-        await salesforceManager.syncUserRegistration(
+        salesforceManager.syncUserRegistration(
             firstName: firstName.trimmingCharacters(in: .whitespacesAndNewlines),
             lastName: lastName.trimmingCharacters(in: .whitespacesAndNewlines),
             email: email.trimmingCharacters(in: .whitespacesAndNewlines),

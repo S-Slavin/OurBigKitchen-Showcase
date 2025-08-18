@@ -18,10 +18,12 @@ extension AppModels.Activity {
         switch self.category {
         case .cooking:
             activityType = .mealPrep
-        case .serving, .cleaning, .cooking, .other:
+        case .serving, .cleaning, .other:
             activityType = .volunteer
         case .delivery:
             activityType = .event
+        case .admin, .fundraising, .training:
+            activityType = .volunteer
         }
         
         return HomeActivityItem(
