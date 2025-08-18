@@ -1,21 +1,12 @@
 import SwiftUI
 
-struct ButtonStyles {
-    // Static accessors for all button styles
-    static var springy: SpringyButtonStyle {
-        SpringyButtonStyle()
-    }
-    
-    static var scale: ScaleButtonStyle {
-        ScaleButtonStyle()
-    }
-    
-    static var bouncy: BouncyButtonStyle {
-        BouncyButtonStyle()
-    }
-}
-
 // MARK: - Button Styles
+
+struct ButtonStyles {
+    static var springy: SpringyButtonStyle { SpringyButtonStyle() }
+    static var scale: ScaleButtonStyle { ScaleButtonStyle() }
+    static var bouncy: BouncyButtonStyle { BouncyButtonStyle() }
+}
 
 struct SpringyButtonStyle: ButtonStyle {
     func makeBody(configuration: ButtonStyleConfiguration) -> some View {
@@ -41,26 +32,6 @@ struct BouncyButtonStyle: ButtonStyle {
             .scaleEffect(configuration.isPressed ? 0.95 : 1)
             .opacity(configuration.isPressed ? 0.9 : 1)
             .animation(.easeInOut(duration: 0.15), value: configuration.isPressed)
-    }
-}
-
-// MARK: - Button Style Extensions
-
-extension ButtonStyle where Self == SpringyButtonStyle {
-    static var springy: SpringyButtonStyle {
-        SpringyButtonStyle()
-    }
-}
-
-extension ButtonStyle where Self == ScaleButtonStyle {
-    static var scale: ScaleButtonStyle {
-        ScaleButtonStyle()
-    }
-}
-
-extension ButtonStyle where Self == BouncyButtonStyle {
-    static var bouncy: BouncyButtonStyle {
-        BouncyButtonStyle()
     }
 }
 

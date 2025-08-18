@@ -18,7 +18,7 @@ extension AppModels.Activity {
         switch self.category {
         case .cooking:
             activityType = .mealPrep
-        case .serving, .cleaning, .organizing, .other:
+        case .serving, .cleaning, .cooking, .other:
             activityType = .volunteer
         case .delivery:
             activityType = .event
@@ -138,7 +138,7 @@ class HomeDashboardViewModel: ObservableObject {
             refreshData()
             
             // Post notification for any observers
-            NotificationCenter.default.post(name: Notification.Name.didUpdateContribution, object: nil)
+            NotificationCenter.default.post(name: Notification.Name("didUpdateContribution"), object: nil)
         }
     }
     

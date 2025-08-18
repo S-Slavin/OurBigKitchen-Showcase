@@ -5,16 +5,22 @@ import UserNotifications
 
 @MainActor
 final class AuthManager: ObservableObject {
+    
+    // MARK: - Singleton
     static let shared = AuthManager()
     
+    // MARK: - Published Properties
     @Published var isAuthenticated = false
     @Published var currentUser: AppModels.User?
     @Published var error: Error?
     @Published var isLoading = false
     
+    // MARK: - Private Properties
     private let authService: AuthService
     private let userManager: UserManager
     private var cancellables = Set<AnyCancellable>()
+    
+    // MARK: - Initialization
     
     private init() {
         self.authService = AuthService.shared
@@ -29,7 +35,6 @@ final class AuthManager: ObservableObject {
         self.isAuthenticated = true
         NotificationCenter.default.post(name: .didUpdateAuth, object: nil)
         
-        // Schedule WWCC reminders if applicable (for any volunteer with WWCC details)
         if user.wwcNumber != nil && user.wwcExpiry != nil {
             scheduleWWCCReminders(for: user)
         }
@@ -46,6 +51,8 @@ final class AuthManager: ObservableObject {
         gmailUser.authProvider = "gmail"
         try saveUser(user: gmailUser)
     }
+    
+    // MARK: - Authentication Methods
     
     func signIn(email: String, password: String) async throws {
         do {
@@ -106,7 +113,7 @@ final class AuthManager: ObservableObject {
         }.eraseToAnyPublisher()
     }
     
-    func loginWithApplePublisher() -> AnyPublisher<AppModels.User, Error> {
+    func loginWithApple() -> AnyPublisher<AppModels.User, Error> {
         isLoading = true
         
         return Future { [weak self] promise in
@@ -119,7 +126,7 @@ final class AuthManager: ObservableObject {
                     if let user = user {
                         promise(.success(user))
                     } else {
-                        promise(.failure(AuthError.appleSignInFailed))
+                        promise(.failure(AuthError.authenticationFailed))
                     }
                 } catch {
                     self?.error = error
@@ -130,7 +137,7 @@ final class AuthManager: ObservableObject {
         }.eraseToAnyPublisher()
     }
     
-    func loginWithGmailPublisher() -> AnyPublisher<AppModels.User, Error> {
+    func loginWithGmail() -> AnyPublisher<AppModels.User, Error> {
         isLoading = true
         
         return Future { [weak self] promise in
@@ -143,7 +150,7 @@ final class AuthManager: ObservableObject {
                     if let user = user {
                         promise(.success(user))
                     } else {
-                        promise(.failure(AuthError.googleSignInFailed))
+                        promise(.failure(AuthError.authenticationFailed))
                     }
                 } catch {
                     self?.error = error
@@ -155,50 +162,95 @@ final class AuthManager: ObservableObject {
     }
     
     func logout() {
-        Task { @MainActor in
-            do {
-                try await authService.signOut()
-                self.currentUser = nil
-                self.isAuthenticated = false
-                NotificationCenter.default.post(name: .didLogout, object: nil)
-            } catch {
-                self.error = error
+        currentUser = nil
+        isAuthenticated = false
+        error = nil
+        
+        // Clear UserDefaults
+        UserDefaults.standard.removeObject(forKey: "isAuthenticated")
+        UserDefaults.standard.removeObject(forKey: "hasSignedIn")
+        
+        // Cancel WWCC reminders
+        cancelWWCCReminders()
+        
+        // Post notification
+        NotificationCenter.default.post(name: .didUpdateAuth, object: nil)
+    }
+    
+    // MARK: - WWCC Reminder Management
+    
+    private func scheduleWWCCReminders(for user: AppModels.User) {
+        guard let expiryDate = user.wwcExpiry else { return }
+        
+        let reminderDates: [TimeInterval] = [
+            90 * 24 * 60 * 60,  // 3 months
+            60 * 24 * 60 * 60,  // 2 months
+            30 * 24 * 60 * 60,  // 1 month
+            14 * 24 * 60 * 60,  // 2 weeks
+            7 * 24 * 60 * 60,   // 1 week
+            24 * 60 * 60        // 1 day
+        ]
+        
+        for (index, interval) in reminderDates.enumerated() {
+            let reminderDate = expiryDate.addingTimeInterval(-interval)
+            
+            if reminderDate > Date() {
+                scheduleNotification(
+                    title: "WWCC Renewal Reminder",
+                    body: "Your Working with Children Check expires in \(index == 0 ? "3 months" : index == 1 ? "2 months" : index == 2 ? "1 month" : index == 3 ? "2 weeks" : index == 4 ? "1 week" : "1 day"). Please renew it to continue volunteering.",
+                    date: reminderDate,
+                    identifier: "wwcc_reminder_\(user.id)_\(index)"
+                )
             }
         }
     }
     
-    func scheduleWWCCReminders(for user: AppModels.User) {
-        guard let wwcExpiry = user.wwcExpiry else { return }
+    private func scheduleNotification(title: String, body: String, date: Date, identifier: String) {
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.body = body
+        content.sound = .default
         
-        let center = UNUserNotificationCenter.current()
+        let trigger = UNCalendarNotificationTrigger(
+            dateMatching: Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: date),
+            repeats: false
+        )
         
-        // Remove any existing WWCC reminders
-        center.removePendingNotificationRequests(withIdentifiers: ["wwcc_3months", "wwcc_2months", "wwcc_1month", "wwcc_2weeks", "wwcc_1week", "wwcc_1day"])
+        let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
         
-        // Calculate reminder dates
-        let calendar = Calendar.current
-        let reminders = [
-            (days: -90, id: "wwcc_3months", title: "WWCC Expiry - 3 Months", body: "Your Working with Children Check will expire in 3 months. Please start the renewal process."),
-            (days: -60, id: "wwcc_2months", title: "WWCC Expiry - 2 Months", body: "Your Working with Children Check will expire in 2 months. Don't forget to renew it."),
-            (days: -30, id: "wwcc_1month", title: "WWCC Expiry - 1 Month", body: "Your Working with Children Check will expire in 1 month. Please renew it soon."),
-            (days: -14, id: "wwcc_2weeks", title: "WWCC Expiry - 2 Weeks", body: "Your Working with Children Check will expire in 2 weeks. Urgent: Please renew it."),
-            (days: -7, id: "wwcc_1week", title: "WWCC Expiry - 1 Week", body: "Your Working with Children Check will expire in 1 week. Very urgent: Please renew it now."),
-            (days: -1, id: "wwcc_1day", title: "WWCC Expiry - Tomorrow", body: "Your Working with Children Check will expire tomorrow. Critical: Please renew immediately.")
-        ]
-        
-        for reminder in reminders {
-            guard let date = calendar.date(byAdding: .day, value: reminder.days, to: wwcExpiry) else { continue }
-            
-            let content = UNMutableNotificationContent()
-            content.title = reminder.title
-            content.body = reminder.body
-            content.sound = .default
-            
-            let components = calendar.dateComponents([.year, .month, .day], from: date)
-            let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
-            
-            let request = UNNotificationRequest(identifier: reminder.id, content: content, trigger: trigger)
-            center.add(request)
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("Failed to schedule WWCC reminder: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    private func cancelWWCCReminders() {
+        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+    }
+}
+
+// MARK: - Auth Errors
+
+enum AuthError: LocalizedError {
+    case invalidCredentials
+    case invalidGroupCode
+    case authenticationFailed
+    case networkError
+    case userNotFound
+    
+    var errorDescription: String? {
+        switch self {
+        case .invalidCredentials:
+            return "Invalid email or password"
+        case .invalidGroupCode:
+            return "Invalid group code"
+        case .authenticationFailed:
+            return "Authentication failed"
+        case .networkError:
+            return "Network connection error"
+        case .userNotFound:
+            return "User not found"
         }
     }
 } 

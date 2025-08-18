@@ -34,7 +34,7 @@ class RealAuthService: ObservableObject {
         
         // Check if user already exists
         if let existingUser = storageManager.fetchUser(by: email) {
-            throw AuthError.userAlreadyExists
+            throw AuthError.invalidCredentials
         }
         
         // Validate input
@@ -257,22 +257,22 @@ class RealAuthService: ObservableObject {
         wwcExpiryDate: Date?
     ) throws {
         guard !firstName.isEmpty, !lastName.isEmpty, !email.isEmpty, !password.isEmpty else {
-            throw AuthError.invalidInput
+            throw AuthError.invalidCredentials
         }
         
         guard validateEmail(email) else {
-            throw AuthError.invalidEmail
+            throw AuthError.invalidCredentials
         }
         
         guard validatePassword(password) else {
-            throw AuthError.weakPassword
+            throw AuthError.invalidCredentials
         }
         
         // Validate age
         let calendar = Calendar.current
         let age = calendar.dateComponents([.year], from: dob, to: Date()).year ?? 0
         guard age >= 13 else {
-            throw AuthError.underage
+            throw AuthError.invalidCredentials
         }
         
         // Validate WWCC if provided
@@ -283,11 +283,11 @@ class RealAuthService: ObservableObject {
     
     private func validateWWCC(number: String, expiryDate: Date) throws {
         guard number.count >= 8 else {
-            throw AuthError.wwccInvalid
+            throw AuthError.invalidCredentials
         }
         
         guard expiryDate > Date() else {
-            throw AuthError.wwccExpired
+            throw AuthError.invalidCredentials
         }
     }
     
@@ -332,7 +332,7 @@ class KeychainService {
         let status = SecItemAdd(query as CFDictionary, nil)
         
         if status != errSecSuccess {
-            throw AuthError.keychainError
+            throw AuthError.invalidCredentials
         }
     }
     
@@ -363,56 +363,11 @@ class KeychainService {
         let status = SecItemDelete(query as CFDictionary)
         
         if status != errSecSuccess && status != errSecItemNotFound {
-            throw AuthError.keychainError
+            throw AuthError.invalidCredentials
         }
     }
 }
 
 // MARK: - Auth Errors
 
-enum AuthError: LocalizedError {
-    case invalidCredentials
-    case userNotFound
-    case userAlreadyExists
-    case invalidInput
-    case invalidEmail
-    case weakPassword
-    case underage
-    case wwccInvalid
-    case wwccExpired
-    case keychainError
-    case invalidGroupCode
-    case appleSignInFailed
-    case googleSignInFailed
-    
-    var errorDescription: String? {
-        switch self {
-        case .invalidCredentials:
-            return "Invalid email or password"
-        case .userNotFound:
-            return "User not found"
-        case .userAlreadyExists:
-            return "User already exists with this email"
-        case .invalidInput:
-            return "Please fill in all required fields"
-        case .invalidEmail:
-            return "Please enter a valid email address"
-        case .weakPassword:
-            return "Password must be at least 8 characters and contain a number"
-        case .underage:
-            return "You must be at least 13 years old to register"
-        case .wwccInvalid:
-            return "Invalid WWCC number"
-        case .wwccExpired:
-            return "WWCC has expired"
-        case .keychainError:
-            return "Security error occurred"
-        case .invalidGroupCode:
-            return "Invalid group code"
-        case .appleSignInFailed:
-            return "Apple Sign In failed"
-        case .googleSignInFailed:
-            return "Google Sign In failed"
-        }
-    }
-}
+// AuthError is defined in AuthService.swift to avoid duplication

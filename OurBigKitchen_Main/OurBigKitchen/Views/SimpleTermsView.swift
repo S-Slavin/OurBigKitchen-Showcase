@@ -175,7 +175,7 @@ struct SimpleTermsView: View {
             defaults.set(false, forKey: "hasAcceptedHealthProtocols")
             
             // Reset health protocols to ensure it's not skipped
-            appState.resetHealthProtocols()
+            appState.hasAcceptedHealthProtocols = false
             
             // Update AppState for terms
             appState.acceptTerms()

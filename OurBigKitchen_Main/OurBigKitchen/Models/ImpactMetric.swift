@@ -45,52 +45,56 @@ typealias ImpactMetric = AppModels.ImpactMetric
 extension ImpactMetric {
     // MARK: - Computed Properties
     
-    var totalImpactScore: Int {
-        // Calculate impact score based on weighted metrics
-        let mealWeight = 1
-        let peopleWeight = 2
-        let hoursWeight = 3
-        let foodWeight = 2
-        let carbonWeight = 2
-        
-        return mealsServed * mealWeight +
-               peopleFed * peopleWeight +
-               Int(volunteerHours * Double(hoursWeight)) +
-               Int(wasteReduced * Double(foodWeight)) +
-               Int(carbonFootprintReduced * Double(carbonWeight))
+    var impactScore: Int {
+        // Calculate impact score based on type and value
+        switch type {
+        case .mealsServed:
+            return Int(value * 10) // 10 points per meal
+        case .peopleFed:
+            return Int(value * 8)  // 8 points per person
+        case .volunteerHours:
+            return Int(value * 15) // 15 points per hour
+        case .volunteer:
+            return Int(value * 15) // 15 points per hour
+        case .foodWasteReduced:
+            return Int(value * 5)  // 5 points per kg
+        case .carbonFootprintReduced:
+            return Int(value * 12) // 12 points per kg CO2
+        case .donationsCollected:
+            return Int(value * 20) // 20 points per dollar
+        case .eventsOrganized:
+            return Int(value * 25) // 25 points per event
+        }
     }
     
-    // MARK: - Combining Metrics
+    // MARK: - Arithmetic Operations
     
     static func + (lhs: ImpactMetric, rhs: ImpactMetric) -> ImpactMetric {
+        // Only combine metrics of the same type
+        guard lhs.type == rhs.type else {
+            return lhs // Return the left operand if types don't match
+        }
+        
         return ImpactMetric(
-            mealsServed: lhs.mealsServed + rhs.mealsServed,
-            peopleFed: lhs.peopleFed + rhs.peopleFed,
-            wasteReduced: lhs.wasteReduced + rhs.wasteReduced,
-            carbonFootprintReduced: lhs.carbonFootprintReduced + rhs.carbonFootprintReduced,
-            volunteerHours: lhs.volunteerHours + rhs.volunteerHours
+            type: lhs.type,
+            value: lhs.value + rhs.value,
+            unit: lhs.unit,
+            date: max(lhs.date, rhs.date)
         )
     }
     
-    // MARK: - Formatting
+    // MARK: - Formatted Values
     
-    func formattedMealsServed() -> String {
-        return NumberFormatter.localizedString(from: NSNumber(value: mealsServed), number: .decimal)
-    }
-    
-    func formattedPeopleFed() -> String {
-        return NumberFormatter.localizedString(from: NSNumber(value: peopleFed), number: .decimal)
-    }
-    
-    func formattedVolunteerHours() -> String {
-        return String(format: "%.1f", volunteerHours)
-    }
-    
-    func formattedWasteReduced() -> String {
-        return String(format: "%.1f kg", wasteReduced)
-    }
-    
-    func formattedCarbonReduced() -> String {
-        return String(format: "%.1f kg CO₂", carbonFootprintReduced)
+    var formattedValue: String {
+        switch type {
+        case .mealsServed, .peopleFed, .donationsCollected, .eventsOrganized:
+            return NumberFormatter.localizedString(from: NSNumber(value: Int(value)), number: .decimal)
+        case .volunteerHours, .volunteer:
+            return String(format: "%.1f", value)
+        case .foodWasteReduced:
+            return String(format: "%.1f kg", value)
+        case .carbonFootprintReduced:
+            return String(format: "%.1f kg CO₂", value)
+        }
     }
 } 

@@ -110,7 +110,7 @@ class LoginViewModel: ObservableObject {
     }
     
     func loginWithApple() {
-        authManager.loginWithApplePublisher()
+        authManager.loginWithApple()
             .sink(
                 receiveCompletion: { [weak self] (completion: Subscribers.Completion<Error>) in
                     if case .failure = completion {
@@ -125,7 +125,7 @@ class LoginViewModel: ObservableObject {
     }
     
     func loginWithGmail() {
-        authManager.loginWithGmailPublisher()
+        authManager.loginWithGmail()
             .sink(
                 receiveCompletion: { [weak self] (completion: Subscribers.Completion<Error>) in
                     if case .failure = completion {

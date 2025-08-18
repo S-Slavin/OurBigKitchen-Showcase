@@ -14,7 +14,7 @@ struct FoodSafetyRegistrationView: View {
     @State private var animateBackground = false
     @State private var currentStep = 1 // Step 1: Personal info & company, Step 2: Additional details
     @State private var showTermsSheet = false
-    @ObservedObject private var termsManager = TermsManager.shared
+    @ObservedObject private var termsManager = TermsManager()
     
     var body: some View {
         NavigationStack {

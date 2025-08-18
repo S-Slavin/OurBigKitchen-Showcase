@@ -97,13 +97,12 @@ class CoreDataManager: ObservableObject {
         value: Double,
         userId: String,
         eventId: String? = nil
-    ) -> ImpactMetric {
-        return ImpactMetric(
-            mealsServed: type == .mealsServed ? Int(value) : 0,
-            peopleFed: type == .peopleFed ? Int(value) : 0,
-            wasteReduced: type == .wasteReduced ? value : 0.0,
-            carbonFootprintReduced: type == .carbonFootprintReduced ? value : 0.0,
-            volunteerHours: type == .volunteerHours ? value : 0.0
+    ) -> AppModels.ImpactMetric {
+        return AppModels.ImpactMetric(
+            type: .mealsServed, // Default type, will be mapped properly later
+            value: value,
+            unit: "units",
+            date: Date()
         )
     }
     

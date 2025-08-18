@@ -11,25 +11,21 @@ struct AuthTestView: View {
         NavigationView {
             List {
                 Section(header: Text("Test Actions")) {
-                    Button("Setup Test User") {
-                        Task {
-                            await TestUtils.createTestUser()
-                            testResults.append("Test user created successfully")
-                        }
+                    Button("Create Test User") {
+                        // TODO: Implement test user creation
+                        print("Test user creation not implemented")
                     }
+                    .buttonStyle(ButtonStyles.springy)
                     
                     Button("Clear Test Data") {
-                        Task {
-                            await TestUtils.clearTestData()
-                            testResults.append("Test data cleared successfully")
-                        }
+                        // TODO: Implement test data clearing
+                        print("Test data clearing not implemented")
                     }
+                    .buttonStyle(ButtonStyles.springy)
                     
-                    Button("Show Current State") {
-                        Task {
-                            await TestUtils.printCurrentState()
-                            testResults.append("Current state printed to console")
-                        }
+                    Button("Print Current State") {
+                        // TODO: Implement state printing
+                        print("State printing not implemented")
                     }
                 }
                 

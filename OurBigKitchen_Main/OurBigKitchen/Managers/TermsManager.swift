@@ -2,26 +2,26 @@ import Foundation
 import Combine
 import SwiftUI
 
+// MARK: - Terms Manager
+
 @MainActor
 class TermsManager: ObservableObject {
-    static let shared = TermsManager()
+    @Published var hasAcceptedTerms = false
     
-    // Support multiple keys for terms acceptance
-    private let mainTermsKey = "OBK_termsAccepted"
-    private let legacyKeys = ["hasAcceptedTerms", "termsAccepted"]
+    private let mainTermsKey = "hasAcceptedTerms"
+    private let legacyKeys = [
+        "hasAcceptedTerms",
+        "termsAccepted",
+        "acceptedTerms"
+    ]
     
-    @Published var hasAcceptedTerms: Bool = false
-    
-    // Add debouncer for notifications
+    private var cancellables = Set<AnyCancellable>()
     private var notificationDebouncer: AnyCancellable?
     
-    private init() {
-        // Load terms acceptance status from UserDefaults during initialization
+    init() {
         loadTermsStatus()
         
-        print("DEBUG: TermsManager initialized. hasAcceptedTerms: \(hasAcceptedTerms)")
-        
-        // Register for UserDefaults changes - use the Combine publisher pattern
+        // Register for UserDefaults changes
         NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification)
             .debounce(for: .milliseconds(100), scheduler: RunLoop.main)
             .sink { [weak self] _ in
@@ -30,15 +30,56 @@ class TermsManager: ObservableObject {
             .store(in: &cancellables)
     }
     
-    // Store cancellables
-    private var cancellables = Set<AnyCancellable>()
+    // MARK: - Public Methods
     
-    // Centralized function to load terms status from UserDefaults
+    func acceptTerms() {
+        hasAcceptedTerms = true
+        
+        // Update UserDefaults asynchronously
+        Task.detached {
+            await self.synchronizeKeys(true)
+            
+            await MainActor.run {
+                self.notificationDebouncer?.cancel()
+                
+                self.notificationDebouncer = Just(())
+                    .delay(for: .milliseconds(100), scheduler: RunLoop.main)
+                    .sink { _ in
+                        NotificationCenter.default.post(name: .didUpdateTerms, object: nil)
+                    }
+            }
+        }
+    }
+    
+    func declineTerms() {
+        hasAcceptedTerms = false
+        
+        Task.detached {
+            await self.synchronizeKeys(false)
+            
+            await MainActor.run {
+                NotificationCenter.default.post(name: .didUpdateTerms, object: nil)
+            }
+        }
+    }
+    
+    func checkTermsStatus() -> Bool {
+        loadTermsStatus()
+        return hasAcceptedTerms
+    }
+    
+    func resetTerms() {
+        hasAcceptedTerms = false
+        synchronizeKeys(false)
+        NotificationCenter.default.post(name: .didUpdateTerms, object: nil)
+    }
+    
+    // MARK: - Private Methods
+    
     private func loadTermsStatus() {
-        // Get terms acceptance status from main key
         var accepted = UserDefaults.standard.bool(forKey: mainTermsKey)
         
-        // If not accepted via main key, check legacy keys as fallback
+        // Check legacy keys as fallback
         if !accepted {
             for key in legacyKeys {
                 if UserDefaults.standard.bool(forKey: key) {
@@ -48,23 +89,19 @@ class TermsManager: ObservableObject {
             }
         }
         
-        // Only update published property if value is different
+        // Update published property if different
         if accepted != hasAcceptedTerms {
-            print("DEBUG: Updating hasAcceptedTerms from \(hasAcceptedTerms) to \(accepted)")
             hasAcceptedTerms = accepted
             
-            // If accepted from legacy key, synchronize to main key
+            // Synchronize keys if accepted from legacy key
             if accepted {
-                // Use asynchronous write to avoid blocking the main thread
-                DispatchQueue.global(qos: .utility).async { [weak self] in
-                    guard let self = self else { return }
-                    self.synchronizeKeys(accepted)
+                Task.detached {
+                    await self.synchronizeKeys(accepted)
                 }
             }
         }
     }
     
-    // Make sure all UserDefaults keys have the same value
     private func synchronizeKeys(_ value: Bool) {
         let defaults = UserDefaults.standard
         
@@ -75,108 +112,9 @@ class TermsManager: ObservableObject {
         for key in legacyKeys {
             defaults.set(value, forKey: key)
         }
-        
-        // No need to call synchronize - it's deprecated and can cause freezing
     }
-    
-    func acceptTerms() {
-        print("DEBUG: Accepting terms, current value: \(hasAcceptedTerms)")
-        
-        // Update local property immediately
-        hasAcceptedTerms = true
-        
-        // Perform UserDefaults operations asynchronously
-        DispatchQueue.global(qos: .utility).async { [weak self] in
-            guard let self = self else { return }
-            
-            // Update UserDefaults keys
-            self.synchronizeKeys(true)
-            
-            // Post a single notification on the main thread
-            DispatchQueue.main.async {
-                // Cancel any pending notifications
-                self.notificationDebouncer?.cancel()
-                
-                // Send notification with debouncing to prevent rapid consecutive calls
-                self.notificationDebouncer = Just(())
-                    .delay(for: .milliseconds(50), scheduler: RunLoop.main)
-                    .sink { _ in
-                        NotificationCenter.default.post(name: .didUpdateTerms, object: nil)
-                    }
-            }
-        }
-    }
-    
-    func checkTermsStatus() -> Bool {
-        // Load latest status
-        loadTermsStatus()
-        return hasAcceptedTerms
-    }
-    
-    func resetTerms() {
-        print("DEBUG: Resetting terms acceptance")
-        
-        // Update local property immediately
-        hasAcceptedTerms = false
-        
-        // Perform UserDefaults operations asynchronously
-        DispatchQueue.global(qos: .utility).async { [weak self] in
-            guard let self = self else { return }
-            
-            // Update UserDefaults keys
-            self.synchronizeKeys(false)
-            
-            // Post notification on the main thread
-            DispatchQueue.main.async {
-                // Cancel any pending notifications
-                self.notificationDebouncer?.cancel()
-                
-                // Send notification with debouncing
-                self.notificationDebouncer = Just(())
-                    .delay(for: .milliseconds(50), scheduler: RunLoop.main)
-                    .sink { _ in
-                        NotificationCenter.default.post(name: .didUpdateTerms, object: nil)
-                    }
-            }
-        }
-    }
-    
-    // For testing: Reset all terms-related values in UserDefaults
-    func resetAllTermsSettings() {
-        print("DEBUG: Resetting all terms-related settings")
-        
-        // Update instance state immediately
-        hasAcceptedTerms = false
-        
-        // Perform UserDefaults operations asynchronously
-        DispatchQueue.global(qos: .utility).async { [weak self] in
-            guard let self = self else { return }
-            
-            let defaults = UserDefaults.standard
-            
-            // Clear main key
-            defaults.removeObject(forKey: self.mainTermsKey)
-            
-            // Clear all legacy keys
-            for key in self.legacyKeys {
-                defaults.removeObject(forKey: key)
-            }
-            
-            // Also clear completion key
-            defaults.removeObject(forKey: "com.ourbigkitchen.hasCompletedOnboarding")
-            
-            // Post notification on the main thread
-            DispatchQueue.main.async {
-                // Cancel any pending notifications
-                self.notificationDebouncer?.cancel()
-                
-                // Send notification with debouncing
-                self.notificationDebouncer = Just(())
-                    .delay(for: .milliseconds(50), scheduler: RunLoop.main)
-                    .sink { _ in
-                        NotificationCenter.default.post(name: .didUpdateTerms, object: nil)
-                    }
-            }
-        }
-    }
-} 
+}
+
+// MARK: - Notification Names
+
+// didUpdateTerms is defined in AppState.swift to avoid duplication 

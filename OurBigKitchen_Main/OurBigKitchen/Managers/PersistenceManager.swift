@@ -19,14 +19,14 @@ class PersistenceManager {
     
     func load<T: Decodable>(_ type: T.Type, forKey key: String) throws -> T {
         guard let data = userDefaults.data(forKey: key) else {
-            throw PersistenceError.notFound
+            throw PersistenceError.storeNotFound
         }
         return try decoder.decode(type, from: data)
     }
     
     func getObject<T: Decodable>(forKey key: String, as type: T.Type) throws -> T {
         guard let data = userDefaults.data(forKey: key) else {
-            throw PersistenceError.notFound
+            throw PersistenceError.storeNotFound
         }
         return try decoder.decode(type, from: data)
     }
@@ -34,10 +34,4 @@ class PersistenceManager {
     func remove(forKey key: String) {
         userDefaults.removeObject(forKey: key)
     }
-}
-
-enum PersistenceError: Error {
-    case notFound
-    case encodingFailed
-    case decodingFailed
 } 

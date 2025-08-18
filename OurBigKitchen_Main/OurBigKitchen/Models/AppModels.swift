@@ -2,7 +2,9 @@ import Foundation
 import SwiftUI
 
 enum AppModels {
+    
     // MARK: - User Models
+    
     enum UserRole: String, Codable, CaseIterable {
         case admin
         case manager
@@ -86,23 +88,26 @@ enum AppModels {
         var company: String?
         var dob: Date?
         
-        // Optional fields for different volunteer types
+        // WWCC fields
         var wwcNumber: String?
         var wwcExpiry: Date?
+        
+        // Corporate fields
         var companyName: String?
         var companyPosition: String?
         var companyEmail: String?
         
-        // Additional fields for Salesforce integration
-        var salesforceId: String?
+        // Contact fields
         var phone: String?
         var address: String?
         var city: String?
         var state: String?
         var postalCode: String?
         var country: String?
+        
+        // Integration fields
+        var salesforceId: String?
         var volunteerType: String?
-        var wwcExpiryDate: Date?
         
         init(id: String = UUID().uuidString,
              firstName: String,
@@ -130,8 +135,7 @@ enum AppModels {
              state: String? = nil,
              postalCode: String? = nil,
              country: String? = nil,
-             volunteerType: String? = nil,
-             wwcExpiryDate: Date? = nil) {
+             volunteerType: String? = nil) {
             self.id = id
             self.firstName = firstName
             self.lastName = lastName
@@ -159,14 +163,16 @@ enum AppModels {
             self.postalCode = postalCode
             self.country = country
             self.volunteerType = volunteerType
-            self.wwcExpiryDate = wwcExpiryDate
         }
+        
+        // MARK: - Validation
         
         func isValid() -> Bool {
             return !id.isEmpty && !firstName.isEmpty && !lastName.isEmpty && !email.isEmpty
         }
         
-        // Convenience computed property for full name
+        // MARK: - Computed Properties
+        
         var fullName: String {
             return "\(firstName) \(lastName)"
         }
@@ -184,155 +190,313 @@ enum AppModels {
             role == .wwcVolunteer
         }
         
-        // Compatibility alias for dateOfBirth
+        // MARK: - Compatibility Aliases
+        
         var dateOfBirth: Date? {
             return dob
         }
         
-        // Compatibility alias for wwccNumber
         var wwccNumber: String? {
-            return self.wwcNumber
+            return wwcNumber
         }
     }
 
     // MARK: - Activity Models
+    
     enum ActivityCategory: String, Codable, CaseIterable {
         case cooking
-        case cleaning
         case serving
-        case organizing
-        case delivery
-        case other
-    }
-    
-    enum ActivityType: String, Codable, CaseIterable {
-        case cooking
         case cleaning
-        case serving
-        case organizing
         case delivery
+        case admin
+        case fundraising
+        case training
         case other
     }
 
-    struct Activity: Identifiable, Codable {
+    struct Activity: Codable, Identifiable {
         let id: String
-        let userId: String
-        let eventId: String?
         let title: String
         let description: String
         let category: ActivityCategory
         let date: Date
         let duration: TimeInterval
-        let impact: ImpactMetric
-        
-        enum CodingKeys: String, CodingKey {
-            case id
-            case userId
-            case eventId
-            case title
-            case description
-            case category
-            case date
-            case duration
-            case impact
-        }
+        let location: String?
+        let participants: [String]
+        let impact: ImpactMetric?
         
         init(id: String = UUID().uuidString,
-             userId: String,
-             eventId: String? = nil,
              title: String,
              description: String,
              category: ActivityCategory,
              date: Date = Date(),
              duration: TimeInterval,
-             impact: ImpactMetric) {
+             location: String? = nil,
+             participants: [String] = [],
+             impact: ImpactMetric? = nil) {
             self.id = id
-            self.userId = userId
-            self.eventId = eventId
             self.title = title
             self.description = description
             self.category = category
             self.date = date
             self.duration = duration
+            self.location = location
+            self.participants = participants
             self.impact = impact
         }
+    }
+
+    // MARK: - Event Models
+    
+    struct Event: Codable, Identifiable {
+        let id: String
+        let title: String
+        let description: String
+        let date: Date
+        let startTime: Date
+        let endTime: Date
+        let location: String
+        let maxParticipants: Int
+        let currentParticipants: Int
+        let category: ActivityCategory
+        let organizer: String
+        let isActive: Bool
         
-        func asDictionary() throws -> [String: Any] {
-            let data = try JSONEncoder().encode(self)
-            return try JSONSerialization.jsonObject(with: data) as? [String: Any] ?? [:]
+        init(id: String = UUID().uuidString,
+             title: String,
+             description: String,
+             date: Date,
+             startTime: Date,
+             endTime: Date,
+             location: String,
+             maxParticipants: Int,
+             currentParticipants: Int = 0,
+             category: ActivityCategory,
+             organizer: String,
+             isActive: Bool = true) {
+            self.id = id
+            self.title = title
+            self.description = description
+            self.date = date
+            self.startTime = startTime
+            self.endTime = endTime
+            self.location = location
+            self.maxParticipants = maxParticipants
+            self.currentParticipants = currentParticipants
+            self.category = category
+            self.organizer = organizer
+            self.isActive = isActive
+        }
+        
+        var isFull: Bool {
+            return currentParticipants >= maxParticipants
+        }
+        
+        var availableSpots: Int {
+            return max(0, maxParticipants - currentParticipants)
         }
     }
 
     // MARK: - Impact Models
-    struct ImpactMetric: Codable {
-        let mealsServed: Int
-        let peopleFed: Int
-        let wasteReduced: Double // in kilograms
-        let carbonFootprintReduced: Double // in kilograms of CO2
-        let volunteerHours: Double
+    
+    struct ImpactMetric: Codable, Identifiable {
+        let id: String
+        let type: ImpactType
+        let value: Double
+        let unit: String
+        let date: Date
+        let description: String?
         
-        enum CodingKeys: String, CodingKey {
-            case mealsServed
-            case peopleFed
-            case wasteReduced
-            case carbonFootprintReduced
-            case volunteerHours
+        init(id: String = UUID().uuidString,
+             type: ImpactType,
+             value: Double,
+             unit: String,
+             date: Date = Date(),
+             description: String? = nil) {
+            self.id = id
+            self.type = type
+            self.value = value
+            self.unit = unit
+            self.date = date
+            self.description = description
+        }
+    }
+    
+    enum ImpactType: String, Codable, CaseIterable {
+        case mealsServed
+        case peopleFed
+        case volunteerHours
+        case foodWasteReduced
+        case carbonFootprintReduced
+        case donationsCollected
+        case eventsOrganized
+        case volunteer
+    }
+
+    // MARK: - Campaign Models
+    
+    struct Campaign: Codable, Identifiable {
+        let id: String
+        let title: String
+        let description: String
+        let startDate: Date
+        let endDate: Date
+        let goal: Double
+        let currentAmount: Double
+        let currency: String
+        let organizer: String
+        let isActive: Bool
+        
+        init(id: String = UUID().uuidString,
+             title: String,
+             description: String,
+             startDate: Date,
+             endDate: Date,
+             goal: Double,
+             currentAmount: Double = 0,
+             currency: String = "AUD",
+             organizer: String,
+             isActive: Bool = true) {
+            self.id = id
+            self.title = title
+            self.description = description
+            self.startDate = startDate
+            self.endDate = endDate
+            self.goal = goal
+            self.currentAmount = currentAmount
+            self.currency = currency
+            self.organizer = organizer
+            self.isActive = isActive
         }
         
-        init(mealsServed: Int = 0,
-             peopleFed: Int = 0,
-             wasteReduced: Double = 0.0,
-             carbonFootprintReduced: Double = 0.0,
-             volunteerHours: Double = 0.0) {
-            self.mealsServed = mealsServed
-            self.peopleFed = peopleFed
-            self.wasteReduced = wasteReduced
-            self.carbonFootprintReduced = carbonFootprintReduced
-            self.volunteerHours = volunteerHours
+        var progress: Double {
+            return min(currentAmount / goal, 1.0)
         }
         
-        func asDictionary() throws -> [String: Any] {
-            let data = try JSONEncoder().encode(self)
-            return try JSONSerialization.jsonObject(with: data) as? [String: Any] ?? [:]
+        var isCompleted: Bool {
+            return currentAmount >= goal
+        }
+        
+        var remainingAmount: Double {
+            return max(0, goal - currentAmount)
         }
     }
 
-    // MARK: - Corporate Volunteer Models
+    // MARK: - Donation Models
+    
+    struct Donation: Codable, Identifiable {
+        let id: String
+        let amount: Double
+        let currency: String
+        let donorName: String
+        let donorEmail: String?
+        let message: String?
+        let date: Date
+        let campaignId: String?
+        let isAnonymous: Bool
+        
+        init(id: String = UUID().uuidString,
+             amount: Double,
+             currency: String = "AUD",
+             donorName: String,
+             donorEmail: String? = nil,
+             message: String? = nil,
+             date: Date = Date(),
+             campaignId: String? = nil,
+             isAnonymous: Bool = false) {
+            self.id = id
+            self.amount = amount
+            self.currency = currency
+            self.donorName = donorName
+            self.donorEmail = donorEmail
+            self.message = message
+            self.date = date
+            self.campaignId = campaignId
+            self.isAnonymous = isAnonymous
+        }
+    }
+
+    // MARK: - Analytics Models
+    
+    struct AnalyticsReport: Codable, Identifiable {
+        let id: String
+        let title: String
+        let dateRange: DateInterval
+        let metrics: [ImpactMetric]
+        let summary: String
+        let generatedAt: Date
+        
+        init(id: String = UUID().uuidString,
+             title: String,
+             dateRange: DateInterval,
+             metrics: [ImpactMetric],
+             summary: String,
+             generatedAt: Date = Date()) {
+            self.id = id
+            self.title = title
+            self.dateRange = dateRange
+            self.metrics = metrics
+            self.summary = summary
+            self.generatedAt = generatedAt
+        }
+    }
+    
+    // MARK: - Corporate Volunteer
+    
     struct CorporateVolunteer: Codable, Identifiable {
         let id: String
-        var name: String
-        var company: String
-        var hoursContributed: Int
-        var impactScore: Double
-    }
-
-    // MARK: - Analytics Report Model
-    struct AnalyticsReport: Codable {
-        let totalMealsServed: Int
-        let totalVolunteers: Int
-        let totalHoursVolunteered: Double
-        let totalPeopleServed: Int
-        let foodWasteReduced: Double
-        let donationsReceived: Double
-        let dailyBreakdown: [DailyStats]
-        let impactMetrics: [ImpactMetric]
-        let topVolunteers: [UserSummary]
-        let topCorporatePartners: [CorporatePartner]
+        let companyName: String
+        let companyEmail: String
+        let companyPosition: String
+        let volunteerType: VolunteerType
+        let wwccNumber: String?
+        let wwccExpiry: Date?
+        let preferences: [String: String]
+        let hoursContributed: Double
+        let impactScore: Double
         
-        struct UserSummary: Codable {
-            let id: String
-            let name: String
-            let profileImageURL: String?
-            let totalHours: Double
-            let totalImpact: Int
+        init(companyName: String, companyEmail: String, companyPosition: String, volunteerType: VolunteerType, wwccNumber: String? = nil, wwccExpiry: Date? = nil, preferences: [String: String] = [:], hoursContributed: Double = 0.0, impactScore: Double = 0.0) {
+            self.id = UUID().uuidString
+            self.companyName = companyName
+            self.companyEmail = companyEmail
+            self.companyPosition = companyPosition
+            self.volunteerType = volunteerType
+            self.wwccNumber = wwccNumber
+            self.wwccExpiry = wwccExpiry
+            self.preferences = preferences
+            self.hoursContributed = hoursContributed
+            self.impactScore = impactScore
         }
         
-        struct CorporatePartner: Codable {
-            let id: String
-            let name: String
-            let logoURL: String?
-            let totalContribution: Double
-            let employeeParticipation: Int
+        enum CodingKeys: String, CodingKey {
+            case id, companyName, companyEmail, companyPosition, volunteerType, wwccNumber, wwccExpiry, preferences, hoursContributed, impactScore
+        }
+        
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            id = try container.decode(String.self, forKey: .id)
+            companyName = try container.decode(String.self, forKey: .companyName)
+            companyEmail = try container.decode(String.self, forKey: .companyEmail)
+            companyPosition = try container.decode(String.self, forKey: .companyPosition)
+            volunteerType = try container.decode(VolunteerType.self, forKey: .volunteerType)
+            wwccNumber = try container.decodeIfPresent(String.self, forKey: .wwccNumber)
+            wwccExpiry = try container.decodeIfPresent(Date.self, forKey: .wwccExpiry)
+            preferences = try container.decode([String: String].self, forKey: .preferences)
+            hoursContributed = try container.decode(Double.self, forKey: .hoursContributed)
+            impactScore = try container.decode(Double.self, forKey: .impactScore)
+        }
+        
+        func encode(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(id, forKey: .id)
+            try container.encode(companyName, forKey: .companyName)
+            try container.encode(companyEmail, forKey: .companyEmail)
+            try container.encode(companyPosition, forKey: .companyPosition)
+            try container.encode(volunteerType, forKey: .volunteerType)
+            try container.encodeIfPresent(wwccNumber, forKey: .wwccNumber)
+            try container.encode(preferences, forKey: .preferences)
+            try container.encode(hoursContributed, forKey: .hoursContributed)
+            try container.encode(impactScore, forKey: .impactScore)
         }
     }
 }

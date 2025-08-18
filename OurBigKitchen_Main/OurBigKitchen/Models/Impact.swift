@@ -116,10 +116,38 @@ struct Impact: Codable, Equatable, Hashable {
     
     // Factory method to create Impact from ImpactMetric
     static func fromImpactMetric(_ metric: AppModels.ImpactMetric) -> Impact {
-        Impact(
-            mealsProvided: metric.mealsServed,
-            hoursContributed: Int(metric.volunteerHours),
-            peopleHelped: metric.peopleFed,
+        // Map the ImpactType to appropriate values
+        let mealsProvided: Int
+        let hoursContributed: Int
+        let peopleHelped: Int
+        
+        switch metric.type {
+        case .mealsServed:
+            mealsProvided = Int(metric.value)
+            hoursContributed = 0
+            peopleHelped = Int(metric.value)
+        case .peopleFed:
+            mealsProvided = 0
+            hoursContributed = 0
+            peopleHelped = Int(metric.value)
+        case .volunteerHours:
+            mealsProvided = 0
+            hoursContributed = Int(metric.value)
+            peopleHelped = 0
+        case .volunteer:
+            mealsProvided = 0
+            hoursContributed = Int(metric.value)
+            peopleHelped = 0
+        default:
+            mealsProvided = 0
+            hoursContributed = 0
+            peopleHelped = 0
+        }
+        
+        return Impact(
+            mealsProvided: mealsProvided,
+            hoursContributed: hoursContributed,
+            peopleHelped: peopleHelped,
             eventsAttended: 1, // Default to 1 event, would be updated in real app
             mealsMade: nil,
             timeSpent: nil

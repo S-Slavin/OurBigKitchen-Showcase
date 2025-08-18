@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct TermsView: View {
-    @StateObject private var termsManager = TermsManager.shared
+    @StateObject private var termsManager = TermsManager()
     @Binding var showTermsSheet: Bool
     @State private var hasRead: Bool = false
     @State private var showError = false

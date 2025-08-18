@@ -88,36 +88,24 @@ class ActivityManager {
                 // Create mock data for demo purposes
                 return [
                     Activity(
-                        userId: "user123",
-                        eventId: "event456",
                         title: "Meal Preparation",
                         description: "Prepared 50 meals for local shelter",
                         category: .cooking,
                         date: Date().addingTimeInterval(-86400), // Yesterday
                         duration: 3600, // 1 hour
-                        impact: ImpactMetric(
-                            mealsServed: 50,
-                            peopleFed: 50,
-                            wasteReduced: 10,
-                            carbonFootprintReduced: 15,
-                            volunteerHours: 5
-                        )
+                        location: "Local Shelter",
+                        participants: ["user123"],
+                        impact: ImpactMetric(type: .mealsServed, value: 50, unit: "meals", date: Date().addingTimeInterval(-86400))
                     ),
                     Activity(
-                        userId: "user123",
-                        eventId: "event789",
                         title: "Food Delivery",
                         description: "Delivered meals to 25 families",
                         category: .delivery,
                         date: Date().addingTimeInterval(-172800), // 2 days ago
                         duration: 7200, // 2 hours
-                        impact: ImpactMetric(
-                            mealsServed: 25,
-                            peopleFed: 75,
-                            wasteReduced: 5,
-                            carbonFootprintReduced: 8,
-                            volunteerHours: 2
-                        )
+                        location: "Community Center",
+                        participants: ["user123"],
+                        impact: ImpactMetric(type: .mealsServed, value: 25, unit: "meals", date: Date().addingTimeInterval(-172800))
                     )
                 ]
             }

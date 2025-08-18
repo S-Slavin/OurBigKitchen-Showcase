@@ -2,6 +2,7 @@ import Foundation
 import Combine
 
 // MARK: - Network Protocol
+
 @preconcurrency
 protocol NetworkManaging {
     func get<T: Decodable>(endpoint: String) -> AnyPublisher<T, Error>
@@ -11,167 +12,172 @@ protocol NetworkManaging {
 }
 
 // MARK: - API Constants
+
 private enum APIConstants {
     static let baseURL = "https://api.ourbigkitchen.com/v1"
     static let authTokenKey = "authToken"
     static let contentTypeJSON = "application/json"
     static let authHeaderKey = "Authorization"
     static let bearerPrefix = "Bearer "
+    static let timeoutInterval: TimeInterval = 30.0
 }
 
-@MainActor
+// MARK: - Network Manager
+
 class NetworkManager: NetworkManaging {
     static let shared = NetworkManager()
     
     private let session: URLSession
+    private let authToken: String?
     
-    private init(session: URLSession = .shared) {
-        self.session = session
+    private init() {
+        self.session = URLSession.shared
+        self.authToken = UserDefaults.standard.string(forKey: APIConstants.authTokenKey)
     }
     
-    // MARK: - Daily Stats
+    // MARK: - Network Protocol Implementation
     
-    func getDailyStats(date: Date) -> AnyPublisher<DailyStats, Error> {
-        let dateString = ISO8601DateFormatter().string(from: date)
-        return get(endpoint: "/stats/daily/\(dateString)")
+    func get<T: Decodable>(endpoint: String) -> AnyPublisher<T, Error> {
+        guard let url = buildURL(for: endpoint) else {
+            return Fail(error: NetworkError.invalidURL)
+                .eraseToAnyPublisher()
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.timeoutInterval = APIConstants.timeoutInterval
+        addHeaders(to: &request)
+        
+        return performRequest(request)
     }
     
-    func getDailyStats(from startDate: Date, to endDate: Date) -> AnyPublisher<[DailyStats], Error> {
-        let formatter = ISO8601DateFormatter()
-        let endpoint = "/stats/daily?from=\(formatter.string(from: startDate))&to=\(formatter.string(from: endDate))"
-        return get(endpoint: endpoint)
+    func post<T: Encodable, U: Decodable>(endpoint: String, body: T) -> AnyPublisher<U, Error> {
+        guard let url = buildURL(for: endpoint) else {
+            return Fail(error: NetworkError.invalidURL)
+                .eraseToAnyPublisher()
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.timeoutInterval = APIConstants.timeoutInterval
+        request.setValue(APIConstants.contentTypeJSON, forHTTPHeaderField: "Content-Type")
+        addHeaders(to: &request)
+        
+        do {
+            request.httpBody = try JSONEncoder().encode(body)
+        } catch {
+            return Fail(error: NetworkError.encodingError(error))
+                .eraseToAnyPublisher()
+        }
+        
+        return performRequest(request)
     }
     
-    func updateDailyStats(_ stats: DailyStats) -> AnyPublisher<DailyStats, Error> {
-        return put(endpoint: "/stats/daily/\(stats.id)", body: stats)
+    func put<T: Encodable, U: Decodable>(endpoint: String, body: T) -> AnyPublisher<U, Error> {
+        guard let url = buildURL(for: endpoint) else {
+            return Fail(error: NetworkError.invalidURL)
+                .eraseToAnyPublisher()
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "PUT"
+        request.timeoutInterval = APIConstants.timeoutInterval
+        request.setValue(APIConstants.contentTypeJSON, forHTTPHeaderField: "Content-Type")
+        addHeaders(to: &request)
+        
+        do {
+            request.httpBody = try JSONEncoder().encode(body)
+        } catch {
+            return Fail(error: NetworkError.encodingError(error))
+                .eraseToAnyPublisher()
+        }
+        
+        return performRequest(request)
     }
     
-    // MARK: - Impact Metrics
-    
-    func getImpactMetrics() -> AnyPublisher<[ImpactMetric], Error> {
-        return get(endpoint: "/stats/impact")
+    func delete(endpoint: String) -> AnyPublisher<Void, Error> {
+        guard let url = buildURL(for: endpoint) else {
+            return Fail(error: NetworkError.invalidURL)
+                .eraseToAnyPublisher()
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        request.timeoutInterval = APIConstants.timeoutInterval
+        addHeaders(to: &request)
+        
+        return session.dataTaskPublisher(for: request)
+            .tryMap { data, response in
+                try self.validateResponse(response)
+            }
+            .map { _ in () }
+            .eraseToAnyPublisher()
     }
     
-    func updateImpactMetric(_ metric: ImpactMetric) -> AnyPublisher<ImpactMetric, Error> {
-        return put(endpoint: "/stats/impact", body: metric)
+    // MARK: - Private Methods
+    
+    private func buildURL(for endpoint: String) -> URL? {
+        let fullURLString = APIConstants.baseURL + endpoint
+        return URL(string: fullURLString)
     }
     
-    // MARK: - Corporate Rankings
-    
-    func getCorporateRankings(category: RankingCategory) -> AnyPublisher<[CorporateRanking], Error> {
-        return get(endpoint: "/stats/rankings/corporate/\(category.rawValue)")
-    }
-    
-    // MARK: - Analytics
-    
-    func getAnalyticsReport(startDate: Date, endDate: Date) -> AnyPublisher<AppModels.AnalyticsReport, Error> {
-        let formatter = ISO8601DateFormatter()
-        let endpoint = "/stats/analytics?from=\(formatter.string(from: startDate))&to=\(formatter.string(from: endDate))"
-        return get(endpoint: endpoint)
-    }
-    
-    // MARK: - Generic Network Methods
-    
-    nonisolated func get<T: Decodable>(endpoint: String) -> AnyPublisher<T, Error> {
-        // For testing, return a mock response
-        return Future<T, Error> { promise in
-            // Simulate network delay
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                if let mockResponse = self.createMockResponse(for: endpoint, as: T.self) {
-                    promise(.success(mockResponse))
-                } else {
-                    promise(.failure(NetworkError.invalidResponse))
+    private func performRequest<T: Decodable>(_ request: URLRequest) -> AnyPublisher<T, Error> {
+        return session.dataTaskPublisher(for: request)
+            .tryMap { data, response in
+                try self.validateResponse(response)
+                return data
+            }
+            .decode(type: T.self, decoder: JSONDecoder())
+            .mapError { error in
+                if let networkError = error as? NetworkError {
+                    return networkError
                 }
+                return NetworkError.decodingError(error)
             }
-        }
-        .eraseToAnyPublisher()
+            .eraseToAnyPublisher()
     }
     
-    nonisolated func post<T: Encodable, U: Decodable>(endpoint: String, body: T) -> AnyPublisher<U, Error> {
-        // For testing, return a mock response
-        return Future<U, Error> { promise in
-            // Simulate network delay
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                if let mockResponse = self.createMockResponse(for: endpoint, as: U.self) {
-                    promise(.success(mockResponse))
-                } else {
-                    promise(.failure(NetworkError.invalidResponse))
-                }
-            }
+    private func addHeaders(to request: inout URLRequest) {
+        if let token = authToken {
+            request.setValue(APIConstants.bearerPrefix + token, forHTTPHeaderField: APIConstants.authHeaderKey)
         }
-        .eraseToAnyPublisher()
     }
     
-    nonisolated func put<T: Encodable, U: Decodable>(endpoint: String, body: T) -> AnyPublisher<U, Error> {
-        // For testing, return a mock response
-        return Future<U, Error> { promise in
-            // Simulate network delay
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                if let mockResponse = self.createMockResponse(for: endpoint, as: U.self) {
-                    promise(.success(mockResponse))
-                } else {
-                    promise(.failure(NetworkError.invalidResponse))
-                }
-            }
+    private func validateResponse(_ response: URLResponse) throws {
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw NetworkError.invalidResponse
         }
-        .eraseToAnyPublisher()
-    }
-    
-    nonisolated func delete(endpoint: String) -> AnyPublisher<Void, Error> {
-        // For testing, return success
-        return Future<Void, Error> { promise in
-            // Simulate network delay
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                promise(.success(()))
-            }
-        }
-        .eraseToAnyPublisher()
-    }
-    
-    // MARK: - Helper Methods
-    
-    private func createMockResponse<T>(for endpoint: String, as type: T.Type) -> T? {
-        // Create appropriate mock responses based on the endpoint
-        switch endpoint {
-        case "/users/current":
-            let mockUser = AppModels.User(
-                id: UUID().uuidString,
-                firstName: "Test",
-                lastName: "User",
-                email: "test@example.com",
-                role: .volunteer
-            )
-            return mockUser as? T
-            
-        case "/users/achievements":
-            let mockAchievements = [
-                AppModels.UserAchievement(
-                    title: "First Volunteer",
-                    description: "Completed first volunteer session"
-                )
-            ]
-            return mockAchievements as? T
-            
-        default:
-            return nil
+        
+        guard (200...299).contains(httpResponse.statusCode) else {
+            throw NetworkError.httpError(httpResponse.statusCode)
         }
     }
 }
 
-// MARK: - Network Error
-enum NetworkError: Error {
+// MARK: - Network Errors
+
+enum NetworkError: LocalizedError {
     case invalidURL
+    case encodingError(Error)
+    case decodingError(Error)
     case invalidResponse
-    case requestFailed(Error)
-    case encodingFailed(Error)
-    case decodingFailed(Error)
-}
-
-// MARK: - URLRequest Extension
-private extension URLRequest {
-    mutating func addAuthenticationHeader() {
-        if let token = UserDefaults.standard.string(forKey: APIConstants.authTokenKey) {
-            setValue("\(APIConstants.bearerPrefix)\(token)", forHTTPHeaderField: APIConstants.authHeaderKey)
+    case httpError(Int)
+    case noData
+    
+    var errorDescription: String? {
+        switch self {
+        case .invalidURL:
+            return "Invalid URL"
+        case .encodingError(let error):
+            return "Encoding error: \(error.localizedDescription)"
+        case .decodingError(let error):
+            return "Decoding error: \(error.localizedDescription)"
+        case .invalidResponse:
+            return "Invalid response"
+        case .httpError(let code):
+            return "HTTP error: \(code)"
+        case .noData:
+            return "No data received"
         }
     }
 } 

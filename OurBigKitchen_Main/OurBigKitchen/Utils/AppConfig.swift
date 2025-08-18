@@ -1,15 +1,9 @@
-//
-//  AppConfig.swift
-//  OurBigKitchen
-//
-//  Created by Admin on 17/4/2025.
-//
-
-
 import Foundation
 
 enum AppConfig {
+    
     // MARK: - Environment
+    
     enum Environment {
         case development
         case staging
@@ -32,6 +26,7 @@ enum AppConfig {
     }
     
     // MARK: - Current Configuration
+    
     static let currentEnvironment: Environment = {
         #if DEBUG
         return .development
@@ -41,15 +36,18 @@ enum AppConfig {
     }()
     
     // MARK: - API Configuration
+    
     static let apiVersion = "v1"
     static let apiTimeout: TimeInterval = 30
     static let maxRetryAttempts = 3
     
     // MARK: - Cache Configuration
+    
     static let cacheExpiration: TimeInterval = 3600 // 1 hour
     static let maxCacheSize: Int = 50 * 1024 * 1024 // 50 MB
     
     // MARK: - Feature Flags
+    
     static var features: [String: Bool] = [
         "socialSharing": true,
         "analytics": true,
@@ -58,6 +56,7 @@ enum AppConfig {
     ]
     
     // MARK: - Constants
+    
     enum Constants {
         static let appName = "Our Big Kitchen"
         static let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
@@ -85,6 +84,7 @@ enum AppConfig {
     }
     
     // MARK: - Helper Methods
+    
     static func isFeatureEnabled(_ feature: String) -> Bool {
         return features[feature] ?? false
     }

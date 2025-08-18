@@ -14,18 +14,19 @@ struct PersistenceController {
     static let preview: PersistenceController = {
         let result = PersistenceController(inMemory: true)
         let viewContext = result.container.viewContext
-        // TODO: Add sample data when Core Data entities are defined
+        
+        // Add sample data for previews when Core Data entities are defined
         // for _ in 0..<10 {
         //     let newItem = Item(context: viewContext)
         //     newItem.timestamp = Date()
         // }
+        
         do {
             try viewContext.save()
         } catch {
-            // Replace this implementation with code to handle the error appropriately.
-            // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
+            // Log error for debugging but don't crash
             let nsError = error as NSError
-            fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
+            print("Preview context save failed: \(nsError), \(nsError.userInfo)")
         }
         return result
     }()
@@ -34,13 +35,14 @@ struct PersistenceController {
 
     init(inMemory: Bool = false) {
         container = NSPersistentCloudKitContainer(name: "OurBigKitchen")
+        
         if inMemory {
             container.persistentStoreDescriptions.first!.url = URL(fileURLWithPath: "/dev/null")
         }
         
         container.loadPersistentStores { [container] (storeDescription, error) in
             if let error = error as NSError? {
-                // Log the error
+                // Log the error for debugging
                 print("Error loading persistent store: \(error), \(error.userInfo)")
                 
                 // Attempt to recover by deleting and recreating the store
@@ -81,5 +83,52 @@ struct PersistenceController {
         // Configure the view context for better performance
         container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
         container.viewContext.shouldDeleteInaccessibleFaults = true
+    }
+    
+    // MARK: - Error Handling
+    
+    func save() throws {
+        let context = container.viewContext
+        
+        if context.hasChanges {
+            do {
+                try context.save()
+            } catch {
+                let nsError = error as NSError
+                throw PersistenceError.saveFailed(nsError)
+            }
+        }
+    }
+    
+    func delete(_ object: NSManagedObject) throws {
+        let context = container.viewContext
+        context.delete(object)
+        try save()
+    }
+    
+    func rollback() {
+        container.viewContext.rollback()
+    }
+}
+
+// MARK: - Persistence Errors
+
+enum PersistenceError: LocalizedError {
+    case saveFailed(Error)
+    case deleteFailed(Error)
+    case fetchFailed(Error)
+    case storeNotFound
+    
+    var errorDescription: String? {
+        switch self {
+        case .saveFailed(let error):
+            return "Failed to save changes: \(error.localizedDescription)"
+        case .deleteFailed(let error):
+            return "Failed to delete object: \(error.localizedDescription)"
+        case .fetchFailed(let error):
+            return "Failed to fetch data: \(error.localizedDescription)"
+        case .storeNotFound:
+            return "Core Data store not found"
+        }
     }
 }

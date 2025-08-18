@@ -149,9 +149,21 @@ class RealImpactService: ObservableObject {
         let userStats = coreDataManager.getUserStats(for: userId)
         let userMetrics = coreDataManager.fetchImpactMetrics(for: userId)
         
-        let totalMeals = userMetrics.reduce(0) { $0 + $1.mealsServed }
-        let totalPeople = userMetrics.reduce(0) { $0 + $1.peopleFed }
-        let totalHours = userMetrics.reduce(0.0) { $0 + $1.volunteerHours }
+        let totalMeals = userMetrics.reduce(into: 0) { result, metric in
+            if metric.type == .mealsServed {
+                result += Int(metric.value)
+            }
+        }
+        let totalPeople = userMetrics.reduce(into: 0) { result, metric in
+            if metric.type == .peopleFed {
+                result += Int(metric.value)
+            }
+        }
+        let totalHours = userMetrics.reduce(into: 0.0) { result, metric in
+            if metric.type == .volunteerHours {
+                result += metric.value
+            }
+        }
         
         return (meals: Int32(totalMeals), people: Int32(totalPeople), hours: totalHours)
     }
@@ -160,8 +172,16 @@ class RealImpactService: ObservableObject {
         let eventMetrics = coreDataManager.fetchImpactMetrics(eventId: eventId)
         let eventSessions = coreDataManager.fetchVolunteerSessions(eventId: eventId, status: "completed")
         
-        let totalMeals = eventMetrics.reduce(0) { $0 + $1.mealsServed }
-        let totalPeople = eventMetrics.reduce(0) { $0 + $1.peopleFed }
+        let totalMeals = eventMetrics.reduce(into: 0) { result, metric in
+            if metric.type == .mealsServed {
+                result += Int(metric.value)
+            }
+        }
+        let totalPeople = eventMetrics.reduce(into: 0) { result, metric in
+            if metric.type == .peopleFed {
+                result += Int(metric.value)
+            }
+        }
         let totalHours = eventSessions.reduce(0.0) { $0 + ($1.duration / 3600) }
         
         return (meals: Int32(totalMeals), people: Int32(totalPeople), hours: totalHours)
@@ -212,8 +232,16 @@ class RealImpactService: ObservableObject {
         while currentDate <= endDate {
             // Since ImpactMetric doesn't have timestamp, we'll create a single trend entry
             // This will need to be updated when Core Data is properly implemented
-            let totalMeals = metrics.reduce(0) { $0 + $1.mealsServed }
-            let totalPeople = metrics.reduce(0) { $0 + $1.peopleFed }
+            let totalMeals = metrics.reduce(into: 0) { result, metric in
+                if metric.type == .mealsServed {
+                    result += Int(metric.value)
+                }
+            }
+            let totalPeople = metrics.reduce(into: 0) { result, metric in
+                if metric.type == .peopleFed {
+                    result += Int(metric.value)
+                }
+            }
             
             trends.append(ImpactTrend(
                 date: currentDate,
@@ -234,15 +262,19 @@ class RealImpactService: ObservableObject {
         
         for metric in allMetrics {
             // Since ImpactMetric doesn't have type property, we'll categorize based on values
-            if metric.mealsServed > 0 {
-                breakdown.mealPreparation += Int32(metric.mealsServed)
-                breakdown.peopleServed += Int32(metric.peopleFed)
+            if metric.type == .mealsServed && metric.value > 0 {
+                breakdown.mealPreparation += Int32(metric.value)
             }
-            if metric.volunteerHours > 0 {
-                breakdown.volunteerHours += metric.volunteerHours
+            if metric.type == .peopleFed && metric.value > 0 {
+                breakdown.peopleServed += Int32(metric.value)
             }
-            if metric.wasteReduced > 0 {
-                breakdown.foodDonations += metric.wasteReduced
+            
+            if metric.type == .volunteerHours && metric.value > 0 {
+                breakdown.volunteerHours += metric.value
+            }
+            
+            if metric.type == .wasteReduced && metric.value > 0 {
+                breakdown.foodDonations += metric.value
             }
         }
         

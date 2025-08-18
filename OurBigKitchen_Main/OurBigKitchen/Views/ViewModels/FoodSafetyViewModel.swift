@@ -33,7 +33,7 @@ class FoodSafetyViewModel: ObservableObject {
         self.foodSafetyService = foodSafetyService ?? FoodSafetyService.shared
         self.userManager = userManager ?? UserManager.shared
         self.authManager = authManager ?? AuthManager.shared
-        self.termsManager = termsManager ?? TermsManager.shared
+        self.termsManager = termsManager ?? TermsManager()
         prefillUserData()
     }
     

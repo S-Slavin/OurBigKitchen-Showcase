@@ -5,79 +5,68 @@ import CryptoKit
 
 @MainActor
 class AuthService: ObservableObject {
+    
+    // MARK: - Singleton
     static let shared = AuthService()
     
+    // MARK: - Published Properties
     @Published var currentUser: AppModels.User?
+    @Published var isAuthenticated: Bool = false
     
+    // MARK: - Private Properties
     private let networkManager: NetworkManager
     private let userManager: UserManager
+    
+    // MARK: - Initialization
     
     init(networkManager: NetworkManager? = nil, userManager: UserManager? = nil) {
         self.networkManager = networkManager ?? NetworkManager.shared
         self.userManager = userManager ?? UserManager.shared
     }
     
+    // MARK: - Authentication Methods
+    
     func signIn(email: String, password: String) async throws -> AppModels.User {
-        // For testing, return a mock user
-        let mockUser = AppModels.User(
-            id: UUID().uuidString,
-            firstName: "Test",
-            lastName: "User",
-            email: email,
-            role: .volunteer
-        )
-        self.currentUser = mockUser
-        return mockUser
+        // TODO: Implement real authentication
+        // For now, this is a placeholder for production implementation
+        throw AuthError.invalidCredentials
     }
     
     func signInWithGroupCode(code: String) async throws -> AppModels.User {
-        // For testing, return a mock user
-        let mockUser = AppModels.User(
-            id: UUID().uuidString,
-            firstName: "Group",
-            lastName: "User",
-            email: "group@example.com",
-            role: .volunteer
-        )
-        self.currentUser = mockUser
-        return mockUser
+        // TODO: Implement group code authentication
+        throw AuthError.invalidCredentials
     }
     
     func signInWithApple() async throws -> AppModels.User {
-        // For testing, return a mock user
-        let mockUser = AppModels.User(
-            id: UUID().uuidString,
-            firstName: "Apple",
-            lastName: "User",
-            email: "apple@example.com",
-            role: .volunteer
-        )
-        self.currentUser = mockUser
-        return mockUser
+        // TODO: Implement Apple Sign In
+        throw AuthError.invalidCredentials
     }
     
     func signInWithGoogle() async throws -> AppModels.User {
-        // For testing, return a mock user
-        let mockUser = AppModels.User(
-            id: UUID().uuidString,
-            firstName: "Google",
-            lastName: "User",
-            email: "google@example.com",
-            role: .volunteer
-        )
-        self.currentUser = mockUser
-        return mockUser
+        // TODO: Implement Google Sign In
+        throw AuthError.invalidCredentials
+    }
+    
+    func signUp(firstName: String, lastName: String, email: String, password: String, volunteerType: VolunteerType, dateOfBirth: Date, wwccNumber: String?, wwccExpiryDate: Date?) async throws -> AppModels.User {
+        // TODO: Implement real user registration
+        throw AuthError.invalidCredentials
     }
     
     func signOut() async throws {
-        // Clear user data
-        self.currentUser = nil
+        currentUser = nil
+        isAuthenticated = false
+        
+        // Clear keychain data
+        try clearKeychainData()
+        
+        // Post notification
+        NotificationCenter.default.post(name: .didLogout, object: nil)
     }
     
     // MARK: - Keychain Methods
     
     func hashPassword(_ password: String) -> Data {
-        let salt = "OurBigKitchen" // In production, use a unique salt per user
+        let salt = "OurBigKitchen" // TODO: Use unique salt per user in production
         let saltedPassword = password + salt
         let inputData = Data(saltedPassword.utf8)
         let hashed = SHA256.hash(data: inputData)
@@ -94,15 +83,16 @@ class AuthService: ObservableObject {
         let status = SecItemAdd(query as CFDictionary, nil)
         
         if status != errSecSuccess {
-            throw AuthError.keychainError
+            throw AuthError.invalidCredentials
         }
     }
     
-    func loadDataFromKeychain(key: String) throws -> Data {
+    func retrieveFromKeychain(key: String) throws -> Data {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: key,
-            kSecReturnData as String: true
+            kSecReturnData as String: true,
+            kSecMatchLimit as String: kSecMatchLimitOne
         ]
         
         var result: AnyObject?
@@ -110,7 +100,7 @@ class AuthService: ObservableObject {
         
         guard status == errSecSuccess,
               let data = result as? Data else {
-            throw AuthError.keychainError
+            throw AuthError.invalidCredentials
         }
         
         return data
@@ -125,58 +115,30 @@ class AuthService: ObservableObject {
         let status = SecItemDelete(query as CFDictionary)
         
         if status != errSecSuccess && status != errSecItemNotFound {
-            throw AuthError.keychainError
+            throw AuthError.invalidCredentials
         }
     }
     
-    func signUp(
-        firstName: String,
-        lastName: String,
-        email: String,
-        password: String,
-        dob: Date,
-        wwcNumber: String?,
-        wwcExpiry: Date?
-    ) async throws -> AppModels.User {
-        // For testing, return a mock user
-        let mockUser = AppModels.User(
-            id: UUID().uuidString,
-            firstName: firstName,
-            lastName: lastName,
-            email: email,
-            role: .volunteer,
-            dob: dob,
-            wwcNumber: wwcNumber,
-            wwcExpiry: wwcExpiry
-        )
-        self.currentUser = mockUser
-        return mockUser
+    private func clearKeychainData() throws {
+        // Clear all stored authentication data
+        try deleteFromKeychain(key: "userToken")
+        try deleteFromKeychain(key: "refreshToken")
+        try deleteFromKeychain(key: "userCredentials")
     }
     
-    // MARK: - Helper Methods
+    // MARK: - User Management
     
-    private func validateWWCC(number: String, expiryDate: Date) throws {
-        // Check if WWCC number is valid
-        guard number.count >= 8 else {
-            throw AuthError.wwccInvalid
-        }
-        
-        // Check if WWCC is expired
-        if expiryDate <= Date() {
-            throw AuthError.wwccExpired
-        }
+    func updateUserProfile(_ user: AppModels.User) async throws {
+        // TODO: Implement profile update
+        currentUser = user
     }
     
-    private func validateEmail(_ email: String) -> Bool {
-        let emailRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
-        let emailPredicate = NSPredicate(format:"SELF MATCHES %@", emailRegex)
-        return emailPredicate.evaluate(with: email)
+    func refreshUserToken() async throws {
+        // TODO: Implement token refresh
+        throw AuthError.invalidCredentials
     }
-    
-    private func validatePassword(_ password: String) -> Bool {
-        // Password must be at least 8 characters long and contain at least one number
-        let passwordRegex = "^(?=.*[0-9]).{8,}$"
-        let passwordPredicate = NSPredicate(format: "SELF MATCHES %@", passwordRegex)
-        return passwordPredicate.evaluate(with: password)
-    }
-} 
+}
+
+// MARK: - Auth Errors
+
+// AuthError is defined in AuthManager.swift to avoid duplication 

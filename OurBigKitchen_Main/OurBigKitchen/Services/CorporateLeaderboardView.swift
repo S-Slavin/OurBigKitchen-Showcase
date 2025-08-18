@@ -90,7 +90,7 @@ struct PodiumPosition: View {
             }
             
             VStack(alignment: .leading, spacing: 4) {
-                Text(company.name)
+                Text(company.companyName)
                     .font(.headline)
                 
                 Text("\(company.hoursContributed) volunteer hours")
@@ -130,7 +130,7 @@ struct CompanyRow: View {
     
     var body: some View {
         HStack {
-            Text(company.name)
+            Text(company.companyName)
                 .font(.subheadline)
             
             Spacer()
@@ -174,7 +174,7 @@ class CorporateLeaderboardViewModel: ObservableObject {
         firebaseService.observeLeaderboard { [weak self] companies in
             DispatchQueue.main.async {
                 self?.isLoading = false
-                self?.companies = companies.sorted { $0.impactScore > $1.impactScore }
+                self?.companies = companies.sorted(by: { $0.impactScore > $1.impactScore })
                 self?.topCompanies = Array(self?.companies.prefix(3) ?? [])
             }
         }

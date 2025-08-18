@@ -2,17 +2,32 @@ import Foundation
 import Combine
 
 // MARK: - Salesforce Configuration
+
 struct SalesforceConfig {
+    // TODO: Update with actual Salesforce instance details
     static let baseURL = "https://your-instance.salesforce.com"
     static let apiVersion = "v58.0"
+    
+    // Authentication credentials - will be configured during setup
     static let clientId = "your-client-id"
     static let clientSecret = "your-client-secret"
     static let username = "your-username"
     static let password = "your-password"
     static let securityToken = "your-security-token"
+    
+    // API endpoints
+    static let authEndpoint = "/services/oauth2/token"
+    static let queryEndpoint = "/services/data/v\(apiVersion)/query"
+    static let sobjectEndpoint = "/services/data/v\(apiVersion)/sobjects"
+    
+    // Custom object names
+    static let volunteerObject = "Volunteer__c"
+    static let volunteerSessionObject = "Volunteer_Session__c"
+    static let impactMetricObject = "Impact_Metric__c"
 }
 
 // MARK: - Salesforce Authentication
+
 struct SalesforceAuthResponse: Codable {
     let accessToken: String
     let instanceURL: String
@@ -30,6 +45,7 @@ struct SalesforceAuthResponse: Codable {
 }
 
 // MARK: - Salesforce Objects
+
 struct SalesforceContact: Codable {
     let id: String?
     let firstName: String
@@ -98,65 +114,29 @@ struct SalesforceAccount: Codable {
     }
 }
 
-struct SalesforceVolunteerEvent: Codable {
-    let id: String?
-    let name: String
-    let eventDate: String?
-    let startTime: String?
-    let endTime: String?
-    let location: String?
-    let description: String?
-    let maxVolunteers: Int?
-    let currentVolunteers: Int?
-    let status: String?
-    let eventType: String?
-    
-    enum CodingKeys: String, CodingKey {
-        case id = "Id"
-        case name = "Name"
-        case eventDate = "Event_Date__c"
-        case startTime = "Start_Time__c"
-        case endTime = "End_Time__c"
-        case location = "Location__c"
-        case description = "Description__c"
-        case maxVolunteers = "Max_Volunteers__c"
-        case currentVolunteers = "Current_Volunteers__c"
-        case status = "Status__c"
-        case eventType = "Event_Type__c"
-    }
-}
+// MARK: - Salesforce Service
 
-// MARK: - Salesforce Service Protocol
-protocol SalesforceServiceProtocol {
-    func authenticate() -> AnyPublisher<SalesforceAuthResponse, Error>
-    func createContact(_ contact: SalesforceContact) -> AnyPublisher<String, Error>
-    func createAccount(_ account: SalesforceAccount) -> AnyPublisher<String, Error>
-    func createVolunteerEvent(_ event: SalesforceVolunteerEvent) -> AnyPublisher<String, Error>
-    func updateContact(_ contact: SalesforceContact) -> AnyPublisher<Bool, Error>
-    func updateAccount(_ account: SalesforceAccount) -> AnyPublisher<Bool, Error>
-    func updateVolunteerEvent(_ event: SalesforceVolunteerEvent) -> AnyPublisher<Bool, Error>
-    func queryContacts(query: String) -> AnyPublisher<[SalesforceContact], Error>
-    func queryAccounts(query: String) -> AnyPublisher<[SalesforceAccount], Error>
-    func queryVolunteerEvents(query: String) -> AnyPublisher<[SalesforceVolunteerEvent], Error>
-    func deleteRecord(objectType: String, recordId: String) -> AnyPublisher<Bool, Error>
-}
-
-// MARK: - Salesforce Service Implementation
-class SalesforceService: SalesforceServiceProtocol, ObservableObject {
-    @Published var isAuthenticated = false
-    @Published var isLoading = false
-    @Published var errorMessage = ""
+@MainActor
+class SalesforceService: ObservableObject {
+    static let shared = SalesforceService()
     
-    private var accessToken: String?
-    private var instanceURL: String?
+    @Published private(set) var isAuthenticated = false
+    @Published private(set) var isLoading = false
+    @Published private(set) var error: Error?
+    
+    private var authResponse: SalesforceAuthResponse?
     private var cancellables = Set<AnyCancellable>()
     
+    private init() {}
+    
     // MARK: - Authentication
+    
     func authenticate() -> AnyPublisher<SalesforceAuthResponse, Error> {
         isLoading = true
         
-        let url = URL(string: "\(SalesforceConfig.baseURL)/services/oauth2/token")!
-        var request = URLRequest(url: url)
+        let authURL = SalesforceConfig.baseURL + SalesforceConfig.authEndpoint
+        
+        var request = URLRequest(url: URL(string: authURL)!)
         request.httpMethod = "POST"
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
         
@@ -168,295 +148,178 @@ class SalesforceService: SalesforceServiceProtocol, ObservableObject {
             "password": SalesforceConfig.password + SalesforceConfig.securityToken
         ]
         
-        request.httpBody = body.percentEncoded()
+        request.httpBody = body
+            .map { "\($0.key)=\($0.value)" }
+            .joined(separator: "&")
+            .data(using: .utf8)
         
         return URLSession.shared.dataTaskPublisher(for: request)
-            .map(\.data)
-            .decode(type: SalesforceAuthResponse.self, decoder: JSONDecoder())
-            .handleEvents(
-                receiveOutput: { [weak self] response in
-                    self?.accessToken = response.accessToken
-                    self?.instanceURL = response.instanceURL
-                    self?.isAuthenticated = true
-                    self?.isLoading = false
-                },
-                receiveCompletion: { [weak self] completion in
-                    if case .failure(let error) = completion {
-                        self?.errorMessage = error.localizedDescription
-                        self?.isLoading = false
-                    }
+            .tryMap { data, response in
+                guard let httpResponse = response as? HTTPURLResponse,
+                      200...299 ~= httpResponse.statusCode else {
+                    throw SalesforceError.authenticationFailed
                 }
-            )
+                
+                do {
+                    let authResponse = try JSONDecoder().decode(SalesforceAuthResponse.self, from: data)
+                    self.authResponse = authResponse
+                    self.isAuthenticated = true
+                    self.isLoading = false
+                    return authResponse
+                } catch {
+                    throw SalesforceError.decodingError(error)
+                }
+            }
+            .handleEvents(receiveCompletion: { [weak self] completion in
+                if case .failure = completion {
+                    self?.isLoading = false
+                }
+            })
             .eraseToAnyPublisher()
     }
     
-    // MARK: - CRUD Operations
-    func createContact(_ contact: SalesforceContact) -> AnyPublisher<String, Error> {
-        guard let accessToken = accessToken, let instanceURL = instanceURL else {
+    // MARK: - Data Operations
+    
+    func queryRecords(_ soql: String) -> AnyPublisher<[String: Any], Error> {
+        guard let authResponse = authResponse else {
             return Fail(error: SalesforceError.notAuthenticated)
                 .eraseToAnyPublisher()
         }
         
-        let url = URL(string: "\(instanceURL)/services/data/\(SalesforceConfig.apiVersion)/sobjects/Contact")!
-        var request = URLRequest(url: url)
+        let queryURL = authResponse.instanceURL + SalesforceConfig.queryEndpoint + "?q=" + soql.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!
+        
+        var request = URLRequest(url: URL(string: queryURL)!)
+        request.setValue("Bearer \(authResponse.accessToken)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        
+        return URLSession.shared.dataTaskPublisher(for: request)
+            .tryMap { data, response in
+                guard let httpResponse = response as? HTTPURLResponse,
+                      200...299 ~= httpResponse.statusCode else {
+                    throw SalesforceError.queryFailed
+                }
+                
+                do {
+                    let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+                    return json ?? [:]
+                } catch {
+                    throw SalesforceError.decodingError(error)
+                }
+            }
+            .eraseToAnyPublisher()
+    }
+    
+    func createRecord(_ objectName: String, fields: [String: Any]) -> AnyPublisher<String, Error> {
+        guard let authResponse = authResponse else {
+            return Fail(error: SalesforceError.notAuthenticated)
+                .eraseToAnyPublisher()
+        }
+        
+        let createURL = authResponse.instanceURL + SalesforceConfig.sobjectEndpoint + "/" + objectName
+        
+        var request = URLRequest(url: URL(string: createURL)!)
         request.httpMethod = "POST"
-        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        request.setValue("Bearer \(authResponse.accessToken)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
         
         do {
-            request.httpBody = try JSONEncoder().encode(contact)
+            request.httpBody = try JSONSerialization.data(withJSONObject: fields)
         } catch {
-            return Fail(error: error).eraseToAnyPublisher()
+            return Fail(error: SalesforceError.encodingError(error))
+                .eraseToAnyPublisher()
         }
         
         return URLSession.shared.dataTaskPublisher(for: request)
-            .map(\.data)
-            .decode(type: SalesforceCreateResponse.self, decoder: JSONDecoder())
-            .map(\.id)
+            .tryMap { data, response in
+                guard let httpResponse = response as? HTTPURLResponse,
+                      200...299 ~= httpResponse.statusCode else {
+                    throw SalesforceError.createFailed
+                }
+                
+                do {
+                    let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+                    return json?["id"] as? String ?? ""
+                } catch {
+                    throw SalesforceError.decodingError(error)
+                }
+            }
             .eraseToAnyPublisher()
     }
     
-    func createAccount(_ account: SalesforceAccount) -> AnyPublisher<String, Error> {
-        guard let accessToken = accessToken, let instanceURL = instanceURL else {
+    func updateRecord(_ objectName: String, id: String, fields: [String: Any]) -> AnyPublisher<Void, Error> {
+        guard let authResponse = authResponse else {
             return Fail(error: SalesforceError.notAuthenticated)
                 .eraseToAnyPublisher()
         }
         
-        let url = URL(string: "\(instanceURL)/services/data/\(SalesforceConfig.apiVersion)/sobjects/Account")!
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        let updateURL = authResponse.instanceURL + SalesforceConfig.sobjectEndpoint + "/" + objectName + "/" + id
         
-        do {
-            request.httpBody = try JSONEncoder().encode(account)
-        } catch {
-            return Fail(error: error).eraseToAnyPublisher()
-        }
-        
-        return URLSession.shared.dataTaskPublisher(for: request)
-            .map(\.data)
-            .decode(type: SalesforceCreateResponse.self, decoder: JSONDecoder())
-            .map(\.id)
-            .eraseToAnyPublisher()
-    }
-    
-    func createVolunteerEvent(_ event: SalesforceVolunteerEvent) -> AnyPublisher<String, Error> {
-        guard let accessToken = accessToken, let instanceURL = instanceURL else {
-            return Fail(error: SalesforceError.notAuthenticated)
-                .eraseToAnyPublisher()
-        }
-        
-        let url = URL(string: "\(instanceURL)/services/data/\(SalesforceConfig.apiVersion)/sobjects/Volunteer_Event__c")!
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        do {
-            request.httpBody = try JSONEncoder().encode(event)
-        } catch {
-            return Fail(error: error).eraseToAnyPublisher()
-        }
-        
-        return URLSession.shared.dataTaskPublisher(for: request)
-            .map(\.data)
-            .decode(type: SalesforceCreateResponse.self, decoder: JSONDecoder())
-            .map(\.id)
-            .eraseToAnyPublisher()
-    }
-    
-    func updateContact(_ contact: SalesforceContact) -> AnyPublisher<Bool, Error> {
-        guard let accessToken = accessToken, let instanceURL = instanceURL, let id = contact.id else {
-            return Fail(error: SalesforceError.notAuthenticated)
-                .eraseToAnyPublisher()
-        }
-        
-        let url = URL(string: "\(instanceURL)/services/data/\(SalesforceConfig.apiVersion)/sobjects/Contact/\(id)")!
-        var request = URLRequest(url: url)
+        var request = URLRequest(url: URL(string: updateURL)!)
         request.httpMethod = "PATCH"
-        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        request.setValue("Bearer \(authResponse.accessToken)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
         do {
-            request.httpBody = try JSONEncoder().encode(contact)
+            request.httpBody = try JSONSerialization.data(withJSONObject: fields)
         } catch {
-            return Fail(error: error).eraseToAnyPublisher()
-        }
-        
-        return URLSession.shared.dataTaskPublisher(for: request)
-            .map { _ in true }
-            .mapError { $0 as Error }
-            .eraseToAnyPublisher()
-    }
-    
-    func updateAccount(_ account: SalesforceAccount) -> AnyPublisher<Bool, Error> {
-        guard let accessToken = accessToken, let instanceURL = instanceURL, let id = account.id else {
-            return Fail(error: SalesforceError.notAuthenticated)
+            return Fail(error: SalesforceError.encodingError(error))
                 .eraseToAnyPublisher()
         }
         
-        let url = URL(string: "\(instanceURL)/services/data/\(SalesforceConfig.apiVersion)/sobjects/Account/\(id)")!
-        var request = URLRequest(url: url)
-        request.httpMethod = "PATCH"
-        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        do {
-            request.httpBody = try JSONEncoder().encode(account)
-        } catch {
-            return Fail(error: error).eraseToAnyPublisher()
-        }
-        
         return URLSession.shared.dataTaskPublisher(for: request)
-            .map { _ in true }
-            .mapError { $0 as Error }
+            .tryMap { _, response in
+                guard let httpResponse = response as? HTTPURLResponse,
+                      200...299 ~= httpResponse.statusCode else {
+                    throw SalesforceError.updateFailed
+                }
+            }
             .eraseToAnyPublisher()
     }
     
-    func updateVolunteerEvent(_ event: SalesforceVolunteerEvent) -> AnyPublisher<Bool, Error> {
-        guard let accessToken = accessToken, let instanceURL = instanceURL, let id = event.id else {
-            return Fail(error: SalesforceError.notAuthenticated)
-                .eraseToAnyPublisher()
-        }
-        
-        let url = URL(string: "\(instanceURL)/services/data/\(SalesforceConfig.apiVersion)/sobjects/Volunteer_Event__c/\(id)")!
-        var request = URLRequest(url: url)
-        request.httpMethod = "PATCH"
-        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        do {
-            request.httpBody = try JSONEncoder().encode(event)
-        } catch {
-            return Fail(error: error).eraseToAnyPublisher()
-        }
-        
-        return URLSession.shared.dataTaskPublisher(for: request)
-            .map { _ in true }
-            .mapError { $0 as Error }
-            .eraseToAnyPublisher()
+    // MARK: - Helper Methods
+    
+    func logout() {
+        authResponse = nil
+        isAuthenticated = false
+        error = nil
     }
     
-    // MARK: - Query Operations
-    func queryContacts(query: String) -> AnyPublisher<[SalesforceContact], Error> {
-        guard let accessToken = accessToken, let instanceURL = instanceURL else {
-            return Fail(error: SalesforceError.notAuthenticated)
-                .eraseToAnyPublisher()
-        }
-        
-        let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-        let url = URL(string: "\(instanceURL)/services/data/\(SalesforceConfig.apiVersion)/query?q=\(encodedQuery)")!
-        var request = URLRequest(url: url)
-        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
-        
-        return URLSession.shared.dataTaskPublisher(for: request)
-            .map(\.data)
-            .decode(type: SalesforceQueryResponse<SalesforceContact>.self, decoder: JSONDecoder())
-            .map(\.records)
-            .eraseToAnyPublisher()
-    }
-    
-    func queryAccounts(query: String) -> AnyPublisher<[SalesforceAccount], Error> {
-        guard let accessToken = accessToken, let instanceURL = instanceURL else {
-            return Just(())
-                .tryMap { _ in throw SalesforceError.notAuthenticated }
-                .eraseToAnyPublisher()
-        }
-        
-        let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-        let url = URL(string: "\(instanceURL)/services/data/\(SalesforceConfig.apiVersion)/query?q=\(encodedQuery)")!
-        var request = URLRequest(url: url)
-        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
-        
-        return URLSession.shared.dataTaskPublisher(for: request)
-            .map(\.data)
-            .decode(type: SalesforceQueryResponse<SalesforceAccount>.self, decoder: JSONDecoder())
-            .map(\.records)
-            .eraseToAnyPublisher()
-    }
-    
-    func queryVolunteerEvents(query: String) -> AnyPublisher<[SalesforceVolunteerEvent], Error> {
-        guard let accessToken = accessToken, let instanceURL = instanceURL else {
-            return Just(())
-                .tryMap { _ in throw SalesforceError.notAuthenticated }
-                .eraseToAnyPublisher()
-        }
-        
-        let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-        let url = URL(string: "\(instanceURL)/services/data/\(SalesforceConfig.apiVersion)/query?q=\(encodedQuery)")!
-        var request = URLRequest(url: url)
-        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
-        
-        return URLSession.shared.dataTaskPublisher(for: request)
-            .map(\.data)
-            .decode(type: SalesforceQueryResponse<SalesforceVolunteerEvent>.self, decoder: JSONDecoder())
-            .map(\.records)
-            .eraseToAnyPublisher()
-    }
-    
-    func deleteRecord(objectType: String, recordId: String) -> AnyPublisher<Bool, Error> {
-        guard let accessToken = accessToken, let instanceURL = instanceURL else {
-            return Just(())
-                .tryMap { _ in throw SalesforceError.notAuthenticated }
-                .eraseToAnyPublisher()
-        }
-        
-        let url = URL(string: "\(instanceURL)/services/data/\(SalesforceConfig.apiVersion)/sobjects/\(objectType)/\(recordId)")!
-        var request = URLRequest(url: url)
-        request.httpMethod = "DELETE"
-        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
-        
-        return URLSession.shared.dataTaskPublisher(for: request)
-            .map { _ in true }
-            .mapError { $0 as Error }
-            .eraseToAnyPublisher()
+    func clearError() {
+        error = nil
     }
 }
 
-// MARK: - Response Models
-struct SalesforceCreateResponse: Codable {
-    let id: String
-    let success: Bool
-    let errors: [String]?
-}
+// MARK: - Salesforce Errors
 
-struct SalesforceQueryResponse<T: Codable>: Codable {
-    let totalSize: Int
-    let done: Bool
-    let records: [T]
-}
-
-// MARK: - Errors
-enum SalesforceError: Error, LocalizedError {
+enum SalesforceError: LocalizedError {
+    case authenticationFailed
     case notAuthenticated
-    case invalidResponse
-    case networkError(Error)
+    case queryFailed
+    case createFailed
+    case updateFailed
+    case encodingError(Error)
     case decodingError(Error)
+    case networkError
     
     var errorDescription: String? {
         switch self {
+        case .authenticationFailed:
+            return "Salesforce authentication failed"
         case .notAuthenticated:
             return "Not authenticated with Salesforce"
-        case .invalidResponse:
-            return "Invalid response from Salesforce"
-        case .networkError(let error):
-            return "Network error: \(error.localizedDescription)"
+        case .queryFailed:
+            return "Failed to query Salesforce records"
+        case .createFailed:
+            return "Failed to create Salesforce record"
+        case .updateFailed:
+            return "Failed to update Salesforce record"
+        case .encodingError(let error):
+            return "Failed to encode data: \(error.localizedDescription)"
         case .decodingError(let error):
-            return "Decoding error: \(error.localizedDescription)"
+            return "Failed to decode response: \(error.localizedDescription)"
+        case .networkError:
+            return "Network error occurred"
         }
-    }
-}
-
-// MARK: - Extensions
-extension Dictionary {
-    func percentEncoded() -> Data? {
-        return map { key, value in
-            let escapedKey = "\(key)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-            let escapedValue = "\(value)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-            return escapedKey + "=" + escapedValue
-        }
-        .joined(separator: "&")
-        .data(using: .utf8)
     }
 }

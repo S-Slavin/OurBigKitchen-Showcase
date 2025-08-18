@@ -46,7 +46,7 @@ struct SettingsView: View {
                 Button("Cancel", role: .cancel) { }
                 Button("Logout", role: .destructive) {
                     Task {
-                        await appState.logout()
+                        await appState.forceLogout()
                     }
                 }
             } message: {

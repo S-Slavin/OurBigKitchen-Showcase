@@ -10,9 +10,7 @@ import Foundation
 import Combine
 import SwiftUI
 
-// MARK: - Models
-
-// UserRanking and UserRankingCategory are defined in Models/UserRanking.swift
+// MARK: - User Manager
 
 @MainActor
 final class UserManager: ObservableObject {
@@ -29,6 +27,8 @@ final class UserManager: ObservableObject {
         loadUser()
     }
     
+    // MARK: - User Management
+    
     func loadUser() {
         if let userData = defaults.data(forKey: "currentUser"),
            let user = try? JSONDecoder().decode(AppModels.User.self, from: userData) {
@@ -43,7 +43,7 @@ final class UserManager: ObservableObject {
             defaults.set(userData, forKey: "currentUser")
             self.currentUser = user
         } catch {
-            throw error
+            throw UserManagerError.saveFailed(error)
         }
     }
     
@@ -63,15 +63,18 @@ final class UserManager: ObservableObject {
         
         return Future { [weak self] promise in
             Task { @MainActor in
-                do {
-                    if let user = self?.currentUser {
-                        self?.isLoading = false
-                        promise(.success(user))
-                    } else {
-                        self?.isLoading = false
-                        promise(.failure(AuthError.userNotFound))
-                    }
+                guard let self = self else {
+                    promise(.failure(UserManagerError.managerNotAvailable))
+                    return
                 }
+                
+                guard self.currentUser != nil else {
+                    promise(.failure(UserManagerError.userNotFound))
+                    return
+                }
+                
+                self.isLoading = false
+                promise(.success(self.currentUser!))
             }
         }.eraseToAnyPublisher()
     }
@@ -81,12 +84,17 @@ final class UserManager: ObservableObject {
         
         return Future { [weak self] promise in
             Task { @MainActor in
+                guard let self = self else {
+                    promise(.failure(UserManagerError.managerNotAvailable))
+                    return
+                }
+                
                 do {
-                    try self?.saveUser(updatedUser)
-                    self?.isLoading = false
+                    try self.saveUser(updatedUser)
+                    self.isLoading = false
                     promise(.success(updatedUser))
                 } catch {
-                    self?.isLoading = false
+                    self.isLoading = false
                     promise(.failure(error))
                 }
             }
@@ -110,36 +118,92 @@ final class UserManager: ObservableObject {
     // MARK: - Ranking Methods
     
     func getUserRankings(category: UserRankingCategory) -> AnyPublisher<[UserRanking], Error> {
-        // Mock implementation - in a real app this would fetch from network
+        // TODO: Implement real Salesforce integration when ready
+        // This will fetch actual rankings from Salesforce instead of mock data
         return Future { [weak self] promise in
             Task { @MainActor in
-                // Generate mock rankings based on current user
-                guard let currentUser = self?.currentUser else {
-                    promise(.failure(AuthError.userNotFound))
+                guard let self = self else {
+                    promise(.failure(UserManagerError.managerNotAvailable))
                     return
                 }
                 
-                let mockRankings = [
-                    UserRanking(rank: 1, user: currentUser, score: 100, category: .impact),
-                    UserRanking(rank: 2, user: AppModels.User(firstName: "John", lastName: "Doe", email: "john@example.com"), score: 85, category: .volunteer),
-                    UserRanking(rank: 3, user: AppModels.User(firstName: "Jane", lastName: "Smith", email: "jane@example.com"), score: 75, category: .donation)
-                ]
+                guard self.currentUser != nil else {
+                    promise(.failure(UserManagerError.userNotFound))
+                    return
+                }
                 
-                promise(.success(mockRankings))
+                // For now, return empty array until Salesforce integration is ready
+                // In production, this will make a real API call to Salesforce
+                let rankings: [UserRanking] = []
+                promise(.success(rankings))
             }
         }.eraseToAnyPublisher()
     }
     
+    // MARK: - Salesforce Integration Preparation
+    
+    func syncUserWithSalesforce() -> AnyPublisher<AppModels.User, Error> {
+        // TODO: Implement when Salesforce integration is ready
+        return Future { [weak self] promise in
+            Task { @MainActor in
+                guard let self = self else {
+                    promise(.failure(UserManagerError.managerNotAvailable))
+                    return
+                }
+                
+                guard let currentUser = self.currentUser else {
+                    promise(.failure(UserManagerError.userNotFound))
+                    return
+                }
+                
+                // For now, just return the current user
+                // In production, this will sync with Salesforce
+                promise(.success(currentUser))
+            }
+        }.eraseToAnyPublisher()
+    }
+    
+    // MARK: - Computed Properties
+    
     var currentUserId: String? {
         return currentUser?.id
     }
+    
+    var isUserLoggedIn: Bool {
+        return currentUser != nil
+    }
 }
 
-// MARK: - Data Extensions
-private extension Data {
-    mutating func append(_ string: String) {
-        if let data = string.data(using: .utf8) {
-            append(data)
+// MARK: - User Manager Errors
+
+enum UserManagerError: LocalizedError {
+    case saveFailed(Error)
+    case loadFailed(Error)
+    case userNotFound
+    case managerNotAvailable
+    case invalidUserData
+    
+    var errorDescription: String? {
+        switch self {
+        case .saveFailed(let error):
+            return "Failed to save user: \(error.localizedDescription)"
+        case .loadFailed(let error):
+            return "Failed to load user: \(error.localizedDescription)"
+        case .userNotFound:
+            return "User not found"
+        case .managerNotAvailable:
+            return "User manager not available"
+        case .invalidUserData:
+            return "Invalid user data"
         }
     }
+}
+
+// MARK: - Notification Names
+
+extension Notification.Name {
+    static let didUpdateUser = Notification.Name("didUpdateUser")
+    static let didDeleteUser = Notification.Name("didDeleteUser")
+    static let didUpdatePreferences = Notification.Name("didUpdatePreferences")
+    static let didClearUserData = Notification.Name("didClearUserData")
 }

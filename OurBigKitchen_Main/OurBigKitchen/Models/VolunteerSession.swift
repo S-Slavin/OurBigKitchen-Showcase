@@ -18,7 +18,7 @@ struct VolunteerSession: Identifiable, Codable {
          checkOutTime: Date? = nil,
          notes: String? = nil,
          status: VolunteerSessionStatus = .active,
-         impact: ImpactMetric = ImpactMetric()) {
+         impact: ImpactMetric = ImpactMetric(type: .volunteer, value: 0, unit: "hours", date: Date())) {
         self.id = id
         self.userId = userId
         self.eventId = eventId
