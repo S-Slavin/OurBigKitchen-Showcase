@@ -15,7 +15,31 @@ class RealAuthService: ObservableObject {
     private let storageManager = StorageManager.shared
     private let keychainService = KeychainService.shared
     
-    private init() {}
+    private init() {
+        createTestUserIfNeeded()
+    }
+    
+    // MARK: - Test User Creation (Development Only)
+    
+    private func createTestUserIfNeeded() {
+        // Create a test user for development if none exists
+        let testEmail = "test@example.com"
+        if storageManager.fetchUser(by: testEmail) == nil {
+            _ = storageManager.createUser(
+                firstName: "Test",
+                lastName: "User",
+                email: testEmail,
+                role: .volunteer
+            )
+            
+            // Store the test password in keychain
+            let testPassword = "password123"
+            let hashedPassword = hashPassword(testPassword)
+            try? keychainService.savePassword(email: testEmail, hashedPassword: hashedPassword)
+            
+            print("Created test user: \(testEmail) with password: \(testPassword)")
+        }
+    }
     
     // MARK: - Authentication Methods
     
