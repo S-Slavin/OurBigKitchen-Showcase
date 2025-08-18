@@ -7,7 +7,7 @@ struct OurBigKitchenApp: App {
     let persistenceController = PersistenceController.shared
     @StateObject private var appState = AppState()
     @StateObject private var impactService = ImpactService.shared
-    @StateObject private var authService = AuthService.shared
+    @StateObject private var authService = RealAuthService.shared
     @StateObject private var sessionService = SessionService.shared
     
     var body: some Scene {

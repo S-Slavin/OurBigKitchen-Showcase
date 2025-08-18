@@ -22,13 +22,13 @@ class AuthViewModel: ObservableObject {
     @Published var hasAcceptedTerms: Bool = false
     
     // MARK: - Dependencies
-    private let authService: AuthService
+    private let authService: RealAuthService
     private let userManager: UserManager
     private var cancellables = Set<AnyCancellable>()
     
     // MARK: - Initialization
     
-    init(authService: AuthService,
+    init(authService: RealAuthService,
          userManager: UserManager) {
         self.authService = authService
         self.userManager = userManager
@@ -37,7 +37,7 @@ class AuthViewModel: ObservableObject {
     }
     
     convenience init() {
-        self.init(authService: AuthService.shared, userManager: UserManager.shared)
+        self.init(authService: RealAuthService.shared, userManager: UserManager.shared)
     }
     
     // MARK: - Public Methods
@@ -121,9 +121,9 @@ class AuthViewModel: ObservableObject {
                 email: email,
                 password: password,
                 volunteerType: volunteerType,
-                dateOfBirth: dateOfBirth,
-                wwccNumber: wwccNumber,
-                wwccExpiryDate: wwccExpiryDate
+                dob: dateOfBirth,
+                wwcNumber: wwccNumber,
+                wwcExpiryDate: wwccExpiryDate
             )
             
             try PersistenceManager.shared.save(user, forKey: "currentUser")
