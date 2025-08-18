@@ -121,11 +121,13 @@ class RealAuthService: ObservableObject {
     }
     
     func signIn(email: String, password: String) async throws -> AppModels.User {
+        print("RealAuthService.signIn() called with email: \(email)")
         isLoading = true
         defer { isLoading = false }
         
         // Validate input
         guard !email.isEmpty, !password.isEmpty else {
+            print("Input validation failed")
             throw AuthError.invalidCredentials
         }
         

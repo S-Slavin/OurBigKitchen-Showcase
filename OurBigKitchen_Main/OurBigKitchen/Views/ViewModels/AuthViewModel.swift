@@ -55,8 +55,13 @@ class AuthViewModel: ObservableObject {
     }
     
     func signIn() async {
-        guard validateSignInInput() else { return }
+        print("AuthViewModel.signIn() called")
+        guard validateSignInInput() else { 
+            print("Validation failed")
+            return 
+        }
         
+        print("Validation passed, starting authentication...")
         isLoading = true
         errorMessage = ""
         

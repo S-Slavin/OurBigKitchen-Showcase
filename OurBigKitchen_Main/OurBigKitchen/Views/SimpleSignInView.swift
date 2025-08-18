@@ -149,6 +149,7 @@ struct SimpleSignInView: View {
             
             // Sign In Button
             Button(action: {
+                print("Sign In button tapped!")
                 let generator = UIImpactFeedbackGenerator(style: .medium)
                 generator.impactOccurred()
                 
@@ -156,6 +157,9 @@ struct SimpleSignInView: View {
                 authViewModel.email = email
                 authViewModel.password = password
                 authViewModel.rememberPassword = rememberPassword
+                
+                print("Email: \(email), Password: \(password)")
+                print("Calling authViewModel.signIn()...")
                 
                 // Call the parameterless signIn method
                 Task {
