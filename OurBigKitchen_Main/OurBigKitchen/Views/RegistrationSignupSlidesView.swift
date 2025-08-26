@@ -78,20 +78,26 @@ struct RegistrationSignupSlidesView: View {
     private var currentStepEnum: Step { Step(rawValue: currentStep) ?? .volunteerType }
     
     private var canProceed: Bool {
+        let result: Bool
         switch currentStep {
         case Step.volunteerType.rawValue:
-            return true
+            result = true
         case Step.personalInfo.rawValue:
-            return isPersonalInfoValid
+            result = isPersonalInfoValid
         case Step.wwcc.rawValue:
-            return isWWCCValid
+            result = isWWCCValid
         case Step.agreements.rawValue:
-            return areAgreementsAccepted
+            result = areAgreementsAccepted
         case Step.accountCreation.rawValue:
-            return true
+            result = true
         default:
-            return false
+            result = false
         }
+        
+        // Debug: Print canProceed status
+        print("DEBUG: canProceed - currentStep: \(currentStep), result: \(result)")
+        
+        return result
     }
     
     private var isLastStep: Bool { currentStep == Constants.totalSteps - 1 }
@@ -99,12 +105,17 @@ struct RegistrationSignupSlidesView: View {
     
     // MARK: - Validation Computed Properties
     private var isPersonalInfoValid: Bool {
-        !firstName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-        !lastName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-        !email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-        !password.isEmpty &&
-        password == confirmPassword &&
-        isValidEmail(email)
+        let firstNameValid = !firstName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        let lastNameValid = !lastName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        let emailValid = !email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        let passwordValid = !password.isEmpty && password.count >= 6
+        let passwordMatch = password == confirmPassword
+        let emailFormatValid = isValidEmail(email)
+        
+        // Debug: Print validation status and actual values
+        print("DEBUG: Personal Info Validation - firstName: '\(firstName)' (\(firstNameValid)), lastName: '\(lastName)' (\(lastNameValid)), email: '\(email)' (\(emailValid)), password: '\(password)' (\(passwordValid), length: \(password.count)), confirmPassword: '\(confirmPassword)', match: \(passwordMatch), format: \(emailFormatValid)")
+        
+        return firstNameValid && lastNameValid && emailValid && passwordValid && passwordMatch && emailFormatValid
     }
     
     private var isWWCCValid: Bool {
@@ -489,35 +500,37 @@ private extension RegistrationSignupSlidesView {
     }
     
     var personalInfoView: some View {
-        VStack(spacing: Constants.spacing) {
-            Spacer()
-            
-            Text("Personal Information")
-                .font(.title)
-                .fontWeight(.bold)
-                .foregroundColor(primaryColor)
-                .multilineTextAlignment(.center)
-            
-            // Mandatory fields note
-            HStack {
-                Text("*")
-                    .foregroundColor(.red)
-                    .fontWeight(.bold)
-                Text("indicates required fields")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-            .padding(.bottom, 16)
-            
+        ScrollView {
             VStack(spacing: Constants.spacing) {
-                nameFieldsSection
-                emailFieldSection
-                passwordFieldsSection
-                dateOfBirthSection
+                Text("Personal Information")
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .foregroundColor(primaryColor)
+                    .multilineTextAlignment(.center)
+                    .padding(.top, 20)
+                
+                // Mandatory fields note
+                HStack {
+                    Text("*")
+                        .foregroundColor(.red)
+                        .fontWeight(.bold)
+                    Text("indicates required fields")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .padding(.bottom, 16)
+                
+                VStack(spacing: Constants.spacing) {
+                    nameFieldsSection
+                    emailFieldSection
+                    passwordFieldsSection
+                    dateOfBirthSection
+                }
+                .padding(.horizontal, Constants.buttonPadding)
+                
+                // Add bottom padding for scrolling
+                Spacer(minLength: 100)
             }
-            .padding(.horizontal, Constants.buttonPadding)
-            
-            Spacer()
         }
         .padding(.vertical, Constants.buttonPadding)
     }
@@ -722,16 +735,17 @@ private extension RegistrationSignupSlidesView {
     }
     
     var wwccView: some View {
-        VStack(spacing: Constants.spacing) {
-            Spacer()
-            
-            if calculatedAge >= 18 {
-                wwccRequiredView
-            } else {
-                wwccNotRequiredView
+        ScrollView {
+            VStack(spacing: Constants.spacing) {
+                if calculatedAge >= 18 {
+                    wwccRequiredView
+                } else {
+                    wwccNotRequiredView
+                }
+                
+                // Add bottom padding for scrolling
+                Spacer(minLength: 100)
             }
-            
-            Spacer()
         }
         .padding(.vertical, Constants.buttonPadding)
     }
@@ -807,37 +821,39 @@ private extension RegistrationSignupSlidesView {
     }
     
     var agreementsView: some View {
-        VStack(spacing: Constants.spacing) {
-            Spacer()
-            
-            Text("Agreements & Policies")
-                .font(.title)
-                .fontWeight(.bold)
-                .foregroundColor(primaryColor)
-                .multilineTextAlignment(.center)
-            
-            VStack(spacing: 20) {
-                agreementCheckbox(
-                    isChecked: $acceptedTerms,
-                    title: "Terms of Service",
-                    description: "Read and agree to our terms and conditions"
-                )
+        ScrollView {
+            VStack(spacing: Constants.spacing) {
+                Text("Agreements & Policies")
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .foregroundColor(primaryColor)
+                    .multilineTextAlignment(.center)
+                    .padding(.top, 20)
                 
-                agreementCheckbox(
-                    isChecked: $acceptedHealthProtocols,
-                    title: "Health & Safety Protocols",
-                    description: "Agree to follow food safety and health guidelines"
-                )
+                VStack(spacing: 20) {
+                    agreementCheckbox(
+                        isChecked: $acceptedTerms,
+                        title: "Terms of Service",
+                        description: "Read and agree to our terms and conditions"
+                    )
+                    
+                    agreementCheckbox(
+                        isChecked: $acceptedHealthProtocols,
+                        title: "Health & Safety Protocols",
+                        description: "Agree to follow food safety and health guidelines"
+                    )
+                    
+                    agreementCheckbox(
+                        isChecked: $acceptedPrivacyPolicy,
+                        title: "Privacy Policy",
+                        description: "Agree to how we collect and use your data"
+                    )
+                }
+                .padding(.horizontal, Constants.buttonPadding)
                 
-                agreementCheckbox(
-                    isChecked: $acceptedPrivacyPolicy,
-                    title: "Privacy Policy",
-                    description: "Agree to how we collect and use your data"
-                )
+                // Add bottom padding for scrolling
+                Spacer(minLength: 100)
             }
-            .padding(.horizontal, Constants.buttonPadding)
-            
-            Spacer()
         }
         .padding(.vertical, Constants.buttonPadding)
     }
