@@ -151,7 +151,12 @@ extension SalesforceDataSyncService {
             using: nil
         ) { task in
             Task { @MainActor in
-                await self.handleBackgroundSync(task: task as! BGAppRefreshTask)
+                if let refreshTask = task as? BGAppRefreshTask {
+                    await self.handleBackgroundSync(task: refreshTask)
+                } else {
+                    // Handle unexpected task type gracefully
+                    task.setTaskCompleted(success: false)
+                }
             }
         }
     }

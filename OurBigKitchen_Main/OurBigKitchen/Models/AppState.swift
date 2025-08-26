@@ -163,12 +163,12 @@ class AppState: ObservableObject {
         self.userProfile = nil
         self.selectedVolunteerType = nil
         
-        print("DEBUG: AppState - Reset onboarding state complete")
+        // Reset onboarding state complete
     }
     
     func resetAllUserDefaults() {
         let defaults = UserDefaults.standard
-        let domain = Bundle.main.bundleIdentifier ?? "com.shaina.obk.OurBigKitchen"
+        _ = Bundle.main.bundleIdentifier ?? "com.shaina.obk.OurBigKitchen"
         
         // Remove all keys for this app
         if let bundleID = Bundle.main.bundleIdentifier {
@@ -194,18 +194,10 @@ class AppState: ObservableObject {
         self.userProfile = nil
         self.selectedVolunteerType = nil
         
-        print("DEBUG: AppState - Reset ALL UserDefaults complete")
-        print("DEBUG: AppState - Current UserDefaults values:")
-        print("DEBUG: AppState - - hasSeenOnboarding: \(UserDefaults.standard.bool(forKey: "hasSeenOnboarding"))")
-        print("DEBUG: AppState - - hasSignedIn: \(UserDefaults.standard.bool(forKey: "hasSignedIn"))")
-        print("DEBUG: AppState - - isAuthenticated: \(UserDefaults.standard.bool(forKey: "isAuthenticated"))")
-        print("DEBUG: AppState - - hasAcceptedTerms: \(UserDefaults.standard.bool(forKey: "hasAcceptedTerms"))")
-        print("DEBUG: AppState - - hasAcceptedHealthProtocols: \(UserDefaults.standard.bool(forKey: "hasAcceptedHealthProtocols"))")
+        // Reset ALL UserDefaults complete
     }
     
     func refreshAuthState() {
-        print("DEBUG: AppState - Refreshing auth state")
-        
         // Simplified synchronous refresh instead of Task.detached
         let isAuthenticatedInDefaults = UserDefaults.standard.bool(forKey: "isAuthenticated")
         let isAuthenticatedInManager = authManager.isAuthenticated
@@ -221,46 +213,35 @@ class AppState: ObservableObject {
                 UserDefaults.standard.set(true, forKey: "isAuthenticated")
                 UserDefaults.standard.set(true, forKey: "hasSignedIn")
             }
-            
-            print("DEBUG: AppState - Auth state updated: \(newAuthState)")
         }
     }
     
     func refreshTermsState() {
-        print("DEBUG: AppState - Refreshing terms state")
-        
         // Simplified synchronous refresh instead of Task.detached
         let termsAccepted = termsManager.checkTermsStatus()
         
         if termsAccepted != hasAcceptedTerms {
             hasAcceptedTerms = termsAccepted
-            print("DEBUG: AppState - Terms state updated: \(termsAccepted)")
         }
     }
     
     // MARK: - Public Methods
     
     func ensureStateConsistency() {
-        print("DEBUG: AppState - Ensuring state consistency")
-        
         // Check for invalid state combinations
         if isAuthenticated && !hasAcceptedTerms {
-            print("DEBUG: AppState - Invalid state: authenticated but no terms accepted")
             // Reset to valid state
             isAuthenticated = false
             needsToChooseVolunteerType = false
         }
         
         if needsToChooseVolunteerType && !isAuthenticated {
-            print("DEBUG: AppState - Invalid state: needs volunteer type but not authenticated")
             needsToChooseVolunteerType = false
         }
-        
-        print("DEBUG: AppState - Final state: isAuthenticated=\(isAuthenticated), needsToChooseVolunteerType=\(needsToChooseVolunteerType), hasAcceptedTerms=\(hasAcceptedTerms)")
     }
     
     func resetToLoginState() {
-        print("DEBUG: AppState - Resetting to login state")
+        // Reset to login state
         isAuthenticated = false
         needsToChooseVolunteerType = false
         hasAcceptedTerms = false

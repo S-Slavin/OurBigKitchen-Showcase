@@ -38,7 +38,7 @@ class FirebaseService: ObservableObject, FirebaseServiceProtocol {
     
     private func configureFirebase() {
         #if DEBUG
-        print("Firebase initialization skipped in DEBUG mode")
+        // Firebase initialization skipped in DEBUG mode
         #else
         // Firebase initialization will be added here
         #endif

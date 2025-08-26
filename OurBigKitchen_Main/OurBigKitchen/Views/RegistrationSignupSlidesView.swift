@@ -1000,7 +1000,6 @@ private extension RegistrationSignupSlidesView {
             
             // Skip for Demo button
             Button(action: {
-                print("DEBUG: Skip for Demo tapped on account creation step")
                 // Skip to success view
                 showSalesforceSync = true
             }) {
@@ -1103,19 +1102,13 @@ private extension RegistrationSignupSlidesView {
 private extension RegistrationSignupSlidesView {
     
     func nextStep() {
-        print("DEBUG: nextStep() called, currentStep: \(currentStep)")
-        print("DEBUG: canProceed = \(canProceed)")
-        print("DEBUG: volunteerType = \(volunteerType)")
-        
         guard currentStep < Constants.totalSteps - 1 else {
-            print("DEBUG: Reached last step, creating account...")
             Task {
                 await createAccount()
             }
             return
         }
         
-        print("DEBUG: Moving to next step: \(currentStep + 1)")
         withAnimation {
             currentStep += 1
         }
