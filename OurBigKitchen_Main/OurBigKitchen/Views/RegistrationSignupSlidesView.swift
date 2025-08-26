@@ -351,40 +351,90 @@ private extension RegistrationSignupSlidesView {
     var nameFieldsSection: some View {
         HStack(spacing: Constants.smallSpacing) {
             VStack(alignment: .leading, spacing: 8) {
-                Text("First Name")
-                    .font(.headline)
-                    .foregroundColor(primaryColor)
+                HStack {
+                    Text("First Name")
+                        .font(.headline)
+                        .foregroundColor(primaryColor)
+                    
+                    if !firstName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.green)
+                            .font(.caption)
+                    }
+                }
                 
                 TextField("First Name", text: $firstName)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .autocapitalization(.words)
                     .disableAutocorrection(true)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(firstName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? Color.gray.opacity(0.3) : .green, lineWidth: 1)
+                    )
             }
             
             VStack(alignment: .leading, spacing: 8) {
-                Text("Last Name")
-                    .font(.headline)
-                    .foregroundColor(primaryColor)
+                HStack {
+                    Text("Last Name")
+                        .font(.headline)
+                        .foregroundColor(primaryColor)
+                    
+                    if !lastName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.green)
+                            .font(.caption)
+                    }
+                }
                 
                 TextField("Last Name", text: $lastName)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .autocapitalization(.words)
                     .disableAutocorrection(true)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(lastName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? Color.gray.opacity(0.3) : .green, lineWidth: 1)
+                    )
             }
         }
     }
     
     var emailFieldSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Email Address")
-                .font(.headline)
-                .foregroundColor(primaryColor)
+            HStack {
+                Text("Email Address")
+                    .font(.headline)
+                    .foregroundColor(primaryColor)
+                
+                if !email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && isValidEmail(email) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundColor(.green)
+                        .font(.caption)
+                } else if !email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !isValidEmail(email) {
+                    Image(systemName: "exclamationmark.circle.fill")
+                        .foregroundColor(.red)
+                        .font(.caption)
+                }
+            }
             
             TextField("Email", text: $email)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .keyboardType(.emailAddress)
                 .autocapitalization(.none)
                 .disableAutocorrection(true)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(emailValidationColor, lineWidth: 1)
+                )
+        }
+    }
+    
+    private var emailValidationColor: Color {
+        if email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return Color.gray.opacity(0.3)
+        } else if isValidEmail(email) {
+            return .green
+        } else {
+            return .red
         }
     }
     
