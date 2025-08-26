@@ -171,11 +171,38 @@ private extension RegistrationSignupSlidesView {
     func headerView(geometry: GeometryProxy) -> some View {
         VStack(spacing: Constants.smallSpacing) {
             stepIndicatorView
+            progressBarView
             stepTitleView
         }
         .frame(maxWidth: .infinity)
         .background(Color.white)
         .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: 1)
+    }
+    
+    var progressBarView: some View {
+        VStack(spacing: 4) {
+            HStack {
+                Text("Progress")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                
+                Spacer()
+                
+                Text("\(Int(progressPercentage * 100))%")
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                    .foregroundColor(primaryColor)
+            }
+            
+            ProgressView(value: progressPercentage)
+                .progressViewStyle(LinearProgressViewStyle(tint: primaryColor))
+                .scaleEffect(x: 1, y: 2, anchor: .center)
+        }
+        .padding(.horizontal, Constants.buttonPadding)
+    }
+    
+    private var progressPercentage: Double {
+        Double(currentStep + 1) / Double(Constants.totalSteps)
     }
     
     var stepIndicatorView: some View {
@@ -351,90 +378,40 @@ private extension RegistrationSignupSlidesView {
     var nameFieldsSection: some View {
         HStack(spacing: Constants.smallSpacing) {
             VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Text("First Name")
-                        .font(.headline)
-                        .foregroundColor(primaryColor)
-                    
-                    if !firstName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                        Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(.green)
-                            .font(.caption)
-                    }
-                }
+                Text("First Name")
+                    .font(.headline)
+                    .foregroundColor(primaryColor)
                 
                 TextField("First Name", text: $firstName)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .autocapitalization(.words)
                     .disableAutocorrection(true)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(firstName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? Color.gray.opacity(0.3) : .green, lineWidth: 1)
-                    )
             }
             
             VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Text("Last Name")
-                        .font(.headline)
-                        .foregroundColor(primaryColor)
-                    
-                    if !lastName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                        Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(.green)
-                            .font(.caption)
-                    }
-                }
+                Text("Last Name")
+                    .font(.headline)
+                    .foregroundColor(primaryColor)
                 
                 TextField("Last Name", text: $lastName)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .autocapitalization(.words)
                     .disableAutocorrection(true)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(lastName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? Color.gray.opacity(0.3) : .green, lineWidth: 1)
-                    )
             }
         }
     }
     
     var emailFieldSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Text("Email Address")
-                    .font(.headline)
-                    .foregroundColor(primaryColor)
-                
-                if !email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && isValidEmail(email) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(.green)
-                        .font(.caption)
-                } else if !email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !isValidEmail(email) {
-                    Image(systemName: "exclamationmark.circle.fill")
-                        .foregroundColor(.red)
-                        .font(.caption)
-                }
-            }
+            Text("Email Address")
+                .font(.headline)
+                .foregroundColor(primaryColor)
             
             TextField("Email", text: $email)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .keyboardType(.emailAddress)
                 .autocapitalization(.none)
                 .disableAutocorrection(true)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(emailValidationColor, lineWidth: 1)
-                )
-        }
-    }
-    
-    private var emailValidationColor: Color {
-        if email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            return Color.gray.opacity(0.3)
-        } else if isValidEmail(email) {
-            return .green
-        } else {
-            return .red
         }
     }
     
