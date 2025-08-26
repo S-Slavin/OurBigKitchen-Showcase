@@ -144,6 +144,9 @@ struct RegistrationSignupSlidesView: View {
         .sheet(isPresented: $showSalesforceSync) {
             successView
         }
+        .onAppear {
+            authViewModel.setAppState(appState)
+        }
     }
 }
 
@@ -948,12 +951,20 @@ private extension RegistrationSignupSlidesView {
                 .multilineTextAlignment(.center)
                 .foregroundColor(.secondary)
             
-            Button("Continue") {
-                // Navigate to main app
-                dismiss()
+            Button("Continue to App") {
+                // Update app state first
                 appState.isAuthenticated = true
                 appState.hasAcceptedTerms = true
                 appState.hasAcceptedHealthProtocols = true
+                appState.needsToChooseVolunteerType = false
+                appState.hasCompletedRegistration = true
+                
+                // Force UI update
+                appState.objectWillChange.send()
+                
+                // Dismiss the sheet and view
+                showSalesforceSync = false
+                dismiss()
             }
             .buttonStyle(ButtonStyles.springy)
         }
@@ -1019,28 +1030,25 @@ private extension RegistrationSignupSlidesView {
             return
         }
         
-
-            await authViewModel.signUp(
-                firstName: firstName.trimmingCharacters(in: .whitespacesAndNewlines),
-                lastName: lastName.trimmingCharacters(in: .whitespacesAndNewlines),
-                email: email.trimmingCharacters(in: .whitespacesAndNewlines),
-                password: password,
-                volunteerType: volunteerType,
-                dateOfBirth: dateOfBirth,
-                wwccNumber: wwccNumber.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : wwccNumber.trimmingCharacters(in: .whitespacesAndNewlines),
-                wwccExpiryDate: wwccNumber.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : wwccExpiryDate
-            )
-            
-            // Try to sync to Salesforce, but don't block on failure
-            await syncToSalesforce()
-            
-            // Update app state
-            updateAppStateWithUserProfile()
-            
-            // Show success
-            showSalesforceSync = true
-            
-
+        await authViewModel.signUp(
+            firstName: firstName.trimmingCharacters(in: .whitespacesAndNewlines),
+            lastName: lastName.trimmingCharacters(in: .whitespacesAndNewlines),
+            email: email.trimmingCharacters(in: .whitespacesAndNewlines),
+            password: password,
+            volunteerType: volunteerType,
+            dateOfBirth: dateOfBirth,
+            wwccNumber: wwccNumber.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : wwccNumber.trimmingCharacters(in: .whitespacesAndNewlines),
+            wwccExpiryDate: wwccNumber.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : wwccExpiryDate
+        )
+        
+        // Try to sync to Salesforce, but don't block on failure
+        await syncToSalesforce()
+        
+        // Update app state
+        updateAppStateWithUserProfile()
+        
+        // Show success
+        showSalesforceSync = true
         
         isLoading = false
     }

@@ -25,6 +25,7 @@ class AuthViewModel: ObservableObject {
     private let authService: RealAuthService
     private let userManager: UserManager
     private var cancellables = Set<AnyCancellable>()
+    private weak var appState: AppState?
     
     // MARK: - Initialization
     
@@ -38,6 +39,10 @@ class AuthViewModel: ObservableObject {
     
     convenience init() {
         self.init(authService: RealAuthService.shared, userManager: UserManager.shared)
+    }
+    
+    func setAppState(_ appState: AppState) {
+        self.appState = appState
     }
     
     // MARK: - Public Methods
@@ -144,6 +149,16 @@ class AuthViewModel: ObservableObject {
             
             UserDefaults.standard.set(true, forKey: "isAuthenticated")
             UserDefaults.standard.set(true, forKey: "hasSignedIn")
+            
+            // Update AppState directly
+            await MainActor.run {
+                self.appState?.isAuthenticated = true
+                self.appState?.hasAcceptedTerms = true
+                self.appState?.hasAcceptedHealthProtocols = true
+                self.appState?.needsToChooseVolunteerType = false
+                self.appState?.hasCompletedRegistration = true
+                self.appState?.objectWillChange.send()
+            }
             
             NotificationCenter.default.post(name: .didUpdateAuth, object: nil)
             
