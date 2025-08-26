@@ -45,9 +45,7 @@ struct SettingsView: View {
             .alert("Logout", isPresented: $showingLogoutAlert) {
                 Button("Cancel", role: .cancel) { }
                 Button("Logout", role: .destructive) {
-                    Task {
-                        await appState.forceLogout()
-                    }
+                    appState.forceLogout()
                 }
             } message: {
                 Text("Are you sure you want to logout?")

@@ -109,27 +109,23 @@ class AppState: ObservableObject {
     private func performAsyncInitialization() async {
         print("DEBUG: AppState - Starting async initialization")
         
-        do {
-            // Check terms status
-            let termsAccepted = await termsManager.checkTermsStatus()
-            let healthProtocolsAccepted = UserDefaults.standard.bool(forKey: "hasAcceptedHealthProtocols")
-            
-            await MainActor.run {
-                if termsAccepted != self.hasAcceptedTerms {
-                    self.hasAcceptedTerms = termsAccepted
-                    print("DEBUG: AppState - Updated terms status: \(termsAccepted)")
-                }
-                
-                if healthProtocolsAccepted != self.hasAcceptedHealthProtocols {
-                    self.hasAcceptedHealthProtocols = healthProtocolsAccepted
-                    print("DEBUG: AppState - Updated health protocols status: \(healthProtocolsAccepted)")
-                }
+        // Check terms status (synchronous method)
+        let termsAccepted = termsManager.checkTermsStatus()
+        let healthProtocolsAccepted = UserDefaults.standard.bool(forKey: "hasAcceptedHealthProtocols")
+        
+        await MainActor.run {
+            if termsAccepted != self.hasAcceptedTerms {
+                self.hasAcceptedTerms = termsAccepted
+                print("DEBUG: AppState - Updated terms status: \(termsAccepted)")
             }
             
-            print("DEBUG: AppState - Async initialization complete")
-        } catch {
-            print("DEBUG: AppState - Async initialization failed: \(error)")
+            if healthProtocolsAccepted != self.hasAcceptedHealthProtocols {
+                self.hasAcceptedHealthProtocols = healthProtocolsAccepted
+                print("DEBUG: AppState - Updated health protocols status: \(healthProtocolsAccepted)")
+            }
         }
+        
+        print("DEBUG: AppState - Async initialization complete")
     }
     
     // MARK: - Notification Setup
