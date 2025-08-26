@@ -64,43 +64,72 @@ class AppState: ObservableObject {
     // MARK: - Initialization
     
     init() {
+        print("DEBUG: AppState.init() - Starting initialization")
         isLoading = true
         
-        if UserDefaults.standard.bool(forKey: "isAuthenticated") || UserDefaults.standard.bool(forKey: "hasSignedIn") {
+        // Set initial state immediately from UserDefaults
+        let hasSeenOnboarding = UserDefaults.standard.bool(forKey: "hasSeenOnboarding")
+        let hasSignedIn = UserDefaults.standard.bool(forKey: "hasSignedIn")
+        let hasAcceptedTerms = UserDefaults.standard.bool(forKey: "hasAcceptedTerms")
+        let hasAcceptedHealthProtocols = UserDefaults.standard.bool(forKey: "hasAcceptedHealthProtocols")
+        
+        print("DEBUG: AppState.init() - UserDefaults state: onboarding=\(hasSeenOnboarding), signedIn=\(hasSignedIn), terms=\(hasAcceptedTerms), health=\(hasAcceptedHealthProtocols)")
+        
+        // Set initial state based on UserDefaults
+        self.hasAcceptedTerms = hasAcceptedTerms
+        self.hasAcceptedHealthProtocols = hasAcceptedHealthProtocols
+        
+        // Only set authenticated if user has actually signed in, not just seen onboarding
+        if hasSignedIn {
             self.isAuthenticated = true
+            print("DEBUG: AppState.init() - User has signed in, setting authenticated=true")
+        } else {
+            self.isAuthenticated = false
+            print("DEBUG: AppState.init() - User has not signed in, setting authenticated=false")
         }
         
-        Task.detached {
-            let termsAccepted = await MainActor.run { self.termsManager.checkTermsStatus() } || UserDefaults.standard.bool(forKey: "hasAcceptedTerms")
+        // Set loading to false immediately
+        self.isLoading = false
+        print("DEBUG: AppState.init() - Initialization complete, isLoading=false")
+        
+        // Setup notification observers
+        setupNotificationObservers()
+        
+        // Post notification that state is ready
+        NotificationCenter.default.post(name: .didUpdateAuth, object: nil)
+        
+        // Run async operations in background without blocking UI
+        Task {
+            await performAsyncInitialization()
+        }
+    }
+    
+    // MARK: - Async Initialization
+    
+    private func performAsyncInitialization() async {
+        print("DEBUG: AppState - Starting async initialization")
+        
+        do {
+            // Check terms status
+            let termsAccepted = await termsManager.checkTermsStatus()
             let healthProtocolsAccepted = UserDefaults.standard.bool(forKey: "hasAcceptedHealthProtocols")
-            let authenticated = await MainActor.run { self.authManager.isAuthenticated } || UserDefaults.standard.bool(forKey: "isAuthenticated")
-            let profile = await MainActor.run { self.authManager.currentUser }
-            
-            // Fixed: Only check authentication if user has actually signed in, not just seen onboarding
-            let hasActuallySignedIn = UserDefaults.standard.bool(forKey: "hasSignedIn")
-            let finalAuthState = authenticated || hasActuallySignedIn
             
             await MainActor.run {
-                self.isLoading = false
-                
-                withAnimation {
+                if termsAccepted != self.hasAcceptedTerms {
                     self.hasAcceptedTerms = termsAccepted
+                    print("DEBUG: AppState - Updated terms status: \(termsAccepted)")
+                }
+                
+                if healthProtocolsAccepted != self.hasAcceptedHealthProtocols {
                     self.hasAcceptedHealthProtocols = healthProtocolsAccepted
-                    self.isAuthenticated = finalAuthState
-                    self.userProfile = profile
+                    print("DEBUG: AppState - Updated health protocols status: \(healthProtocolsAccepted)")
                 }
-                
-                if self.isAuthenticated {
-                    let defaults = UserDefaults.standard
-                    defaults.set(true, forKey: "isAuthenticated")
-                    defaults.set(true, forKey: "hasSignedIn")
-                }
-                
-                NotificationCenter.default.post(name: .didUpdateAuth, object: nil)
             }
+            
+            print("DEBUG: AppState - Async initialization complete")
+        } catch {
+            print("DEBUG: AppState - Async initialization failed: \(error)")
         }
-        
-        setupNotificationObservers()
     }
     
     // MARK: - Notification Setup

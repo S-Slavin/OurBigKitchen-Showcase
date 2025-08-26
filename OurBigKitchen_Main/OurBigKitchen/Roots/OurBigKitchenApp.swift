@@ -43,11 +43,7 @@ struct RootView: View {
                 })
             } else if !appState.isAuthenticated {
                 let _ = print("DEBUG RootView: Showing AuthTypeSelectionView")
-                VStack(spacing: 20) {
-                    AuthTypeSelectionView()
-                    
-
-                }
+                AuthTypeSelectionView()
             } else if appState.needsToChooseVolunteerType {
                 let _ = print("DEBUG RootView: Showing VolunteerTypeSelectionView")
                 VolunteerTypeSelectionView()
