@@ -990,8 +990,15 @@ private extension RegistrationSignupSlidesView {
                 .foregroundColor(.secondary)
             
             Button("Continue to App") {
-                // Dismiss the sheet and view
+                print("DEBUG: Continue to App button tapped")
+                print("DEBUG: appState.isAuthenticated = \(appState.isAuthenticated)")
+                print("DEBUG: appState.hasCompletedRegistration = \(appState.hasCompletedRegistration)")
+                
+                // First dismiss the sheet
                 showSalesforceSync = false
+                
+                // Then dismiss the registration view
+                // The app will automatically navigate to home page because appState.isAuthenticated is now true
                 dismiss()
             }
             .buttonStyle(ButtonStyles.springy)
@@ -1059,7 +1066,7 @@ private extension RegistrationSignupSlidesView {
             return
         }
         
-        // Attempt to create account
+        // Attempt to create account and wait for it to complete
         await authViewModel.signUp(
             firstName: firstName.trimmingCharacters(in: .whitespacesAndNewlines),
             lastName: lastName.trimmingCharacters(in: .whitespacesAndNewlines),
@@ -1071,10 +1078,13 @@ private extension RegistrationSignupSlidesView {
             wwccExpiryDate: wwccNumber.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : wwccExpiryDate
         )
         
+        // Update app state with user profile
+        updateAppStateWithUserProfile()
+        
         // Try to sync to Salesforce, but don't block on failure
         await syncToSalesforce()
         
-        // Show success
+        // Show success - now the app state should be properly updated
         showSalesforceSync = true
         
         isLoading = false
