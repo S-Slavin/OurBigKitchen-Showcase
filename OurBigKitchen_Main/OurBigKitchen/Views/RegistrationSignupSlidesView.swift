@@ -83,11 +83,17 @@ struct RegistrationSignupSlidesView: View {
         case Step.volunteerType.rawValue:
             result = true
         case Step.personalInfo.rawValue:
-            result = isPersonalInfoValid
+            let personalInfoValid = isPersonalInfoValid
+            print("DEBUG: Personal Info validation - firstName: '\(firstName)', lastName: '\(lastName)', email: '\(email)', password: '\(password)', confirmPassword: '\(confirmPassword)', result: \(personalInfoValid)")
+            result = personalInfoValid
         case Step.wwcc.rawValue:
-            result = isWWCCValid
+            let wwccValid = isWWCCValid
+            print("DEBUG: WWCC validation - age: \(calculatedAge), wwccNumber: '\(wwccNumber)', expiryDate: \(wwccExpiryDate), result: \(wwccValid)")
+            result = wwccValid
         case Step.agreements.rawValue:
-            result = areAgreementsAccepted
+            let agreementsValid = areAgreementsAccepted
+            print("DEBUG: Agreements validation - terms: \(acceptedTerms), health: \(acceptedHealthProtocols), privacy: \(acceptedPrivacyPolicy), result: \(agreementsValid)")
+            result = agreementsValid
         case Step.accountCreation.rawValue:
             result = true
         default:
