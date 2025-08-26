@@ -954,7 +954,13 @@ private extension RegistrationSignupSlidesView {
                 .foregroundColor(.secondary)
             
             Button("Continue to App") {
-                // Update app state first
+                // Update UserDefaults to persist the authentication state
+                UserDefaults.standard.set(true, forKey: "isAuthenticated")
+                UserDefaults.standard.set(true, forKey: "hasSignedIn")
+                UserDefaults.standard.set(true, forKey: "hasAcceptedTerms")
+                UserDefaults.standard.set(true, forKey: "hasAcceptedHealthProtocols")
+                
+                // Update app state to match UserDefaults
                 appState.isAuthenticated = true
                 appState.hasAcceptedTerms = true
                 appState.hasAcceptedHealthProtocols = true
