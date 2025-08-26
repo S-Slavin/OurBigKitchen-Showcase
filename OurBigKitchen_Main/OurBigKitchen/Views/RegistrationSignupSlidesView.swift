@@ -108,8 +108,7 @@ struct RegistrationSignupSlidesView: View {
     }
     
     private var isWWCCValid: Bool {
-        let age = calculateAge(from: dateOfBirth)
-        if age >= 18 {
+        if calculatedAge >= 18 {
             return !wwccNumber.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
                    wwccExpiryDate > Date()
         }
@@ -118,6 +117,10 @@ struct RegistrationSignupSlidesView: View {
     
     private var areAgreementsAccepted: Bool {
         acceptedTerms && acceptedHealthProtocols && acceptedPrivacyPolicy
+    }
+    
+    private var calculatedAge: Int {
+        calculateAge(from: dateOfBirth)
     }
     
     // MARK: - Body
@@ -390,8 +393,7 @@ private extension RegistrationSignupSlidesView {
             }
             return ""
         case Step.wwcc.rawValue:
-            let age = calculateAge(from: dateOfBirth)
-            if age >= 18 {
+            if calculatedAge >= 18 {
                 if wwccNumber.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                     return "WWCC number is required for volunteers 18+"
                 } else if wwccExpiryDate <= Date() {
@@ -723,9 +725,7 @@ private extension RegistrationSignupSlidesView {
         VStack(spacing: Constants.spacing) {
             Spacer()
             
-            let age = calculateAge(from: dateOfBirth)
-            
-            if age >= 18 {
+            if calculatedAge >= 18 {
                 wwccRequiredView
             } else {
                 wwccNotRequiredView
@@ -919,8 +919,7 @@ private extension RegistrationSignupSlidesView {
             summaryRow(label: "Name", value: "\(firstName) \(lastName)")
             summaryRow(label: "Email", value: email)
             
-            let age = calculateAge(from: dateOfBirth)
-            if age >= 18 {
+            if calculatedAge >= 18 {
                 summaryRow(label: "WWCC Number", value: wwccNumber.isEmpty ? "Not provided" : wwccNumber)
             }
         }
@@ -1086,8 +1085,7 @@ private extension RegistrationSignupSlidesView {
         }
         
         // Validate WWCC for adults
-        let age = calculateAge(from: dateOfBirth)
-        if age >= 18 {
+        if calculatedAge >= 18 {
             guard !wwccNumber.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
                 showValidationError("WWCC number is required for volunteers 18 and older")
                 return false
@@ -1174,7 +1172,16 @@ private extension RegistrationSignupSlidesView {
     }
     
     func calculateAge(from dateOfBirth: Date) -> Int {
-        Calendar.current.dateComponents([.year], from: dateOfBirth, to: Date()).year ?? 0
+        let calendar = Calendar.current
+        let now = Date()
+        
+        // Ensure dateOfBirth is not in the future
+        guard dateOfBirth <= now else {
+            return 0
+        }
+        
+        let ageComponents = calendar.dateComponents([.year], from: dateOfBirth, to: now)
+        return ageComponents.year ?? 0
     }
 }
 
