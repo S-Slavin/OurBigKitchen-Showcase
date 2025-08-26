@@ -83,10 +83,14 @@ struct SimpleSignInView: View {
         .navigationBarHidden(true)
         .transition(.opacity)
         .onReceive(authViewModel.$isAuthenticated) { isAuthenticated in
+            print("DEBUG: SimpleSignInView - authViewModel.isAuthenticated changed to: \(isAuthenticated)")
             if isAuthenticated {
+                print("DEBUG: Authentication successful, setting appState properties...")
                 // User is authenticated, now they need to choose Individual/Corporate
                 appState.isAuthenticated = true
                 appState.needsToChooseVolunteerType = true
+                print("DEBUG: appState.isAuthenticated = \(appState.isAuthenticated)")
+                print("DEBUG: appState.needsToChooseVolunteerType = \(appState.needsToChooseVolunteerType)")
             }
         }
         .onReceive(authViewModel.$errorMessage) { errorMessage in

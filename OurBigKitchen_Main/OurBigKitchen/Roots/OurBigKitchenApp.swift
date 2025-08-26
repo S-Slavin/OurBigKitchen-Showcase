@@ -32,12 +32,17 @@ struct RootView: View {
             // Force check onboarding state first, before any authentication logic
             let hasSeenOnboarding = UserDefaults.standard.bool(forKey: "hasSeenOnboarding")
             
+            // Debug logging
+            let _ = print("DEBUG RootView: hasSeenOnboarding=\(hasSeenOnboarding), isAuthenticated=\(appState.isAuthenticated), needsToChooseVolunteerType=\(appState.needsToChooseVolunteerType)")
+            
             if !hasSeenOnboarding {
+                let _ = print("DEBUG RootView: Showing UserWelcomeView")
                 UserWelcomeView(onComplete: {
                     UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
                     appState.objectWillChange.send()
                 })
             } else if !appState.isAuthenticated {
+                let _ = print("DEBUG RootView: Showing AuthTypeSelectionView")
                 VStack(spacing: 20) {
                     AuthTypeSelectionView()
                     
@@ -80,12 +85,16 @@ struct RootView: View {
                     .padding(.bottom, 20)
                 }
             } else if appState.needsToChooseVolunteerType {
+                let _ = print("DEBUG RootView: Showing VolunteerTypeSelectionView")
                 VolunteerTypeSelectionView()
             } else if !appState.hasAcceptedTerms {
+                let _ = print("DEBUG RootView: Showing SimpleTermsView")
                 SimpleTermsView()
             } else if !appState.hasAcceptedHealthProtocols {
+                let _ = print("DEBUG RootView: Showing HealthProtocolView")
                 HealthProtocolView()
             } else {
+                let _ = print("DEBUG RootView: Showing ContentView")
                 ContentView()
             }
         }
