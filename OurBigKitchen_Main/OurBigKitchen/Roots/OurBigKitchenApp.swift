@@ -29,13 +29,30 @@ struct RootView: View {
     
     var body: some View {
         Group {
-            if !UserDefaults.standard.bool(forKey: "hasSeenOnboarding") {
+            // Force check onboarding state first, before any authentication logic
+            let hasSeenOnboarding = UserDefaults.standard.bool(forKey: "hasSeenOnboarding")
+            
+            if !hasSeenOnboarding {
                 UserWelcomeView(onComplete: {
                     UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
                     appState.objectWillChange.send()
                 })
             } else if !appState.isAuthenticated {
-                AuthTypeSelectionView()
+                VStack {
+                    AuthTypeSelectionView()
+                    
+                    // Temporary debug button to reset onboarding
+                    Button("Reset Onboarding (Debug)") {
+                        UserDefaults.standard.set(false, forKey: "hasSeenOnboarding")
+                        UserDefaults.standard.set(false, forKey: "hasSignedIn")
+                        UserDefaults.standard.set(false, forKey: "isAuthenticated")
+                        appState.objectWillChange.send()
+                    }
+                    .padding()
+                    .background(Color.red.opacity(0.8))
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
+                }
             } else if appState.needsToChooseVolunteerType {
                 VolunteerTypeSelectionView()
             } else if !appState.hasAcceptedTerms {
