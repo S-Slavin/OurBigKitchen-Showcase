@@ -30,16 +30,23 @@ struct RootView: View {
     var body: some View {
         VStack {
             // TEMPORARY DEBUG BUTTON
-            Button("RESET ALL USERDEFAULTS (DEBUG)") {
+            Button("Reset Onboarding") {
                 print("DEBUG RootView: User tapped reset button")
                 appState.resetAllUserDefaults()
                 print("DEBUG RootView: Reset complete, forcing UI update")
                 appState.objectWillChange.send()
             }
-            .padding()
-            .background(Color.red)
-            .foregroundColor(.white)
-            .cornerRadius(8)
+            .font(.caption2)
+            .foregroundColor(.secondary)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(Color.clear)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+            )
+            .cornerRadius(12)
+            .padding(.top, 10)
             
             Group {
                 // Force check onboarding state first, before any authentication logic
