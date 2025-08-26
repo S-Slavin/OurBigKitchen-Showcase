@@ -17,13 +17,15 @@ struct RegistrationSignupSlidesView: View {
     private enum Constants {
         static let totalSteps = 5
         static let animationDuration: Double = 0.3
-        static let stepIndicatorSize: CGFloat = 12
-        static let stepIndicatorScale: CGFloat = 1.2
-        static let cornerRadius: CGFloat = 12
-        static let buttonPadding: CGFloat = 20
-        static let spacing: CGFloat = 24
-        static let smallSpacing: CGFloat = 16
-        static let iconSize: CGFloat = 60
+        static let stepIndicatorSize: CGFloat = 10
+        static let stepIndicatorScale: CGFloat = 1.1
+        static let cornerRadius: CGFloat = 16
+        static let buttonPadding: CGFloat = 16
+        static let spacing: CGFloat = 20
+        static let smallSpacing: CGFloat = 12
+        static let iconSize: CGFloat = 50
+        static let mobileSpacing: CGFloat = 8
+        static let mobilePadding: CGFloat = 12
     }
     
     private enum Step: Int, CaseIterable {
@@ -129,10 +131,11 @@ struct RegistrationSignupSlidesView: View {
                     headerView(geometry: geometry)
                     
                     stepContent
+                        .padding(.top, Constants.mobileSpacing)
                     
                     navigationButtons
-                        .padding(.horizontal, Constants.buttonPadding)
-                        .padding(.bottom, 30)
+                        .padding(.horizontal, Constants.mobilePadding)
+                        .padding(.bottom, geometry.safeAreaInsets.bottom + 20)
                 }
             }
         }
@@ -423,7 +426,7 @@ private extension RegistrationSignupSlidesView {
                 subtitle: "Select how you'd like to volunteer with OurBigKitchen"
             )
             
-            VStack(spacing: Constants.smallSpacing) {
+            VStack(spacing: Constants.mobileSpacing) {
                 volunteerTypeButton(
                     type: .individual,
                     title: "Individual Volunteer",
@@ -438,11 +441,11 @@ private extension RegistrationSignupSlidesView {
                     icon: "building.2.fill"
                 )
             }
-            .padding(.horizontal, Constants.buttonPadding)
+            .padding(.horizontal, Constants.mobilePadding)
             
             Spacer()
         }
-        .padding(.vertical, Constants.buttonPadding)
+        .padding(.vertical, Constants.mobilePadding)
     }
     
     func volunteerTypeButton(type: VolunteerType, title: String, subtitle: String, icon: String) -> some View {
@@ -475,7 +478,7 @@ private extension RegistrationSignupSlidesView {
                         .font(.title2)
                 }
             }
-            .padding(Constants.buttonPadding)
+            .padding(Constants.mobilePadding)
             .background(volunteerType == type ? primaryColor : Color.white)
             .cornerRadius(Constants.cornerRadius)
             .overlay(
@@ -486,7 +489,7 @@ private extension RegistrationSignupSlidesView {
     }
     
     var personalInfoView: some View {
-        VStack(spacing: Constants.spacing) {
+        VStack(spacing: Constants.mobileSpacing) {
             Spacer()
             
             Text("Personal Information")
@@ -506,21 +509,21 @@ private extension RegistrationSignupSlidesView {
             }
             .padding(.bottom, 10)
             
-            VStack(spacing: 20) {
+            VStack(spacing: Constants.mobileSpacing) {
                 nameFieldsSection
                 emailFieldSection
                 passwordFieldsSection
                 dateOfBirthSection
             }
-            .padding(.horizontal, Constants.buttonPadding)
+            .padding(.horizontal, Constants.mobilePadding)
             
             Spacer()
         }
-        .padding(.vertical, Constants.buttonPadding)
+        .padding(.vertical, Constants.mobilePadding)
     }
     
     var nameFieldsSection: some View {
-        HStack(spacing: Constants.smallSpacing) {
+        VStack(spacing: Constants.mobileSpacing) {
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     Text("First Name")
@@ -541,6 +544,7 @@ private extension RegistrationSignupSlidesView {
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .autocapitalization(.words)
                     .disableAutocorrection(true)
+                    .frame(height: 44)
                     .overlay(
                         RoundedRectangle(cornerRadius: 8)
                             .stroke(firstName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? Color.gray.opacity(0.3) : .green, lineWidth: 1)
@@ -567,6 +571,7 @@ private extension RegistrationSignupSlidesView {
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .autocapitalization(.words)
                     .disableAutocorrection(true)
+                    .frame(height: 44)
                     .overlay(
                         RoundedRectangle(cornerRadius: 8)
                             .stroke(lastName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? Color.gray.opacity(0.3) : .green, lineWidth: 1)
@@ -601,6 +606,7 @@ private extension RegistrationSignupSlidesView {
                 .keyboardType(.emailAddress)
                 .autocapitalization(.none)
                 .disableAutocorrection(true)
+                .frame(height: 44)
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
                         .stroke(emailValidationColor, lineWidth: 1)
