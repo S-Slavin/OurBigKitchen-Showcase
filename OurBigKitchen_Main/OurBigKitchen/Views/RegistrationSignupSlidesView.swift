@@ -94,7 +94,7 @@ struct RegistrationSignupSlidesView: View {
             result = false
         }
         
-
+        print("DEBUG: canProceed check - Step: \(currentStep), Result: \(result)")
         
         return result
     }
@@ -115,16 +115,31 @@ struct RegistrationSignupSlidesView: View {
     
     private var isWWCCValid: Bool {
         let age = calculatedAge
+        print("DEBUG: WWCC validation check - age: \(age), wwccNumber: '\(wwccNumber)', expiryDate: \(wwccExpiryDate)")
+        
         if age >= 18 {
-            let wwccValid = !wwccNumber.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-                           wwccExpiryDate > Date()
-            return wwccValid
+            let wwccNumberValid = !wwccNumber.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            let wwccExpiryValid = wwccExpiryDate > Date()
+            
+            print("DEBUG: WWCC validation - age: \(age), wwccNumberValid: \(wwccNumberValid), wwccExpiryValid: \(wwccExpiryValid)")
+            
+            return wwccNumberValid && wwccExpiryValid
         }
+        
+        print("DEBUG: WWCC validation - age: \(age), no WWCC required")
         return true
     }
     
     private var areAgreementsAccepted: Bool {
-        acceptedTerms && acceptedHealthProtocols && acceptedPrivacyPolicy
+        let termsValid = acceptedTerms
+        let healthValid = acceptedHealthProtocols
+        let privacyValid = acceptedPrivacyPolicy
+        
+        let result = termsValid && healthValid && privacyValid
+        
+        print("DEBUG: Agreements validation - terms: \(termsValid), health: \(healthValid), privacy: \(privacyValid), result: \(result)")
+        
+        return result
     }
     
     private var calculatedAge: Int {
@@ -189,6 +204,9 @@ private extension RegistrationSignupSlidesView {
             removal: .move(edge: .leading)
         ))
         .animation(.easeInOut(duration: Constants.animationDuration), value: currentStep)
+        .onChange(of: currentStep) { newStep in
+            print("DEBUG: Step changed from \(currentStep) to \(newStep)")
+        }
 
     }
     
@@ -346,7 +364,11 @@ private extension RegistrationSignupSlidesView {
     }
     
     var nextButton: some View {
-        Button(action: nextStep) {
+        Button(action: {
+            print("DEBUG: Next button tapped on step \(currentStep)")
+            print("DEBUG: Button state - canProceed: \(canProceed), isLoading: \(isLoading)")
+            nextStep()
+        }) {
             HStack {
                 if isLoading {
                     ProgressView()
@@ -849,8 +871,8 @@ private extension RegistrationSignupSlidesView {
                 }
                 .padding(.horizontal, Constants.buttonPadding)
                 
-                // Add bottom padding for scrolling
-                Spacer(minLength: 100)
+                // Add bottom padding for scrolling but not too much
+                Spacer(minLength: 50)
             }
         }
         .padding(.vertical, Constants.buttonPadding)
@@ -998,6 +1020,12 @@ private extension RegistrationSignupSlidesView {
 private extension RegistrationSignupSlidesView {
     
     func nextStep() {
+        // Check if we can proceed to the next step
+        guard canProceed else {
+            print("DEBUG: Cannot proceed - validation failed")
+            return
+        }
+        
         guard currentStep < Constants.totalSteps - 1 else {
             Task {
                 await createAccount()
@@ -1005,6 +1033,7 @@ private extension RegistrationSignupSlidesView {
             return
         }
         
+        print("DEBUG: Moving from step \(currentStep) to step \(currentStep + 1)")
         withAnimation {
             currentStep += 1
         }
