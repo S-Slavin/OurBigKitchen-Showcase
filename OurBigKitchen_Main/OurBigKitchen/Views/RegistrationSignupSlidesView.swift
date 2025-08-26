@@ -295,6 +295,8 @@ private extension RegistrationSignupSlidesView {
             }
             .padding(.horizontal, Constants.buttonPadding)
             
+
+            
             // Main navigation buttons
             HStack(spacing: Constants.smallSpacing) {
                 if !isFirstStep {
