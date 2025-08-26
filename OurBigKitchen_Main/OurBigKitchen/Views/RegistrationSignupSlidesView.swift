@@ -489,7 +489,7 @@ private extension RegistrationSignupSlidesView {
     }
     
     var personalInfoView: some View {
-        VStack(spacing: Constants.mobileSpacing) {
+        VStack(spacing: Constants.spacing) {
             Spacer()
             
             Text("Personal Information")
@@ -497,6 +497,7 @@ private extension RegistrationSignupSlidesView {
                 .fontWeight(.bold)
                 .foregroundColor(primaryColor)
                 .multilineTextAlignment(.center)
+                .padding(.bottom, Constants.smallSpacing)
             
             // Mandatory fields note
             HStack {
@@ -507,24 +508,49 @@ private extension RegistrationSignupSlidesView {
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
-            .padding(.bottom, 10)
+            .padding(.bottom, Constants.spacing)
             
-            VStack(spacing: Constants.mobileSpacing) {
+            VStack(spacing: Constants.spacing) {
                 nameFieldsSection
+                
+                Divider()
+                    .padding(.vertical, Constants.smallSpacing)
+                
                 emailFieldSection
+                
+                Divider()
+                    .padding(.vertical, Constants.smallSpacing)
+                
                 passwordFieldsSection
+                
+                Divider()
+                    .padding(.vertical, Constants.smallSpacing)
+                
                 dateOfBirthSection
             }
-            .padding(.horizontal, Constants.mobilePadding)
+            .padding(.horizontal, Constants.buttonPadding)
             
             Spacer()
         }
-        .padding(.vertical, Constants.mobilePadding)
+        .padding(.vertical, Constants.buttonPadding)
     }
     
     var nameFieldsSection: some View {
-        VStack(spacing: Constants.mobileSpacing) {
-            VStack(alignment: .leading, spacing: 8) {
+        VStack(spacing: Constants.smallSpacing) {
+            // Section header
+            HStack {
+                Image(systemName: "person.circle.fill")
+                    .foregroundColor(primaryColor)
+                    .font(.title2)
+                Text("Name")
+                    .font(.title3)
+                    .fontWeight(.semibold)
+                    .foregroundColor(primaryColor)
+                Spacer()
+            }
+            .padding(.bottom, Constants.mobileSpacing)
+            
+            VStack(alignment: .leading, spacing: Constants.smallSpacing) {
                 HStack {
                     Text("First Name")
                         .font(.headline)
@@ -532,6 +558,8 @@ private extension RegistrationSignupSlidesView {
                     Text("*")
                         .foregroundColor(.red)
                         .fontWeight(.bold)
+                    
+                    Spacer()
                     
                     if !firstName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                         Image(systemName: "checkmark.circle.fill")
@@ -551,7 +579,7 @@ private extension RegistrationSignupSlidesView {
                     )
             }
             
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: Constants.smallSpacing) {
                 HStack {
                     Text("Last Name")
                         .font(.headline)
@@ -559,6 +587,8 @@ private extension RegistrationSignupSlidesView {
                     Text("*")
                         .foregroundColor(.red)
                         .fontWeight(.bold)
+                    
+                    Spacer()
                     
                     if !lastName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                         Image(systemName: "checkmark.circle.fill")
@@ -578,10 +608,27 @@ private extension RegistrationSignupSlidesView {
                     )
             }
         }
+        .padding(.horizontal, Constants.mobilePadding)
+        .padding(.vertical, Constants.smallSpacing)
+        .background(Color.white.opacity(0.7))
+        .cornerRadius(Constants.cornerRadius)
     }
     
     var emailFieldSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: Constants.smallSpacing) {
+            // Section header
+            HStack {
+                Image(systemName: "envelope.circle.fill")
+                    .foregroundColor(primaryColor)
+                    .font(.title2)
+                Text("Contact Information")
+                    .font(.title3)
+                    .fontWeight(.semibold)
+                    .foregroundColor(primaryColor)
+                Spacer()
+            }
+            .padding(.bottom, Constants.mobileSpacing)
+            
             HStack {
                 Text("Email Address")
                     .font(.headline)
@@ -589,6 +636,8 @@ private extension RegistrationSignupSlidesView {
                 Text("*")
                     .foregroundColor(.red)
                     .fontWeight(.bold)
+                
+                Spacer()
                 
                 if !email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && isValidEmail(email) {
                     Image(systemName: "checkmark.circle.fill")
@@ -612,6 +661,10 @@ private extension RegistrationSignupSlidesView {
                         .stroke(emailValidationColor, lineWidth: 1)
                 )
         }
+        .padding(.horizontal, Constants.mobilePadding)
+        .padding(.vertical, Constants.smallSpacing)
+        .background(Color.white.opacity(0.7))
+        .cornerRadius(Constants.cornerRadius)
     }
     
     private var emailValidationColor: Color {
@@ -626,7 +679,20 @@ private extension RegistrationSignupSlidesView {
     
     var passwordFieldsSection: some View {
         VStack(spacing: Constants.smallSpacing) {
-            VStack(alignment: .leading, spacing: 8) {
+            // Section header
+            HStack {
+                Image(systemName: "lock.circle.fill")
+                    .foregroundColor(primaryColor)
+                    .font(.title2)
+                Text("Security")
+                    .font(.title3)
+                    .fontWeight(.semibold)
+                    .foregroundColor(primaryColor)
+                Spacer()
+            }
+            .padding(.bottom, Constants.mobileSpacing)
+            
+            VStack(alignment: .leading, spacing: Constants.smallSpacing) {
                 HStack {
                     Text("Password")
                         .font(.headline)
@@ -634,6 +700,8 @@ private extension RegistrationSignupSlidesView {
                     Text("*")
                         .foregroundColor(.red)
                         .fontWeight(.bold)
+                    
+                    Spacer()
                     
                     if !password.isEmpty && password.count >= 6 {
                         Image(systemName: "checkmark.circle.fill")
@@ -648,20 +716,23 @@ private extension RegistrationSignupSlidesView {
                 
                 SecureField("Password", text: $password)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .frame(height: 44)
                     .overlay(
                         RoundedRectangle(cornerRadius: 8)
                             .stroke(passwordValidationColor, lineWidth: 1)
                     )
             }
             
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: Constants.smallSpacing) {
                 HStack {
                     Text("Confirm Password")
-                        .font(.headline)
-                        .foregroundColor(primaryColor)
+                    .font(.headline)
+                    .foregroundColor(primaryColor)
                     Text("*")
                         .foregroundColor(.red)
                         .fontWeight(.bold)
+                    
+                    Spacer()
                     
                     if !confirmPassword.isEmpty && password == confirmPassword {
                         Image(systemName: "checkmark.circle.fill")
@@ -676,12 +747,17 @@ private extension RegistrationSignupSlidesView {
                 
                 SecureField("Confirm Password", text: $confirmPassword)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .frame(height: 44)
                     .overlay(
                         RoundedRectangle(cornerRadius: 8)
                             .stroke(confirmPasswordValidationColor, lineWidth: 1)
                     )
             }
         }
+        .padding(.horizontal, Constants.mobilePadding)
+        .padding(.vertical, Constants.smallSpacing)
+        .background(Color.white.opacity(0.7))
+        .cornerRadius(Constants.cornerRadius)
     }
     
     private var passwordValidationColor: Color {
@@ -705,7 +781,20 @@ private extension RegistrationSignupSlidesView {
     }
     
     var dateOfBirthSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: Constants.smallSpacing) {
+            // Section header
+            HStack {
+                Image(systemName: "calendar.circle.fill")
+                    .foregroundColor(primaryColor)
+                    .font(.title2)
+                Text("Personal Details")
+                    .font(.title3)
+                    .fontWeight(.semibold)
+                    .foregroundColor(primaryColor)
+                Spacer()
+            }
+            .padding(.bottom, Constants.mobileSpacing)
+            
             HStack {
                 Text("Date of Birth")
                     .font(.headline)
@@ -713,12 +802,31 @@ private extension RegistrationSignupSlidesView {
                 Text("*")
                     .foregroundColor(.red)
                     .fontWeight(.bold)
+                
+                Spacer()
+                
+                // Show age indicator
+                Text("Age: \(calculatedAge)")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color.gray.opacity(0.1))
+                    .cornerRadius(4)
             }
             
             DatePicker("Date of Birth", selection: $dateOfBirth, displayedComponents: .date)
                 .datePickerStyle(CompactDatePickerStyle())
                 .labelsHidden()
+                .frame(height: 44)
+                .padding(.horizontal, 12)
+                .background(Color.gray.opacity(0.05))
+                .cornerRadius(8)
         }
+        .padding(.horizontal, Constants.mobilePadding)
+        .padding(.vertical, Constants.smallSpacing)
+        .background(Color.white.opacity(0.7))
+        .cornerRadius(Constants.cornerRadius)
     }
     
     var wwccView: some View {
