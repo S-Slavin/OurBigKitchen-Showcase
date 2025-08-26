@@ -68,7 +68,7 @@ struct RegistrationSignupSlidesView: View {
     @State private var showSalesforceSync = false
     
     // MARK: - Combine
-    private var cancellables = Set<AnyCancellable>()
+    @State private var cancellables = Set<AnyCancellable>()
     
     // MARK: - Computed Properties
     private var primaryColor: Color { ThemeManager.Colors.primary }
@@ -985,7 +985,7 @@ private extension RegistrationSignupSlidesView {
             return
         }
         
-        do {
+
             await authViewModel.signUp(
                 firstName: firstName.trimmingCharacters(in: .whitespacesAndNewlines),
                 lastName: lastName.trimmingCharacters(in: .whitespacesAndNewlines),
@@ -1006,10 +1006,7 @@ private extension RegistrationSignupSlidesView {
             // Show success
             showSalesforceSync = true
             
-        } catch {
-            errorMessage = "Account creation failed: \(error.localizedDescription)"
-            showError = true
-        }
+
         
         isLoading = false
     }
