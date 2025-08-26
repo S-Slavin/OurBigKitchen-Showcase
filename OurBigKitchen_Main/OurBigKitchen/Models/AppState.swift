@@ -135,12 +135,8 @@ class AppState: ObservableObject {
     // MARK: - Notification Setup
     
     private func setupNotificationObservers() {
-        NotificationCenter.default.publisher(for: .didUpdateAuth)
-            .debounce(for: .milliseconds(100), scheduler: RunLoop.main)
-            .sink { [weak self] _ in
-                self?.refreshAuthState()
-            }
-            .store(in: &cancellables)
+        // REMOVED: Circular dependency - was listening to didUpdateAuth and calling refreshAuthState()
+        // which would post didUpdateAuth again, causing infinite loop
         
         termsManager.$hasAcceptedTerms
             .dropFirst()
@@ -194,42 +190,37 @@ class AppState: ObservableObject {
     }
     
     func refreshAuthState() {
-        Task.detached {
-            let isAuthenticatedInDefaults = UserDefaults.standard.bool(forKey: "isAuthenticated")
-            let isAuthenticatedInManager = await MainActor.run { self.authManager.isAuthenticated }
-            
-            let newAuthState = isAuthenticatedInManager || isAuthenticatedInDefaults
-            let profile = await MainActor.run { self.authManager.currentUser }
+        print("DEBUG: AppState - Refreshing auth state")
+        
+        // Simplified synchronous refresh instead of Task.detached
+        let isAuthenticatedInDefaults = UserDefaults.standard.bool(forKey: "isAuthenticated")
+        let isAuthenticatedInManager = authManager.isAuthenticated
+        
+        let newAuthState = isAuthenticatedInManager || isAuthenticatedInDefaults
+        let profile = authManager.currentUser
+        
+        if newAuthState != isAuthenticated {
+            isAuthenticated = newAuthState
+            userProfile = profile
             
             if newAuthState && !isAuthenticatedInDefaults {
-                await MainActor.run {
-                    self.saveAuthStateDebouncer?.cancel()
-                    self.saveAuthStateDebouncer = Just(())
-                        .delay(for: .milliseconds(200), scheduler: RunLoop.main)
-                        .sink { _ in
-                            UserDefaults.standard.set(true, forKey: "isAuthenticated")
-                            UserDefaults.standard.set(true, forKey: "hasSignedIn")
-                        }
-                    
-                    self.isAuthenticated = newAuthState
-                    self.userProfile = profile
-                }
-            } else {
-                await MainActor.run {
-                    self.isAuthenticated = newAuthState
-                    self.userProfile = profile
-                }
+                UserDefaults.standard.set(true, forKey: "isAuthenticated")
+                UserDefaults.standard.set(true, forKey: "hasSignedIn")
             }
+            
+            print("DEBUG: AppState - Auth state updated: \(newAuthState)")
         }
     }
     
     func refreshTermsState() {
-        Task.detached {
-            let termsAccepted = await MainActor.run { self.termsManager.checkTermsStatus() }
-            
-            await MainActor.run {
-                self.hasAcceptedTerms = termsAccepted
-            }
+        print("DEBUG: AppState - Refreshing terms state")
+        
+        // Simplified synchronous refresh instead of Task.detached
+        let termsAccepted = termsManager.checkTermsStatus()
+        
+        if termsAccepted != hasAcceptedTerms {
+            hasAcceptedTerms = termsAccepted
+            print("DEBUG: AppState - Terms state updated: \(termsAccepted)")
         }
     }
     
