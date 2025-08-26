@@ -65,6 +65,7 @@ class AppState: ObservableObject {
     
     init() {
         print("DEBUG: AppState.init() - Starting initialization")
+        print("DEBUG: AppState.init() - Bundle identifier: \(Bundle.main.bundleIdentifier ?? "NIL")")
         isLoading = true
         
         // Set initial state immediately from UserDefaults
@@ -74,6 +75,10 @@ class AppState: ObservableObject {
         let hasAcceptedHealthProtocols = UserDefaults.standard.bool(forKey: "hasAcceptedHealthProtocols")
         
         print("DEBUG: AppState.init() - UserDefaults state: onboarding=\(hasSeenOnboarding), signedIn=\(hasSignedIn), terms=\(hasAcceptedTerms), health=\(hasAcceptedHealthProtocols)")
+        
+        // Check if UserDefaults is working at all
+        let testValue = UserDefaults.standard.string(forKey: "test_key")
+        print("DEBUG: AppState.init() - Test UserDefaults read: \(testValue ?? "NIL")")
         
         // Set initial state based on UserDefaults
         self.hasAcceptedTerms = hasAcceptedTerms
