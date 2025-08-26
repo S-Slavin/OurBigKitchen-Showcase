@@ -2,14 +2,49 @@ import SwiftUI
 import UIKit
 import Foundation
 
+// MARK: - Registration Signup Slides View
+/// A multi-step registration flow for new volunteers with professional styling and validation
 struct RegistrationSignupSlidesView: View {
-    @EnvironmentObject var appState: AppState
+    
+    // MARK: - Dependencies
+    @EnvironmentObject private var appState: AppState
     @StateObject private var authViewModel = AuthViewModel()
     @StateObject private var salesforceManager = SalesforceIntegrationManager()
     @Environment(\.dismiss) private var dismiss
     
+    // MARK: - Constants
+    private enum Constants {
+        static let totalSteps = 5
+        static let animationDuration: Double = 0.3
+        static let stepIndicatorSize: CGFloat = 12
+        static let stepIndicatorScale: CGFloat = 1.2
+        static let cornerRadius: CGFloat = 12
+        static let buttonPadding: CGFloat = 20
+        static let spacing: CGFloat = 24
+        static let smallSpacing: CGFloat = 16
+        static let iconSize: CGFloat = 60
+    }
+    
+    private enum Step: Int, CaseIterable {
+        case volunteerType = 0
+        case personalInfo = 1
+        case wwcc = 2
+        case agreements = 3
+        case accountCreation = 4
+        
+        var title: String {
+            switch self {
+            case .volunteerType: return "Volunteer Type"
+            case .personalInfo: return "Personal Information"
+            case .wwcc: return "Working with Children Check"
+            case .agreements: return "Agreements"
+            case .accountCreation: return "Create Account"
+            }
+        }
+    }
+    
     // MARK: - Form Data
-    @State private var currentStep = 0
+    @State private var currentStep = Step.volunteerType.rawValue
     @State private var volunteerType: VolunteerType = .individual
     @State private var firstName = ""
     @State private var lastName = ""
@@ -31,41 +66,68 @@ struct RegistrationSignupSlidesView: View {
     @State private var errorMessage = ""
     @State private var showSalesforceSync = false
     
-    // MARK: - Constants
-    private let primaryColor = ThemeManager.Colors.primary
-    private let backgroundColor = Color(red: 1.0, green: 0.98, blue: 0.94)
-    private let totalSteps = 5
+    // MARK: - Computed Properties
+    private var primaryColor: Color { ThemeManager.Colors.primary }
+    private var backgroundColor: Color { Color(red: 1.0, green: 0.98, blue: 0.94) }
+    private var currentStepEnum: Step { Step(rawValue: currentStep) ?? .volunteerType }
     
+    private var canProceed: Bool {
+        switch currentStep {
+        case Step.volunteerType.rawValue:
+            return true
+        case Step.personalInfo.rawValue:
+            return isPersonalInfoValid
+        case Step.wwcc.rawValue:
+            return isWWCCValid
+        case Step.agreements.rawValue:
+            return areAgreementsAccepted
+        case Step.accountCreation.rawValue:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    private var isLastStep: Bool { currentStep == Constants.totalSteps - 1 }
+    private var isFirstStep: Bool { currentStep == 0 }
+    
+    // MARK: - Validation Computed Properties
+    private var isPersonalInfoValid: Bool {
+        !firstName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+        !lastName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+        !email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+        !password.isEmpty &&
+        password == confirmPassword &&
+        isValidEmail(email)
+    }
+    
+    private var isWWCCValid: Bool {
+        let age = calculateAge(from: dateOfBirth)
+        if age >= 18 {
+            return !wwccNumber.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+                   wwccExpiryDate > Date()
+        }
+        return true
+    }
+    
+    private var areAgreementsAccepted: Bool {
+        acceptedTerms && acceptedHealthProtocols && acceptedPrivacyPolicy
+    }
+    
+    // MARK: - Body
     var body: some View {
         GeometryReader { geometry in
             ZStack {
                 backgroundColor
-                    .edgesIgnoringSafeArea(.all)
+                    .ignoresSafeArea()
                 
                 VStack(spacing: 0) {
                     headerView(geometry: geometry)
                     
-                    TabView(selection: $currentStep) {
-                        volunteerTypeSelectionView
-                            .tag(0)
-                        
-                        personalInfoView
-                            .tag(1)
-                        
-                        wwccView
-                            .tag(2)
-                        
-                        agreementsView
-                            .tag(3)
-                        
-                        accountCreationView
-                            .tag(4)
-                    }
-                    .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-                    .animation(.easeInOut(duration: 0.3), value: currentStep)
+                    stepContent
                     
                     navigationButtons
-                        .padding(.horizontal, 20)
+                        .padding(.horizontal, Constants.buttonPadding)
                         .padding(.bottom, 30)
                 }
             }
@@ -76,172 +138,136 @@ struct RegistrationSignupSlidesView: View {
             Text(errorMessage)
         }
         .sheet(isPresented: $showSalesforceSync) {
-            // Success view after Salesforce sync
-            VStack(spacing: 20) {
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 60))
-                    .foregroundColor(.green)
-                
-                Text("Account Created Successfully!")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                
-                Text("Your account has been created and synced with Salesforce.")
-                    .multilineTextAlignment(.center)
-                    .foregroundColor(.secondary)
-                
-                Button("Continue") {
-                    // Navigate to main app
-                }
-                .buttonStyle(ButtonStyles.springy)
-            }
-            .padding()
+            successView
         }
     }
+}
+
+// MARK: - UI Components
+private extension RegistrationSignupSlidesView {
     
-    // MARK: - Computed Properties
-    
-    private var canProceed: Bool {
-        switch currentStep {
-        case 0:
-            return true
-        case 1:
-            return !firstName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-                   !lastName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-                   !email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-                   !password.isEmpty &&
-                   password == confirmPassword &&
-                   isValidEmail(email)
-        case 2:
-            let age = Calendar.current.dateComponents([.year], from: dateOfBirth, to: Date()).year ?? 0
-            if age >= 18 {
-                return !wwccNumber.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-                       wwccExpiryDate > Date()
-            }
-            return true
-        case 3:
-            return acceptedTerms && acceptedHealthProtocols && acceptedPrivacyPolicy
-        case 4:
-            return true // Final step always allows proceeding
-        default:
-            return false
+    var stepContent: some View {
+        TabView(selection: $currentStep) {
+            volunteerTypeSelectionView
+                .tag(Step.volunteerType.rawValue)
+            
+            personalInfoView
+                .tag(Step.personalInfo.rawValue)
+            
+            wwccView
+                .tag(Step.wwcc.rawValue)
+            
+            agreementsView
+                .tag(Step.agreements.rawValue)
+            
+            accountCreationView
+                .tag(Step.accountCreation.rawValue)
         }
-    }
-    
-    private var isLastStep: Bool {
-        currentStep == totalSteps - 1
-    }
-    
-    private var isFirstStep: Bool {
-        currentStep == 0
+        .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+        .animation(.easeInOut(duration: Constants.animationDuration), value: currentStep)
     }
     
     // MARK: - Header View
-    
-    private func headerView(geometry: GeometryProxy) -> some View {
-        VStack(spacing: 16) {
-            HStack(spacing: 8) {
-                ForEach(0..<totalSteps, id: \.self) { step in
-                    Circle()
-                        .fill(step <= currentStep ? primaryColor : Color.gray.opacity(0.3))
-                        .frame(width: 12, height: 12)
-                        .scaleEffect(step == currentStep ? 1.2 : 1.0)
-                        .animation(.easeInOut(duration: 0.2), value: currentStep)
-                }
-            }
-            .padding(.top, 20)
-            
-            Text(stepTitle)
-                .font(.title2)
-                .fontWeight(.semibold)
-                .foregroundColor(primaryColor)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 20)
+    func headerView(geometry: GeometryProxy) -> some View {
+        VStack(spacing: Constants.smallSpacing) {
+            stepIndicatorView
+            stepTitleView
         }
         .frame(maxWidth: .infinity)
         .background(Color.white)
         .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: 1)
     }
     
-    private var stepTitle: String {
-        switch currentStep {
-        case 0: return "Volunteer Type"
-        case 1: return "Personal Information"
-        case 2: return "Working with Children Check"
-        case 3: return "Agreements"
-        case 4: return "Create Account"
-        default: return ""
+    var stepIndicatorView: some View {
+        HStack(spacing: 8) {
+            ForEach(0..<Constants.totalSteps, id: \.self) { step in
+                Circle()
+                    .fill(step <= currentStep ? primaryColor : Color.gray.opacity(0.3))
+                    .frame(width: Constants.stepIndicatorSize, height: Constants.stepIndicatorSize)
+                    .scaleEffect(step == currentStep ? Constants.stepIndicatorScale : 1.0)
+                    .animation(.easeInOut(duration: 0.2), value: currentStep)
+            }
         }
+        .padding(.top, 20)
+    }
+    
+    var stepTitleView: some View {
+        Text(currentStepEnum.title)
+            .font(.title2)
+            .fontWeight(.semibold)
+            .foregroundColor(primaryColor)
+            .multilineTextAlignment(.center)
+            .padding(.horizontal, Constants.buttonPadding)
     }
     
     // MARK: - Navigation Buttons
-    
-    private var navigationButtons: some View {
-        HStack(spacing: 16) {
+    var navigationButtons: some View {
+        HStack(spacing: Constants.smallSpacing) {
             if !isFirstStep {
-                Button(action: previousStep) {
-                    HStack {
-                        Image(systemName: "chevron.left")
-                        Text("Back")
-                    }
-                    .foregroundColor(primaryColor)
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 12)
-                    .background(Color.white)
-                    .cornerRadius(8)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(primaryColor, lineWidth: 1)
-                    )
-                }
+                backButton
             }
             
             Spacer()
             
-            Button(action: nextStep) {
-                HStack {
-                    if isLoading {
-                        ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                            .scaleEffect(0.8)
-                    } else {
-                        Text(isLastStep ? "Create Account" : "Next")
-                        if !isLastStep {
-                            Image(systemName: "chevron.right")
-                        }
-                    }
-                }
-                .foregroundColor(.white)
-                .padding(.horizontal, 24)
-                .padding(.vertical, 12)
-                .background(canProceed ? primaryColor : Color.gray.opacity(0.5))
-                .cornerRadius(8)
-            }
-            .disabled(!canProceed || isLoading)
+            nextButton
         }
     }
     
-    // MARK: - Step Views
+    var backButton: some View {
+        Button(action: previousStep) {
+            HStack {
+                Image(systemName: "chevron.left")
+                Text("Back")
+            }
+            .foregroundColor(primaryColor)
+            .padding(.horizontal, 24)
+            .padding(.vertical, 12)
+            .background(Color.white)
+            .cornerRadius(8)
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(primaryColor, lineWidth: 1)
+            )
+        }
+    }
     
-    private var volunteerTypeSelectionView: some View {
-        VStack(spacing: 24) {
+    var nextButton: some View {
+        Button(action: nextStep) {
+            HStack {
+                if isLoading {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        .scaleEffect(0.8)
+                } else {
+                    Text(isLastStep ? "Create Account" : "Next")
+                    if !isLastStep {
+                        Image(systemName: "chevron.right")
+                    }
+                }
+            }
+            .foregroundColor(.white)
+            .padding(.horizontal, 24)
+            .padding(.vertical, 12)
+            .background(canProceed ? primaryColor : Color.gray.opacity(0.5))
+            .cornerRadius(8)
+        }
+        .disabled(!canProceed || isLoading)
+    }
+}
+
+// MARK: - Step Views
+private extension RegistrationSignupSlidesView {
+    
+    var volunteerTypeSelectionView: some View {
+        VStack(spacing: Constants.spacing) {
             Spacer()
             
-            VStack(spacing: 16) {
-                Text("Choose Your Volunteer Type")
-                    .font(.title)
-                    .fontWeight(.bold)
-                    .foregroundColor(primaryColor)
-                    .multilineTextAlignment(.center)
-                
-                Text("Select how you'd like to volunteer with OurBigKitchen")
-                    .font(.body)
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 20)
-            }
+            headerSection(
+                title: "Choose Your Volunteer Type",
+                subtitle: "Select how you'd like to volunteer with OurBigKitchen"
+            )
             
-            VStack(spacing: 16) {
+            VStack(spacing: Constants.smallSpacing) {
                 volunteerTypeButton(
                     type: .individual,
                     title: "Individual Volunteer",
@@ -256,14 +282,14 @@ struct RegistrationSignupSlidesView: View {
                     icon: "building.2.fill"
                 )
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, Constants.buttonPadding)
             
             Spacer()
         }
-        .padding(.vertical, 20)
+        .padding(.vertical, Constants.buttonPadding)
     }
     
-    private func volunteerTypeButton(type: VolunteerType, title: String, subtitle: String, icon: String) -> some View {
+    func volunteerTypeButton(type: VolunteerType, title: String, subtitle: String, icon: String) -> some View {
         Button(action: { volunteerType = type }) {
             HStack {
                 Image(systemName: icon)
@@ -289,18 +315,18 @@ struct RegistrationSignupSlidesView: View {
                         .font(.title2)
                 }
             }
-            .padding(20)
+            .padding(Constants.buttonPadding)
             .background(volunteerType == type ? primaryColor : Color.white)
-            .cornerRadius(12)
+            .cornerRadius(Constants.cornerRadius)
             .overlay(
-                RoundedRectangle(cornerRadius: 12)
+                RoundedRectangle(cornerRadius: Constants.cornerRadius)
                     .stroke(volunteerType == type ? primaryColor : Color.gray.opacity(0.3), lineWidth: 1)
             )
         }
     }
     
-    private var personalInfoView: some View {
-        VStack(spacing: 24) {
+    var personalInfoView: some View {
+        VStack(spacing: Constants.spacing) {
             Spacer()
             
             Text("Personal Information")
@@ -310,148 +336,171 @@ struct RegistrationSignupSlidesView: View {
                 .multilineTextAlignment(.center)
             
             VStack(spacing: 20) {
-                HStack(spacing: 16) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("First Name")
-                            .font(.headline)
-                            .foregroundColor(primaryColor)
-                        
-                        TextField("First Name", text: $firstName)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .autocapitalization(.words)
-                            .disableAutocorrection(true)
-                    }
-                    
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Last Name")
-                            .font(.headline)
-                            .foregroundColor(primaryColor)
-                        
-                        TextField("Last Name", text: $lastName)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .autocapitalization(.words)
-                            .disableAutocorrection(true)
-                    }
-                }
+                nameFieldsSection
+                emailFieldSection
+                passwordFieldsSection
+                dateOfBirthSection
+            }
+            .padding(.horizontal, Constants.buttonPadding)
+            
+            Spacer()
+        }
+        .padding(.vertical, Constants.buttonPadding)
+    }
+    
+    var nameFieldsSection: some View {
+        HStack(spacing: Constants.smallSpacing) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("First Name")
+                    .font(.headline)
+                    .foregroundColor(primaryColor)
                 
+                TextField("First Name", text: $firstName)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .autocapitalization(.words)
+                    .disableAutocorrection(true)
+            }
+            
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Last Name")
+                    .font(.headline)
+                    .foregroundColor(primaryColor)
+                
+                TextField("Last Name", text: $lastName)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .autocapitalization(.words)
+                    .disableAutocorrection(true)
+            }
+        }
+    }
+    
+    var emailFieldSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Email Address")
+                .font(.headline)
+                .foregroundColor(primaryColor)
+            
+            TextField("Email", text: $email)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .keyboardType(.emailAddress)
+                .autocapitalization(.none)
+                .disableAutocorrection(true)
+        }
+    }
+    
+    var passwordFieldsSection: some View {
+        VStack(spacing: Constants.smallSpacing) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Password")
+                    .font(.headline)
+                    .foregroundColor(primaryColor)
+                
+                SecureField("Password", text: $password)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+            }
+            
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Confirm Password")
+                    .font(.headline)
+                    .foregroundColor(primaryColor)
+                
+                SecureField("Confirm Password", text: $confirmPassword)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+            }
+        }
+    }
+    
+    var dateOfBirthSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Date of Birth")
+                .font(.headline)
+                .foregroundColor(primaryColor)
+            
+            DatePicker("Date of Birth", selection: $dateOfBirth, displayedComponents: .date)
+                .datePickerStyle(CompactDatePickerStyle())
+                .labelsHidden()
+        }
+    }
+    
+    var wwccView: some View {
+        VStack(spacing: Constants.spacing) {
+            Spacer()
+            
+            let age = calculateAge(from: dateOfBirth)
+            
+            if age >= 18 {
+                wwccRequiredView
+            } else {
+                wwccNotRequiredView
+            }
+            
+            Spacer()
+        }
+        .padding(.vertical, Constants.buttonPadding)
+    }
+    
+    var wwccRequiredView: some View {
+        VStack(spacing: 20) {
+            Text("Working with Children Check")
+                .font(.title)
+                .fontWeight(.bold)
+                .foregroundColor(primaryColor)
+                .multilineTextAlignment(.center)
+            
+            Text("As you are 18 or older, you need a valid Working with Children Check to volunteer with food preparation.")
+                .font(.body)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, Constants.buttonPadding)
+            
+            VStack(spacing: Constants.smallSpacing) {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Email Address")
+                    Text("WWCC Number")
                         .font(.headline)
                         .foregroundColor(primaryColor)
                     
-                    TextField("Email", text: $email)
+                    TextField("WWCC Number", text: $wwccNumber)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .keyboardType(.emailAddress)
                         .autocapitalization(.none)
                         .disableAutocorrection(true)
                 }
                 
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Password")
+                    Text("Expiry Date")
                         .font(.headline)
                         .foregroundColor(primaryColor)
                     
-                    SecureField("Password", text: $password)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                }
-                
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Confirm Password")
-                        .font(.headline)
-                        .foregroundColor(primaryColor)
-                    
-                    SecureField("Confirm Password", text: $confirmPassword)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                }
-                
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Date of Birth")
-                        .font(.headline)
-                        .foregroundColor(primaryColor)
-                    
-                    DatePicker("Date of Birth", selection: $dateOfBirth, displayedComponents: .date)
+                    DatePicker("Expiry Date", selection: $wwccExpiryDate, displayedComponents: .date)
                         .datePickerStyle(CompactDatePickerStyle())
                         .labelsHidden()
                 }
             }
-            .padding(.horizontal, 20)
-            
-            Spacer()
+            .padding(.horizontal, Constants.buttonPadding)
         }
-        .padding(.vertical, 20)
     }
     
-    private var wwccView: some View {
-        VStack(spacing: 24) {
-            Spacer()
+    var wwccNotRequiredView: some View {
+        VStack(spacing: 20) {
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: Constants.iconSize))
+                .foregroundColor(.green)
             
-            let age = Calendar.current.dateComponents([.year], from: dateOfBirth, to: Date()).year ?? 0
+            Text("No WWCC Required")
+                .font(.title)
+                .fontWeight(.bold)
+                .foregroundColor(primaryColor)
+                .multilineTextAlignment(.center)
             
-            if age >= 18 {
-                VStack(spacing: 20) {
-                    Text("Working with Children Check")
-                        .font(.title)
-                        .fontWeight(.bold)
-                        .foregroundColor(primaryColor)
-                        .multilineTextAlignment(.center)
-                    
-                    Text("As you are 18 or older, you need a valid Working with Children Check to volunteer with food preparation.")
-                        .font(.body)
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 20)
-                    
-                    VStack(spacing: 16) {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("WWCC Number")
-                                .font(.headline)
-                                .foregroundColor(primaryColor)
-                            
-                            TextField("WWCC Number", text: $wwccNumber)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                                .autocapitalization(.none)
-                                .disableAutocorrection(true)
-                        }
-                        
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("Expiry Date")
-                                .font(.headline)
-                                .foregroundColor(primaryColor)
-                            
-                            DatePicker("Expiry Date", selection: $wwccExpiryDate, displayedComponents: .date)
-                                .datePickerStyle(CompactDatePickerStyle())
-                                .labelsHidden()
-                        }
-                    }
-                    .padding(.horizontal, 20)
-                }
-            } else {
-                VStack(spacing: 20) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 60))
-                        .foregroundColor(.green)
-                    
-                    Text("No WWCC Required")
-                        .font(.title)
-                        .fontWeight(.bold)
-                        .foregroundColor(primaryColor)
-                        .multilineTextAlignment(.center)
-                    
-                    Text("You are under 18, so no Working with Children Check is required.")
-                        .font(.body)
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 20)
-                }
-            }
-            
-            Spacer()
+            Text("You are under 18, so no Working with Children Check is required.")
+                .font(.body)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, Constants.buttonPadding)
         }
-        .padding(.vertical, 20)
     }
     
-    private var agreementsView: some View {
-        VStack(spacing: 24) {
+    var agreementsView: some View {
+        VStack(spacing: Constants.spacing) {
             Spacer()
             
             Text("Agreements & Policies")
@@ -479,16 +528,16 @@ struct RegistrationSignupSlidesView: View {
                     description: "Agree to how we collect and use your data"
                 )
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, Constants.buttonPadding)
             
             Spacer()
         }
-        .padding(.vertical, 20)
+        .padding(.vertical, Constants.buttonPadding)
     }
     
-    private func agreementCheckbox(isChecked: Binding<Bool>, title: String, description: String) -> some View {
+    func agreementCheckbox(isChecked: Binding<Bool>, title: String, description: String) -> some View {
         Button(action: { isChecked.wrappedValue.toggle() }) {
-            HStack(spacing: 16) {
+            HStack(spacing: Constants.smallSpacing) {
                 Image(systemName: isChecked.wrappedValue ? "checkmark.circle.fill" : "circle")
                     .foregroundColor(isChecked.wrappedValue ? primaryColor : .gray)
                     .font(.title2)
@@ -508,13 +557,13 @@ struct RegistrationSignupSlidesView: View {
         }
     }
     
-    private var accountCreationView: some View {
-        VStack(spacing: 24) {
+    var accountCreationView: some View {
+        VStack(spacing: Constants.spacing) {
             Spacer()
             
             VStack(spacing: 20) {
                 Image(systemName: "person.badge.plus")
-                    .font(.system(size: 60))
+                    .font(.system(size: Constants.iconSize))
                     .foregroundColor(primaryColor)
                 
                 Text("Ready to Create Your Account?")
@@ -527,34 +576,34 @@ struct RegistrationSignupSlidesView: View {
                     .font(.body)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
-                    .padding(.horizontal, 20)
+                    .padding(.horizontal, Constants.buttonPadding)
                 
                 accountSummaryView
             }
             
             Spacer()
         }
-        .padding(.vertical, 20)
+        .padding(.vertical, Constants.buttonPadding)
     }
     
-    private var accountSummaryView: some View {
-        VStack(spacing: 16) {
+    var accountSummaryView: some View {
+        VStack(spacing: Constants.smallSpacing) {
             summaryRow(label: "Volunteer Type", value: volunteerType == .individual ? "Individual" : "Corporate")
             summaryRow(label: "Name", value: "\(firstName) \(lastName)")
             summaryRow(label: "Email", value: email)
             
-            let age = Calendar.current.dateComponents([.year], from: dateOfBirth, to: Date()).year ?? 0
+            let age = calculateAge(from: dateOfBirth)
             if age >= 18 {
                 summaryRow(label: "WWCC Number", value: wwccNumber.isEmpty ? "Not provided" : wwccNumber)
             }
         }
-        .padding(20)
+        .padding(Constants.buttonPadding)
         .background(Color.gray.opacity(0.1))
-        .cornerRadius(12)
-        .padding(.horizontal, 20)
+        .cornerRadius(Constants.cornerRadius)
+        .padding(.horizontal, Constants.buttonPadding)
     }
     
-    private func summaryRow(label: String, value: String) -> some View {
+    func summaryRow(label: String, value: String) -> some View {
         HStack {
             Text("\(label):")
                 .fontWeight(.semibold)
@@ -565,10 +614,50 @@ struct RegistrationSignupSlidesView: View {
         }
     }
     
-    // MARK: - Navigation Methods
+    var successView: some View {
+        VStack(spacing: 20) {
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: Constants.iconSize))
+                .foregroundColor(.green)
+            
+            Text("Account Created Successfully!")
+                .font(.title2)
+                .fontWeight(.semibold)
+            
+            Text("Your account has been created and synced with Salesforce.")
+                .multilineTextAlignment(.center)
+                .foregroundColor(.secondary)
+            
+            Button("Continue") {
+                // Navigate to main app
+            }
+            .buttonStyle(ButtonStyles.springy)
+        }
+        .padding()
+    }
     
-    private func nextStep() {
-        guard currentStep < totalSteps - 1 else {
+    func headerSection(title: String, subtitle: String) -> some View {
+        VStack(spacing: Constants.smallSpacing) {
+            Text(title)
+                .font(.title)
+                .fontWeight(.bold)
+                .foregroundColor(primaryColor)
+                .multilineTextAlignment(.center)
+            
+            Text(subtitle)
+                .font(.body)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, Constants.buttonPadding)
+        }
+    }
+}
+
+// MARK: - Navigation Methods
+private extension RegistrationSignupSlidesView {
+    
+    func nextStep() {
+        guard currentStep < Constants.totalSteps - 1 else {
             Task {
                 await createAccount()
             }
@@ -580,17 +669,19 @@ struct RegistrationSignupSlidesView: View {
         }
     }
     
-    private func previousStep() {
+    func previousStep() {
         guard currentStep > 0 else { return }
         
         withAnimation {
             currentStep -= 1
         }
     }
+}
+
+// MARK: - Account Creation
+private extension RegistrationSignupSlidesView {
     
-    // MARK: - Account Creation
-    
-    private func createAccount() async {
+    func createAccount() async {
         isLoading = true
         
         guard validateForm() else {
@@ -614,7 +705,7 @@ struct RegistrationSignupSlidesView: View {
         isLoading = false
     }
     
-    private func validateForm() -> Bool {
+    func validateForm() -> Bool {
         // Validate required fields
         guard !firstName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
               !lastName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
@@ -637,13 +728,13 @@ struct RegistrationSignupSlidesView: View {
         }
         
         // Validate agreements
-        guard acceptedTerms && acceptedHealthProtocols && acceptedPrivacyPolicy else {
+        guard areAgreementsAccepted else {
             showValidationError("Please accept all agreements")
             return false
         }
         
         // Validate WWCC for adults
-        let age = Calendar.current.dateComponents([.year], from: dateOfBirth, to: Date()).year ?? 0
+        let age = calculateAge(from: dateOfBirth)
         if age >= 18 {
             guard !wwccNumber.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
                 showValidationError("WWCC number is required for volunteers 18 and older")
@@ -659,14 +750,16 @@ struct RegistrationSignupSlidesView: View {
         return true
     }
     
-    private func showValidationError(_ message: String) {
+    func showValidationError(_ message: String) {
         errorMessage = message
         showError = true
     }
+}
+
+// MARK: - App State Integration
+private extension RegistrationSignupSlidesView {
     
-    // MARK: - App State Integration
-    
-    private func updateAppStateWithUserProfile() {
+    func updateAppStateWithUserProfile() {
         let userProfile = AppModels.User(
             id: UUID().uuidString,
             firstName: firstName.trimmingCharacters(in: .whitespacesAndNewlines),
@@ -685,10 +778,12 @@ struct RegistrationSignupSlidesView: View {
         
         appState.userProfile = userProfile
     }
+}
+
+// MARK: - Salesforce Integration
+private extension RegistrationSignupSlidesView {
     
-    // MARK: - Salesforce Integration
-    
-    private func syncToSalesforce() async {
+    func syncToSalesforce() async {
         let wwccExpiry = wwccNumber.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : wwccExpiryDate
         
         salesforceManager.syncUserRegistration(
@@ -715,18 +810,23 @@ struct RegistrationSignupSlidesView: View {
         )
         .store(in: &salesforceManager.cancellables)
     }
+}
+
+// MARK: - Helper Methods
+private extension RegistrationSignupSlidesView {
     
-    // MARK: - Helper Methods
-    
-    private func isValidEmail(_ email: String) -> Bool {
+    func isValidEmail(_ email: String) -> Bool {
         let emailRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
         let emailPredicate = NSPredicate(format: "SELF MATCHES %@", emailRegex)
         return emailPredicate.evaluate(with: email)
     }
+    
+    func calculateAge(from dateOfBirth: Date) -> Int {
+        Calendar.current.dateComponents([.year], from: dateOfBirth, to: Date()).year ?? 0
+    }
 }
 
 // MARK: - Preview
-
 struct RegistrationSignupSlidesView_Previews: PreviewProvider {
     static var previews: some View {
         RegistrationSignupSlidesView()
