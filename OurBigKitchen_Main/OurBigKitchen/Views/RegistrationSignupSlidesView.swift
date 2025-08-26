@@ -882,6 +882,26 @@ private extension RegistrationSignupSlidesView {
             }
             
             Spacer()
+            
+            // Skip for Demo button
+            Button(action: {
+                print("DEBUG: Skip for Demo tapped on account creation step")
+                // Skip to success view
+                showSalesforceSync = true
+            }) {
+                Text("Skip for Demo")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Color.clear)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                    )
+                    .cornerRadius(12)
+            }
+            .padding(.bottom, 20)
         }
         .padding(.vertical, Constants.buttonPadding)
     }
