@@ -28,25 +28,43 @@ struct RootView: View {
     @EnvironmentObject var appState: AppState
     
     var body: some View {
-        Group {
-            // Force check onboarding state first, before any authentication logic
-            let hasSeenOnboarding = UserDefaults.standard.bool(forKey: "hasSeenOnboarding")
+        VStack {
+            // Reset button for development/testing
+            Button("Reset Onboarding") {
+                appState.resetAllUserDefaults()
+            }
+            .font(.caption2)
+            .foregroundColor(.secondary)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(Color.clear)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+            )
+            .cornerRadius(12)
+            .padding(.top, 10)
             
-            if !hasSeenOnboarding {
-                UserWelcomeView(onComplete: {
-                    UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
-                    appState.objectWillChange.send()
-                })
-            } else if !appState.isAuthenticated {
-                AuthTypeSelectionView()
-            } else if appState.needsToChooseVolunteerType {
-                VolunteerTypeSelectionView()
-            } else if !appState.hasAcceptedTerms {
-                SimpleTermsView()
-            } else if !appState.hasAcceptedHealthProtocols {
-                HealthProtocolView()
-            } else {
-                ContentView()
+            Group {
+                // Force check onboarding state first, before any authentication logic
+                let hasSeenOnboarding = UserDefaults.standard.bool(forKey: "hasSeenOnboarding")
+                
+                if !hasSeenOnboarding {
+                    UserWelcomeView(onComplete: {
+                        UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
+                        appState.objectWillChange.send()
+                    })
+                } else if !appState.isAuthenticated {
+                    AuthTypeSelectionView()
+                } else if appState.needsToChooseVolunteerType {
+                    VolunteerTypeSelectionView()
+                } else if !appState.hasAcceptedTerms {
+                    SimpleTermsView()
+                } else if !appState.hasAcceptedHealthProtocols {
+                    HealthProtocolView()
+                } else {
+                    ContentView()
+                }
             }
         }
         .onReceive(appState.$isAuthenticated) { _ in
