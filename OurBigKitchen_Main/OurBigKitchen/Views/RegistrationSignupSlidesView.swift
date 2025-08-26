@@ -147,23 +147,26 @@ struct RegistrationSignupSlidesView: View {
 private extension RegistrationSignupSlidesView {
     
     var stepContent: some View {
-        TabView(selection: $currentStep) {
-            volunteerTypeSelectionView
-                .tag(Step.volunteerType.rawValue)
-            
-            personalInfoView
-                .tag(Step.personalInfo.rawValue)
-            
-            wwccView
-                .tag(Step.wwcc.rawValue)
-            
-            agreementsView
-                .tag(Step.agreements.rawValue)
-            
-            accountCreationView
-                .tag(Step.accountCreation.rawValue)
+        Group {
+            switch currentStep {
+            case Step.volunteerType.rawValue:
+                volunteerTypeSelectionView
+            case Step.personalInfo.rawValue:
+                personalInfoView
+            case Step.wwcc.rawValue:
+                wwccView
+            case Step.agreements.rawValue:
+                agreementsView
+            case Step.accountCreation.rawValue:
+                accountCreationView
+            default:
+                volunteerTypeSelectionView
+            }
         }
-        .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+        .transition(.asymmetric(
+            insertion: .move(edge: .trailing),
+            removal: .move(edge: .leading)
+        ))
         .animation(.easeInOut(duration: Constants.animationDuration), value: currentStep)
     }
     
@@ -208,14 +211,48 @@ private extension RegistrationSignupSlidesView {
     var stepIndicatorView: some View {
         HStack(spacing: 8) {
             ForEach(0..<Constants.totalSteps, id: \.self) { step in
-                Circle()
-                    .fill(step <= currentStep ? primaryColor : Color.gray.opacity(0.3))
-                    .frame(width: Constants.stepIndicatorSize, height: Constants.stepIndicatorSize)
-                    .scaleEffect(step == currentStep ? Constants.stepIndicatorScale : 1.0)
-                    .animation(.easeInOut(duration: 0.2), value: currentStep)
+                Button(action: {
+                    // Only allow navigation to completed steps or current step
+                    if step <= currentStep {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            currentStep = step
+                        }
+                    }
+                }) {
+                    ZStack {
+                        Circle()
+                            .fill(stepIndicatorColor(for: step))
+                            .frame(width: Constants.stepIndicatorSize, height: Constants.stepIndicatorSize)
+                        
+                        if step < currentStep {
+                            // Completed step
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 8, weight: .bold))
+                                .foregroundColor(.white)
+                        } else if step == currentStep {
+                            // Current step
+                            Circle()
+                                .stroke(primaryColor, lineWidth: 2)
+                                .frame(width: Constants.stepIndicatorSize + 4, height: Constants.stepIndicatorSize + 4)
+                        }
+                    }
+                }
+                .scaleEffect(step == currentStep ? Constants.stepIndicatorScale : 1.0)
+                .animation(.easeInOut(duration: 0.2), value: currentStep)
+                .disabled(step > currentStep) // Can't jump ahead
             }
         }
         .padding(.top, 20)
+    }
+    
+    private func stepIndicatorColor(for step: Int) -> Color {
+        if step < currentStep {
+            return .green // Completed steps
+        } else if step == currentStep {
+            return primaryColor // Current step
+        } else {
+            return Color.gray.opacity(0.3) // Future steps
+        }
     }
     
     var stepTitleView: some View {
@@ -279,6 +316,62 @@ private extension RegistrationSignupSlidesView {
             .cornerRadius(8)
         }
         .disabled(!canProceed || isLoading)
+        .overlay(
+            Group {
+                if !canProceed && !isLoading {
+                    VStack {
+                        Spacer()
+                        Text(validationMessage)
+                            .font(.caption)
+                            .foregroundColor(.red)
+                            .padding(.top, 4)
+                    }
+                }
+            }
+        )
+    }
+    
+    private var validationMessage: String {
+        switch currentStep {
+        case Step.personalInfo.rawValue:
+            if firstName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                return "First name is required"
+            } else if lastName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                return "Last name is required"
+            } else if email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                return "Email is required"
+            } else if !isValidEmail(email) {
+                return "Please enter a valid email"
+            } else if password.isEmpty {
+                return "Password is required"
+            } else if password.count < 6 {
+                return "Password must be at least 6 characters"
+            } else if password != confirmPassword {
+                return "Passwords do not match"
+            }
+            return ""
+        case Step.wwcc.rawValue:
+            let age = calculateAge(from: dateOfBirth)
+            if age >= 18 {
+                if wwccNumber.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    return "WWCC number is required for volunteers 18+"
+                } else if wwccExpiryDate <= Date() {
+                    return "WWCC expiry date must be in the future"
+                }
+            }
+            return ""
+        case Step.agreements.rawValue:
+            if !acceptedTerms {
+                return "Please accept Terms of Service"
+            } else if !acceptedHealthProtocols {
+                return "Please accept Health & Safety Protocols"
+            } else if !acceptedPrivacyPolicy {
+                return "Please accept Privacy Policy"
+            }
+            return ""
+        default:
+            return ""
+        }
     }
 }
 
@@ -378,62 +471,164 @@ private extension RegistrationSignupSlidesView {
     var nameFieldsSection: some View {
         HStack(spacing: Constants.smallSpacing) {
             VStack(alignment: .leading, spacing: 8) {
-                Text("First Name")
-                    .font(.headline)
-                    .foregroundColor(primaryColor)
+                HStack {
+                    Text("First Name")
+                        .font(.headline)
+                        .foregroundColor(primaryColor)
+                    
+                    if !firstName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.green)
+                            .font(.caption)
+                    }
+                }
                 
                 TextField("First Name", text: $firstName)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .autocapitalization(.words)
                     .disableAutocorrection(true)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(firstName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? Color.gray.opacity(0.3) : .green, lineWidth: 1)
+                    )
             }
             
             VStack(alignment: .leading, spacing: 8) {
-                Text("Last Name")
-                    .font(.headline)
-                    .foregroundColor(primaryColor)
+                HStack {
+                    Text("Last Name")
+                        .font(.headline)
+                        .foregroundColor(primaryColor)
+                    
+                    if !lastName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.green)
+                            .font(.caption)
+                    }
+                }
                 
                 TextField("Last Name", text: $lastName)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .autocapitalization(.words)
                     .disableAutocorrection(true)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(lastName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? Color.gray.opacity(0.3) : .green, lineWidth: 1)
+                    )
             }
         }
     }
     
     var emailFieldSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Email Address")
-                .font(.headline)
-                .foregroundColor(primaryColor)
+            HStack {
+                Text("Email Address")
+                    .font(.headline)
+                    .foregroundColor(primaryColor)
+                
+                if !email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && isValidEmail(email) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundColor(.green)
+                        .font(.caption)
+                } else if !email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !isValidEmail(email) {
+                    Image(systemName: "exclamationmark.circle.fill")
+                        .foregroundColor(.red)
+                        .font(.caption)
+                }
+            }
             
             TextField("Email", text: $email)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .keyboardType(.emailAddress)
                 .autocapitalization(.none)
                 .disableAutocorrection(true)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(emailValidationColor, lineWidth: 1)
+                )
+        }
+    }
+    
+    private var emailValidationColor: Color {
+        if email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return Color.gray.opacity(0.3)
+        } else if isValidEmail(email) {
+            return .green
+        } else {
+            return .red
         }
     }
     
     var passwordFieldsSection: some View {
         VStack(spacing: Constants.smallSpacing) {
             VStack(alignment: .leading, spacing: 8) {
-                Text("Password")
-                    .font(.headline)
-                    .foregroundColor(primaryColor)
+                HStack {
+                    Text("Password")
+                        .font(.headline)
+                        .foregroundColor(primaryColor)
+                    
+                    if !password.isEmpty && password.count >= 6 {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.green)
+                            .font(.caption)
+                    } else if !password.isEmpty && password.count < 6 {
+                        Image(systemName: "exclamationmark.circle.fill")
+                            .foregroundColor(.red)
+                            .font(.caption)
+                    }
+                }
                 
                 SecureField("Password", text: $password)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(passwordValidationColor, lineWidth: 1)
+                    )
             }
             
             VStack(alignment: .leading, spacing: 8) {
-                Text("Confirm Password")
-                    .font(.headline)
-                    .foregroundColor(primaryColor)
+                HStack {
+                    Text("Confirm Password")
+                        .font(.headline)
+                        .foregroundColor(primaryColor)
+                    
+                    if !confirmPassword.isEmpty && password == confirmPassword {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.green)
+                            .font(.caption)
+                    } else if !confirmPassword.isEmpty && password != confirmPassword {
+                        Image(systemName: "exclamationmark.circle.fill")
+                            .foregroundColor(.red)
+                            .font(.caption)
+                    }
+                }
                 
                 SecureField("Confirm Password", text: $confirmPassword)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(confirmPasswordValidationColor, lineWidth: 1)
+                    )
             }
+        }
+    }
+    
+    private var passwordValidationColor: Color {
+        if password.isEmpty {
+            return Color.gray.opacity(0.3)
+        } else if password.count >= 6 {
+            return .green
+        } else {
+            return .red
+        }
+    }
+    
+    private var confirmPasswordValidationColor: Color {
+        if confirmPassword.isEmpty {
+            return Color.gray.opacity(0.3)
+        } else if password == confirmPassword {
+            return .green
+        } else {
+            return .red
         }
     }
     
