@@ -76,8 +76,9 @@ class AppState: ObservableObject {
             let authenticated = await MainActor.run { self.authManager.isAuthenticated } || UserDefaults.standard.bool(forKey: "isAuthenticated")
             let profile = await MainActor.run { self.authManager.currentUser }
             
-            let finalAuthState = authenticated || (UserDefaults.standard.bool(forKey: "hasSeenOnboarding") && 
-                                                   UserDefaults.standard.bool(forKey: "hasSignedIn"))
+            // Fixed: Only check authentication if user has actually signed in, not just seen onboarding
+            let hasActuallySignedIn = UserDefaults.standard.bool(forKey: "hasSignedIn")
+            let finalAuthState = authenticated || hasActuallySignedIn
             
             await MainActor.run {
                 self.isLoading = false
@@ -143,6 +144,25 @@ class AppState: ObservableObject {
     }
     
     // MARK: - State Management
+    
+    func resetOnboardingState() {
+        let defaults = UserDefaults.standard
+        defaults.set(false, forKey: "hasSeenOnboarding")
+        defaults.set(false, forKey: "hasSignedIn")
+        defaults.set(false, forKey: "isAuthenticated")
+        defaults.set(false, forKey: "hasAcceptedTerms")
+        defaults.set(false, forKey: "hasAcceptedHealthProtocols")
+        
+        // Reset app state
+        self.isAuthenticated = false
+        self.hasAcceptedTerms = false
+        self.hasAcceptedHealthProtocols = false
+        self.userProfile = nil
+        self.needsToChooseVolunteerType = false
+        self.selectedVolunteerType = nil
+        
+        print("DEBUG: Onboarding state reset successfully")
+    }
     
     func refreshAuthState() {
         Task.detached {
