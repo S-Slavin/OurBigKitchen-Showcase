@@ -140,9 +140,11 @@ struct AuthTypeSelectionView: View {
                             if selectedAction == .signIn {
                                 print("DEBUG: Setting showSignInView to true")
                                 showSignInView = true
+                                print("DEBUG: showSignInView after setting: \(showSignInView)")
                             } else {
                                 print("DEBUG: Setting showSignUpView to true")
                                 showSignUpView = true
+                                print("DEBUG: showSignUpView after setting: \(showSignUpView)")
                             }
                         }) {
                             Text(selectedAction == .signIn ? "Sign In" : "Continue to Sign Up")
@@ -164,6 +166,26 @@ struct AuthTypeSelectionView: View {
                         .buttonStyle(ButtonStyles.scale)
                         .padding(.horizontal)
                         .padding(.bottom, 30)
+                        
+                        // Debug info display
+                        VStack(spacing: 8) {
+                            Text("Debug Info:")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Text("Selected Action: \(selectedAction == .signIn ? "Sign In" : "Sign Up")")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Text("showSignInView: \(showSignInView ? "true" : "false")")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Text("showSignUpView: \(showSignUpView ? "true" : "false")")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        .padding()
+                        .background(Color.gray.opacity(0.1))
+                        .cornerRadius(8)
+                        .padding(.horizontal)
                     }
                     .padding(.top, geometry.safeAreaInsets.top + 20)
                     .padding(.bottom, 30)
