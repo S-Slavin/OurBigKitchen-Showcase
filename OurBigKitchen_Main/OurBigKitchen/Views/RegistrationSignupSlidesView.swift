@@ -271,22 +271,26 @@ private extension RegistrationSignupSlidesView {
     // MARK: - Navigation Buttons
     var navigationButtons: some View {
         VStack(spacing: Constants.smallSpacing) {
-            // Skip for Demo button - Always visible
+            // Skip for Demo button - available on every section
             HStack {
                 Spacer()
                 Button("Skip for Demo") {
                     print("DEBUG: Skip for Demo button tapped!")
-                    // Skip to the end for demo purposes
                     withAnimation {
-                        currentStep = Constants.totalSteps - 1
+                        if currentStep < Constants.totalSteps - 1 {
+                            currentStep += 1
+                        } else {
+                            // If on last step, go back to first step
+                            currentStep = 1
+                        }
                     }
                 }
-                .font(.caption)
+                .font(.caption2)
                 .foregroundColor(.secondary)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
                 .background(Color.gray.opacity(0.1))
-                .cornerRadius(20)
+                .cornerRadius(15)
             }
             .padding(.horizontal, Constants.buttonPadding)
             
@@ -298,7 +302,7 @@ private extension RegistrationSignupSlidesView {
                 Spacer()
                 Text("Can proceed: \(canProceed ? "Yes" : "No")")
                     .font(.caption2)
-                    .foregroundColor(canProceed ? .green : .red)
+                    .foregroundColor(.secondary)
             }
             .padding(.horizontal, Constants.buttonPadding)
             
@@ -1156,5 +1160,38 @@ struct RegistrationSignupSlidesView_Previews: PreviewProvider {
     static var previews: some View {
         RegistrationSignupSlidesView()
             .environmentObject(AppState())
+    }
+} 
+
+// MARK: - Button Styles
+
+struct PrimaryButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.headline)
+            .foregroundColor(.white)
+            .padding(.horizontal, 24)
+            .padding(.vertical, 12)
+            .background(ThemeManager.Colors.primary)
+            .cornerRadius(8)
+            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
+            .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
+    }
+}
+
+struct SecondaryButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.headline)
+            .foregroundColor(ThemeManager.Colors.primary)
+            .padding(.horizontal, 24)
+            .padding(.vertical, 12)
+            .background(Color.clear)
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(ThemeManager.Colors.primary, lineWidth: 2)
+            )
+            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
+            .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
     }
 } 
