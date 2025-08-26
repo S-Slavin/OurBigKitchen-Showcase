@@ -22,182 +22,175 @@ struct AuthTypeSelectionView: View {
     }
     
     var body: some View {
-        NavigationStack {
-            GeometryReader { geometry in
-                ZStack {
-                    // Modern background
-                    LinearGradient(
-                        gradient: Gradient(colors: [backgroundColor, backgroundColor.opacity(0.95), Color(red: 1.0, green: 0.92, blue: 0.86)]),
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                    .edgesIgnoringSafeArea(.all)
+        VStack(spacing: 24) {
+            // Logo
+            Image("AppLogo")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 120)
+                .padding(.top, 40)
+                .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
 
-                    VStack(spacing: 24) {
-                        // Logo
-                        Image("AppLogo")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: geometry.size.width * 0.4)
-                            .padding(.top, geometry.size.height * 0.02)
-                            .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
-
-                        Text("Welcome to Our Big Kitchen")
-                            .font(.system(.title, design: .rounded, weight: .bold))
-                            .foregroundColor(primaryColor)
-                            .padding(.top, 8)
-                            .padding(.bottom, 10)
-                        
-                        Text("Choose how you'd like to get started")
-                            .font(.subheadline)
-                            .foregroundColor(accentColor)
-                            .multilineTextAlignment(.center)
-                            .padding(.bottom, 20)
-                        
-                        // Auth Action Selection (Sign In vs Sign Up)
-                        VStack(spacing: 16) {
-                            Text("I want to:")
-                                .font(.headline)
-                                .foregroundColor(.primary)
-                                .padding(.bottom, 10)
-                            
-                            HStack(spacing: 12) {
-                                AuthActionButton(
-                                    title: "Sign In",
-                                    subtitle: "Already have an account",
-                                    icon: "person.fill",
-                                    isSelected: selectedAction == .signIn,
-                                    primaryColor: primaryColor,
-                                    accentColor: accentColor
-                                ) {
-                                    print("DEBUG: Sign In button tapped!")
-                                    selectedAction = .signIn
-                                    print("DEBUG: selectedAction set to: \(selectedAction)")
-                                }
-                                
-                                AuthActionButton(
-                                    title: "Sign Up",
-                                    subtitle: "Create new account",
-                                    icon: "person.badge.plus.fill",
-                                    isSelected: selectedAction == .signUp,
-                                    primaryColor: primaryColor,
-                                    accentColor: accentColor
-                                ) {
-                                    print("DEBUG: Sign Up button tapped!")
-                                    selectedAction = .signUp
-                                    print("DEBUG: selectedAction set to: \(selectedAction)")
-                                }
-                            }
+            Text("Welcome to Our Big Kitchen")
+                .font(.system(.title, design: .rounded, weight: .bold))
+                .foregroundColor(primaryColor)
+                .padding(.top, 8)
+                .padding(.bottom, 10)
+            
+            Text("Choose how you'd like to get started")
+                .font(.subheadline)
+                .foregroundColor(accentColor)
+                .multilineTextAlignment(.center)
+                .padding(.bottom, 20)
+            
+            // Auth Action Selection (Sign In vs Sign Up)
+            VStack(spacing: 16) {
+                Text("I want to:")
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                    .padding(.bottom, 10)
+                
+                HStack(spacing: 12) {
+                    AuthActionButton(
+                        title: "Sign In",
+                        subtitle: "Already have an account",
+                        icon: "person.fill",
+                        isSelected: selectedAction == .signIn,
+                        primaryColor: primaryColor,
+                        accentColor: accentColor
+                    ) {
+                        print("DEBUG: Sign In button tapped!")
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            selectedAction = .signIn
                         }
-                        .padding(.horizontal)
-                        
-                        // Volunteer Type Selection (only for sign up)
-                        if selectedAction == .signUp {
-                            VStack(spacing: 16) {
-                                Text("I will volunteer as:")
-                                    .font(.headline)
-                                    .foregroundColor(.primary)
-                                    .padding(.top, 20)
-                                    .padding(.bottom, 10)
-                                
-                                VStack(spacing: 16) {
-                                    AuthTypeButton(
-                                        title: "Individual Volunteer",
-                                        subtitle: "Volunteer on your own",
-                                        icon: "person.fill",
-                                        isSelected: selectedType == .volunteer,
-                                        primaryColor: primaryColor,
-                                        accentColor: accentColor
-                                    ) {
-                                        selectedType = .volunteer
-                                    }
-                                    
-                                    AuthTypeButton(
-                                        title: "Corporate/Group",
-                                        subtitle: "Volunteer with your organization",
-                                        icon: "building.2.fill",
-                                        isSelected: selectedType == .corporate,
-                                        primaryColor: primaryColor,
-                                        accentColor: accentColor
-                                    ) {
-                                        selectedType = .corporate
-                                    }
-                                }
-                            }
-                            .padding(.horizontal)
-                            .transition(.move(edge: .top).combined(with: .opacity))
-                        }
-                        
-                        Spacer()
-                        
-                        // Continue Button
-                        Button(action: {
-                            print("DEBUG: Continue button tapped!")
-                            print("DEBUG: selectedAction = \(selectedAction)")
-                            print("DEBUG: showSignInView = \(showSignInView)")
-                            print("DEBUG: showSignUpView = \(showSignUpView)")
-                            
-                            if selectedAction == .signIn {
-                                print("DEBUG: Setting showSignInView to true")
-                                showSignInView = true
-                                print("DEBUG: showSignInView after setting: \(showSignInView)")
-                            } else {
-                                print("DEBUG: Setting showSignUpView to true")
-                                showSignUpView = true
-                                print("DEBUG: showSignUpView after setting: \(showSignUpView)")
-                            }
-                        }) {
-                            Text(selectedAction == .signIn ? "Sign In" : "Continue to Sign Up")
-                                .font(.headline)
-                                .fontWeight(.semibold)
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 16)
-                                .background(
-                                    LinearGradient(
-                                        gradient: Gradient(colors: [primaryColor, accentColor]),
-                                        startPoint: .leading,
-                                        endPoint: .trailing
-                                    )
-                                )
-                                .cornerRadius(25)
-                                .shadow(color: primaryColor.opacity(0.4), radius: 8, x: 0, y: 5)
-                        }
-                        .buttonStyle(ButtonStyles.scale)
-                        .padding(.horizontal)
-                        .padding(.bottom, 30)
-                        
-                        // Debug info display
-                        VStack(spacing: 8) {
-                            Text("Debug Info:")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                            Text("Selected Action: \(selectedAction == .signIn ? "Sign In" : "Sign Up")")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                            Text("showSignInView: \(showSignInView ? "true" : "false")")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                            Text("showSignUpView: \(showSignUpView ? "true" : "false")")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                        .padding()
-                        .background(Color.gray.opacity(0.1))
-                        .cornerRadius(8)
-                        .padding(.horizontal)
+                        print("DEBUG: selectedAction set to: \(selectedAction)")
                     }
-                    .padding(.top, geometry.safeAreaInsets.top + 20)
-                    .padding(.bottom, 30)
+                    
+                    AuthActionButton(
+                        title: "Sign Up",
+                        subtitle: "Create new account",
+                        icon: "person.badge.plus.fill",
+                        isSelected: selectedAction == .signUp,
+                        primaryColor: primaryColor,
+                        accentColor: accentColor
+                    ) {
+                        print("DEBUG: Sign Up button tapped!")
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            selectedAction = .signUp
+                        }
+                        print("DEBUG: selectedAction set to: \(selectedAction)")
+                    }
                 }
             }
-            .navigationBarHidden(true)
+            .padding(.horizontal)
+            
+            // Volunteer Type Selection (only for sign up)
+            if selectedAction == .signUp {
+                VStack(spacing: 16) {
+                    Text("I will volunteer as:")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                        .padding(.top, 20)
+                        .padding(.bottom, 10)
+                    
+                    VStack(spacing: 16) {
+                        AuthTypeButton(
+                            title: "Individual Volunteer",
+                            subtitle: "Volunteer on your own",
+                            icon: "person.fill",
+                            isSelected: selectedType == .volunteer,
+                            primaryColor: primaryColor,
+                            accentColor: accentColor
+                        ) {
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                selectedType = .volunteer
+                            }
+                        }
+                        
+                        AuthTypeButton(
+                            title: "Corporate/Group",
+                            subtitle: "Volunteer with your organization",
+                            icon: "building.2.fill",
+                            isSelected: selectedType == .corporate,
+                            primaryColor: primaryColor,
+                            accentColor: accentColor
+                        ) {
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                selectedType = .corporate
+                            }
+                        }
+                    }
+                }
+                .padding(.horizontal)
+                .transition(.move(edge: .top).combined(with: .opacity))
+            }
+            
+            Spacer()
+            
+            // Continue Button
+            Button(action: {
+                print("DEBUG: Continue button tapped!")
+                print("DEBUG: selectedAction = \(selectedAction)")
+                
+                if selectedAction == .signIn {
+                    print("DEBUG: Navigating to Sign In")
+                    showSignInView = true
+                } else {
+                    print("DEBUG: Navigating to Sign Up")
+                    showSignUpView = true
+                }
+            }) {
+                Text(selectedAction == .signIn ? "Sign In" : "Continue to Sign Up")
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(
+                        LinearGradient(
+                            gradient: Gradient(colors: [primaryColor, accentColor]),
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .cornerRadius(25)
+                    .shadow(color: primaryColor.opacity(0.4), radius: 8, x: 0, y: 5)
+            }
+            .buttonStyle(ButtonStyles.scale)
+            .padding(.horizontal)
+            .padding(.bottom, 30)
+            
+            // Debug info display
+            VStack(spacing: 8) {
+                Text("Debug Info:")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                Text("Selected Action: \(selectedAction == .signIn ? "Sign In" : "Sign Up")")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                Text("showSignInView: \(showSignInView ? "true" : "false")")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                Text("showSignUpView: \(showSignUpView ? "true" : "false")")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            .padding()
+            .background(Color.gray.opacity(0.1))
+            .cornerRadius(8)
+            .padding(.horizontal)
         }
-        .navigationDestination(isPresented: $showSignInView) {
-            SimpleSignInView()
+        .background(backgroundColor)
+        .edgesIgnoringSafeArea(.all)
+        .sheet(isPresented: $showSignInView) {
+            NavigationView {
+                SimpleSignInView()
+            }
         }
-        .navigationDestination(isPresented: $showSignUpView) {
-            RegistrationSignupSlidesView()
+        .sheet(isPresented: $showSignUpView) {
+            NavigationView {
+                RegistrationSignupSlidesView()
+            }
         }
     }
 }
