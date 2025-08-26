@@ -54,9 +54,9 @@ struct RegistrationSignupSlidesView: View {
     @State private var email = ""
     @State private var password = ""
     @State private var confirmPassword = ""
-    @State private var dateOfBirth = Date()
+    @State private var dateOfBirth = Calendar.current.date(byAdding: .year, value: -18, to: Date()) ?? Date()
     @State private var wwccNumber = ""
-    @State private var wwccExpiryDate = Date()
+    @State private var wwccExpiryDate = Calendar.current.date(byAdding: .year, value: 1, to: Date()) ?? Date()
     
     // MARK: - Agreements
     @State private var acceptedTerms = false
@@ -184,7 +184,7 @@ private extension RegistrationSignupSlidesView {
             case Step.accountCreation.rawValue:
                 accountCreationView
             default:
-                volunteerTypeSelectionView
+                EmptyView()
             }
         }
         .transition(.asymmetric(
@@ -229,7 +229,7 @@ private extension RegistrationSignupSlidesView {
     }
     
     private var progressPercentage: Double {
-        Double(currentStep + 1) / Double(Constants.totalSteps)
+        min(Double(currentStep + 1) / Double(Constants.totalSteps), 1.0)
     }
     
     var stepIndicatorView: some View {
