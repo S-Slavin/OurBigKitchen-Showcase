@@ -178,16 +178,57 @@ class AppState: ObservableObject {
         defaults.set(false, forKey: "isAuthenticated")
         defaults.set(false, forKey: "hasAcceptedTerms")
         defaults.set(false, forKey: "hasAcceptedHealthProtocols")
+        defaults.set(false, forKey: "needsToChooseVolunteerType")
+        defaults.set(false, forKey: "hasCompletedRegistration")
+        defaults.synchronize()
         
-        // Reset app state
+        // Reset local state
         self.isAuthenticated = false
         self.hasAcceptedTerms = false
         self.hasAcceptedHealthProtocols = false
-        self.userProfile = nil
         self.needsToChooseVolunteerType = false
+        self.hasCompletedRegistration = false
+        self.userProfile = nil
         self.selectedVolunteerType = nil
         
-        print("DEBUG: Onboarding state reset successfully")
+        print("DEBUG: AppState - Reset onboarding state complete")
+    }
+    
+    func resetAllUserDefaults() {
+        let defaults = UserDefaults.standard
+        let domain = Bundle.main.bundleIdentifier ?? "com.shaina.obk.OurBigKitchen"
+        
+        // Remove all keys for this app
+        if let bundleID = Bundle.main.bundleIdentifier {
+            defaults.removePersistentDomain(forName: bundleID)
+        }
+        
+        // Also remove standard keys
+        defaults.removeObject(forKey: "hasSeenOnboarding")
+        defaults.removeObject(forKey: "hasSignedIn")
+        defaults.removeObject(forKey: "isAuthenticated")
+        defaults.removeObject(forKey: "hasAcceptedTerms")
+        defaults.removeObject(forKey: "hasAcceptedHealthProtocols")
+        defaults.removeObject(forKey: "needsToChooseVolunteerType")
+        defaults.removeObject(forKey: "hasCompletedRegistration")
+        defaults.synchronize()
+        
+        // Reset local state
+        self.isAuthenticated = false
+        self.hasAcceptedTerms = false
+        self.hasAcceptedHealthProtocols = false
+        self.needsToChooseVolunteerType = false
+        self.hasCompletedRegistration = false
+        self.userProfile = nil
+        self.selectedVolunteerType = nil
+        
+        print("DEBUG: AppState - Reset ALL UserDefaults complete")
+        print("DEBUG: AppState - Current UserDefaults values:")
+        print("DEBUG: AppState - - hasSeenOnboarding: \(UserDefaults.standard.bool(forKey: "hasSeenOnboarding"))")
+        print("DEBUG: AppState - - hasSignedIn: \(UserDefaults.standard.bool(forKey: "hasSignedIn"))")
+        print("DEBUG: AppState - - isAuthenticated: \(UserDefaults.standard.bool(forKey: "isAuthenticated"))")
+        print("DEBUG: AppState - - hasAcceptedTerms: \(UserDefaults.standard.bool(forKey: "hasAcceptedTerms"))")
+        print("DEBUG: AppState - - hasAcceptedHealthProtocols: \(UserDefaults.standard.bool(forKey: "hasAcceptedHealthProtocols"))")
     }
     
     func refreshAuthState() {
