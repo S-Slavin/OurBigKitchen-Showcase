@@ -29,9 +29,6 @@ struct RootView: View {
     
     var body: some View {
         Group {
-            // TEMPORARY: Force show welcome slides for testing
-            let _ = print("DEBUG RootView: FORCING UserWelcomeView for testing")
-            
             // Force check onboarding state first, before any authentication logic
             let hasSeenOnboarding = UserDefaults.standard.bool(forKey: "hasSeenOnboarding")
             
@@ -51,22 +48,16 @@ struct RootView: View {
             let _ = print("DEBUG RootView: - hasAcceptedHealthProtocols: \(UserDefaults.standard.bool(forKey: "hasAcceptedHealthProtocols"))")
             let _ = print("DEBUG RootView: =================================")
             
-            // TEMPORARY: FORCE SHOW WELCOME SLIDES
-            let _ = print("DEBUG RootView: DECISION: FORCING UserWelcomeView")
-            UserWelcomeView(onComplete: {
-                print("DEBUG RootView: UserWelcomeView completed, setting hasSeenOnboarding=true")
-                UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
-                appState.objectWillChange.send()
-            })
-            
-            // ORIGINAL LOGIC COMMENTED OUT FOR TESTING
-            /*
             if !hasSeenOnboarding {
                 let _ = print("DEBUG RootView: DECISION: Showing UserWelcomeView")
                 UserWelcomeView(onComplete: {
                     print("DEBUG RootView: UserWelcomeView completed, setting hasSeenOnboarding=true")
                     UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
+                    print("DEBUG RootView: hasSeenOnboarding set to true in UserDefaults")
+                    print("DEBUG RootView: About to call appState.objectWillChange.send()")
                     appState.objectWillChange.send()
+                    print("DEBUG RootView: appState.objectWillChange.send() completed")
+                    print("DEBUG RootView: Current UserDefaults value: \(UserDefaults.standard.bool(forKey: "hasSeenOnboarding"))")
                 })
             } else if !appState.isAuthenticated {
                 let _ = print("DEBUG RootView: DECISION: Showing AuthTypeSelectionView")
@@ -84,7 +75,6 @@ struct RootView: View {
                 let _ = print("DEBUG RootView: DECISION: Showing ContentView")
                 ContentView()
             }
-            */
         }
         .onReceive(appState.$isAuthenticated) { _ in
             print("DEBUG RootView: isAuthenticated changed, forcing update")
