@@ -2,7 +2,6 @@ import SwiftUI
 
 struct AuthTypeSelectionView: View {
     @EnvironmentObject var appState: AppState
-    @State private var selectedType: AuthType = .volunteer
     @State private var selectedAction: AuthAction = .signIn
     @State private var showSignInView = false
     @State private var showSignUpView = false
@@ -10,11 +9,6 @@ struct AuthTypeSelectionView: View {
     private let primaryColor = ThemeManager.Colors.primary
     private let accentColor = ThemeManager.Colors.accent
     private let backgroundColor = Color(red: 1.0, green: 0.98, blue: 0.94)
-    
-    enum AuthType {
-        case volunteer
-        case corporate
-    }
     
     enum AuthAction {
         case signIn
@@ -83,47 +77,6 @@ struct AuthTypeSelectionView: View {
                 }
             }
             .padding(.horizontal)
-            
-            // Volunteer Type Selection (only for sign up)
-            if selectedAction == .signUp {
-                VStack(spacing: 16) {
-                    Text("I will volunteer as:")
-                        .font(.headline)
-                        .foregroundColor(.primary)
-                        .padding(.top, 20)
-                        .padding(.bottom, 10)
-                    
-                    VStack(spacing: 16) {
-                        AuthTypeButton(
-                            title: "Individual Volunteer",
-                            subtitle: "Volunteer on your own",
-                            icon: "person.fill",
-                            isSelected: selectedType == .volunteer,
-                            primaryColor: primaryColor,
-                            accentColor: accentColor
-                        ) {
-                            withAnimation(.easeInOut(duration: 0.3)) {
-                                selectedType = .volunteer
-                            }
-                        }
-                        
-                        AuthTypeButton(
-                            title: "Corporate/Group",
-                            subtitle: "Volunteer with your organization",
-                            icon: "building.2.fill",
-                            isSelected: selectedType == .corporate,
-                            primaryColor: primaryColor,
-                            accentColor: accentColor
-                        ) {
-                            withAnimation(.easeInOut(duration: 0.3)) {
-                                selectedType = .corporate
-                            }
-                        }
-                    }
-                }
-                .padding(.horizontal)
-                .transition(.move(edge: .top).combined(with: .opacity))
-            }
             
             Spacer()
             
@@ -246,61 +199,7 @@ struct AuthActionButton: View {
     }
 }
 
-// MARK: - Auth Type Button
 
-struct AuthTypeButton: View {
-    let title: String
-    let subtitle: String
-    let icon: String
-    let isSelected: Bool
-    let primaryColor: Color
-    let accentColor: Color
-    let action: () -> Void
-    
-    var body: some View {
-        Button(action: action) {
-            HStack {
-                Image(systemName: icon)
-                    .font(.title2)
-                    .foregroundColor(isSelected ? .white : primaryColor)
-                    .frame(width: 40)
-                
-                VStack(alignment: .leading) {
-                    Text(title)
-                        .font(.headline)
-                        .foregroundColor(isSelected ? .white : .primary)
-                    
-                    Text(subtitle)
-                        .font(.subheadline)
-                        .foregroundColor(isSelected ? .white.opacity(0.8) : .secondary)
-                }
-                
-                Spacer()
-                
-                if isSelected {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(.white)
-                }
-            }
-            .padding()
-            .background(
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(isSelected ? 
-                        AnyShapeStyle(
-                            LinearGradient(
-                                gradient: Gradient(colors: [primaryColor, accentColor]),
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        ) : 
-                        AnyShapeStyle(Color.white.opacity(0.8))
-                    )
-            )
-            .shadow(color: isSelected ? primaryColor.opacity(0.4) : Color.black.opacity(0.07), radius: 8, x: 0, y: 4)
-        }
-        .buttonStyle(PlainButtonStyle())
-    }
-}
 
 struct AuthTypeSelectionView_Previews: PreviewProvider {
     static var previews: some View {
