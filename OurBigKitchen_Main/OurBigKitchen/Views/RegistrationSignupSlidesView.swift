@@ -94,8 +94,7 @@ struct RegistrationSignupSlidesView: View {
             result = false
         }
         
-        // Debug: Print canProceed status
-        print("DEBUG: canProceed - currentStep: \(currentStep), result: \(result)")
+
         
         return result
     }
@@ -107,21 +106,19 @@ struct RegistrationSignupSlidesView: View {
     private var isPersonalInfoValid: Bool {
         let firstNameValid = !firstName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         let lastNameValid = !lastName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        let emailValid = !email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        let emailValid = !email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && isValidEmail(email)
         let passwordValid = !password.isEmpty && password.count >= 6
         let passwordMatch = password == confirmPassword
-        let emailFormatValid = isValidEmail(email)
         
-        // Debug: Print validation status and actual values
-        print("DEBUG: Personal Info Validation - firstName: '\(firstName)' (\(firstNameValid)), lastName: '\(lastName)' (\(lastNameValid)), email: '\(email)' (\(emailValid)), password: '\(password)' (\(passwordValid), length: \(password.count)), confirmPassword: '\(confirmPassword)', match: \(passwordMatch), format: \(emailFormatValid)")
-        
-        return firstNameValid && lastNameValid && emailValid && passwordValid && passwordMatch && emailFormatValid
+        return firstNameValid && lastNameValid && emailValid && passwordValid && passwordMatch
     }
     
     private var isWWCCValid: Bool {
-        if calculatedAge >= 18 {
-            return !wwccNumber.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-                   wwccExpiryDate > Date()
+        let age = calculatedAge
+        if age >= 18 {
+            let wwccValid = !wwccNumber.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+                           wwccExpiryDate > Date()
+            return wwccValid
         }
         return true
     }
@@ -192,6 +189,7 @@ private extension RegistrationSignupSlidesView {
             removal: .move(edge: .leading)
         ))
         .animation(.easeInOut(duration: Constants.animationDuration), value: currentStep)
+
     }
     
     // MARK: - Header View
@@ -1190,13 +1188,11 @@ private extension RegistrationSignupSlidesView {
         let calendar = Calendar.current
         let now = Date()
         
-        // Ensure dateOfBirth is not in the future
-        guard dateOfBirth <= now else {
-            return 0
-        }
-        
         let ageComponents = calendar.dateComponents([.year], from: dateOfBirth, to: now)
-        return ageComponents.year ?? 0
+        let age = ageComponents.year ?? 0
+        
+        // Ensure age is reasonable (not negative or too high)
+        return max(0, min(age, 120))
     }
 }
 
