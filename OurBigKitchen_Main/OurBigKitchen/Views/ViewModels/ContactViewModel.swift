@@ -31,7 +31,7 @@ class ContactViewModel: ObservableObject {
     }
     
     private func loadUserDetails() {
-        userManager.fetchUserProfile()
+        userManager.getCurrentUser()
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { [weak self] completion in
                 if case .failure(let error) = completion {

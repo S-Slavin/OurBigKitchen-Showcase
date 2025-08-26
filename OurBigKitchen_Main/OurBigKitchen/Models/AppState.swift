@@ -46,6 +46,8 @@ class AppState: ObservableObject {
     @Published var isAuthenticated = false
     @Published var isLoading = false
     @Published var error: Error?
+    @Published var hasSeenOnboarding: Bool = false
+    @Published var hasSignedIn: Bool = false
     @Published var hasAcceptedTerms: Bool = false
     @Published var hasAcceptedHealthProtocols: Bool = false
     @Published var userType: AppModels.UserRole?
@@ -57,6 +59,7 @@ class AppState: ObservableObject {
     // MARK: - Private Properties
     private let authManager = AuthManager.shared
     private let termsManager = TermsManager()
+    // Health protocols are managed directly through UserDefaults
     private var cancellables = Set<AnyCancellable>()
     private var saveAuthStateDebouncer: AnyCancellable?
     private var saveTermsStateDebouncer: AnyCancellable?
@@ -64,46 +67,27 @@ class AppState: ObservableObject {
     // MARK: - Initialization
     
     init() {
-        print("DEBUG: AppState.init() - Starting initialization")
-        print("DEBUG: AppState.init() - Bundle identifier: \(Bundle.main.bundleIdentifier ?? "NIL")")
-        isLoading = true
+        // Initialize with UserDefaults values
+        let defaults = UserDefaults.standard
         
-        // Set initial state immediately from UserDefaults
-        let hasSeenOnboarding = UserDefaults.standard.bool(forKey: "hasSeenOnboarding")
-        let hasSignedIn = UserDefaults.standard.bool(forKey: "hasSignedIn")
-        let hasAcceptedTerms = UserDefaults.standard.bool(forKey: "hasAcceptedTerms")
-        let hasAcceptedHealthProtocols = UserDefaults.standard.bool(forKey: "hasAcceptedHealthProtocols")
+        // Read UserDefaults values synchronously to avoid blocking UI
+        hasSeenOnboarding = defaults.bool(forKey: "hasSeenOnboarding")
+        hasSignedIn = defaults.bool(forKey: "hasSignedIn")
+        hasAcceptedTerms = defaults.bool(forKey: "hasAcceptedTerms")
+        hasAcceptedHealthProtocols = defaults.bool(forKey: "hasAcceptedHealthProtocols")
+        needsToChooseVolunteerType = defaults.bool(forKey: "needsToChooseVolunteerType")
+        hasCompletedRegistration = defaults.bool(forKey: "hasCompletedRegistration")
         
-        print("DEBUG: AppState.init() - UserDefaults state: onboarding=\(hasSeenOnboarding), signedIn=\(hasSignedIn), terms=\(hasAcceptedTerms), health=\(hasAcceptedHealthProtocols)")
-        
-        // Check if UserDefaults is working at all
-        let testValue = UserDefaults.standard.string(forKey: "test_key")
-        print("DEBUG: AppState.init() - Test UserDefaults read: \(testValue ?? "NIL")")
-        
-        // Set initial state based on UserDefaults
-        self.hasAcceptedTerms = hasAcceptedTerms
-        self.hasAcceptedHealthProtocols = hasAcceptedHealthProtocols
-        
-        // Only set authenticated if user has actually signed in, not just seen onboarding
+        // Set authentication state based on sign-in status
         if hasSignedIn {
-            self.isAuthenticated = true
-            print("DEBUG: AppState.init() - User has signed in, setting authenticated=true")
+            isAuthenticated = true
         } else {
-            self.isAuthenticated = false
-            print("DEBUG: AppState.init() - User has not signed in, setting authenticated=false")
+            isAuthenticated = false
         }
         
-        // Set loading to false immediately
-        self.isLoading = false
-        print("DEBUG: AppState.init() - Initialization complete, isLoading=false")
+        isLoading = false
         
-        // Setup notification observers
-        setupNotificationObservers()
-        
-        // Post notification that state is ready
-        NotificationCenter.default.post(name: .didUpdateAuth, object: nil)
-        
-        // Run async operations in background without blocking UI
+        // Perform async initialization in background
         Task {
             await performAsyncInitialization()
         }
@@ -112,25 +96,13 @@ class AppState: ObservableObject {
     // MARK: - Async Initialization
     
     private func performAsyncInitialization() async {
-        print("DEBUG: AppState - Starting async initialization")
-        
-        // Check terms status (synchronous method)
+        // Update terms status
         let termsAccepted = termsManager.checkTermsStatus()
-        let healthProtocolsAccepted = UserDefaults.standard.bool(forKey: "hasAcceptedHealthProtocols")
-        
-        await MainActor.run {
-            if termsAccepted != self.hasAcceptedTerms {
-                self.hasAcceptedTerms = termsAccepted
-                print("DEBUG: AppState - Updated terms status: \(termsAccepted)")
-            }
-            
-            if healthProtocolsAccepted != self.hasAcceptedHealthProtocols {
-                self.hasAcceptedHealthProtocols = healthProtocolsAccepted
-                print("DEBUG: AppState - Updated health protocols status: \(healthProtocolsAccepted)")
-            }
+        if termsAccepted != hasAcceptedTerms {
+            hasAcceptedTerms = termsAccepted
         }
         
-        print("DEBUG: AppState - Async initialization complete")
+        // Health protocols status is already set from UserDefaults in init()
     }
     
     // MARK: - Notification Setup

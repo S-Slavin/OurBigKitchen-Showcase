@@ -72,7 +72,7 @@ class HomeDashboardViewModel: ObservableObject {
         isLoading = true
         
         // Load user data
-        userManager.fetchUserProfile()
+        userManager.getCurrentUser()
             .sink { [weak self] completion in
                 if case .failure(let error) = completion {
                     self?.error = error

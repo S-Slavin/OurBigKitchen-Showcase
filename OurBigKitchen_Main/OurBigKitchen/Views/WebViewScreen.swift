@@ -52,8 +52,9 @@ struct WebViewScreen: View {
 }
 
 #Preview {
-    WebViewScreen(
-        url: URL(string: "https://www.ourbigkitchen.org/contact-us/") ?? URL(string: "https://ourbigkitchen.org")!,
+    let previewURL = URL(string: "https://www.ourbigkitchen.org/contact-us/") ?? URL(string: "https://ourbigkitchen.org") ?? URL(string: "https://example.com")!
+    return WebViewScreen(
+        url: previewURL,
         title: "Contact OBK"
     )
 } 

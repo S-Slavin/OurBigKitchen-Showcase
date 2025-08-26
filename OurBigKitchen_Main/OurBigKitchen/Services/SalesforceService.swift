@@ -136,7 +136,12 @@ class SalesforceService: ObservableObject {
         
         let authURL = SalesforceConfig.baseURL + SalesforceConfig.authEndpoint
         
-        var request = URLRequest(url: URL(string: authURL)!)
+        guard let url = URL(string: authURL) else {
+            return Fail(error: SalesforceError.invalidURL)
+                .eraseToAnyPublisher()
+        }
+        
+        var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
         
@@ -188,7 +193,12 @@ class SalesforceService: ObservableObject {
         
         let queryURL = authResponse.instanceURL + SalesforceConfig.queryEndpoint + "?q=" + soql.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!
         
-        var request = URLRequest(url: URL(string: queryURL)!)
+        guard let url = URL(string: queryURL) else {
+            return Fail(error: SalesforceError.invalidURL)
+                .eraseToAnyPublisher()
+        }
+        
+        var request = URLRequest(url: url)
         request.setValue("Bearer \(authResponse.accessToken)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         
@@ -217,7 +227,12 @@ class SalesforceService: ObservableObject {
         
         let createURL = authResponse.instanceURL + SalesforceConfig.sobjectEndpoint + "/" + objectName
         
-        var request = URLRequest(url: URL(string: createURL)!)
+        guard let url = URL(string: createURL) else {
+            return Fail(error: SalesforceError.invalidURL)
+                .eraseToAnyPublisher()
+        }
+        
+        var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("Bearer \(authResponse.accessToken)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -255,7 +270,12 @@ class SalesforceService: ObservableObject {
         
         let updateURL = authResponse.instanceURL + SalesforceConfig.sobjectEndpoint + "/" + objectName + "/" + id
         
-        var request = URLRequest(url: URL(string: updateURL)!)
+        guard let url = URL(string: updateURL) else {
+            return Fail(error: SalesforceError.invalidURL)
+                .eraseToAnyPublisher()
+        }
+        
+        var request = URLRequest(url: url)
         request.httpMethod = "PATCH"
         request.setValue("Bearer \(authResponse.accessToken)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -301,6 +321,7 @@ enum SalesforceError: LocalizedError {
     case encodingError(Error)
     case decodingError(Error)
     case networkError
+    case invalidURL
     
     var errorDescription: String? {
         switch self {
@@ -320,6 +341,8 @@ enum SalesforceError: LocalizedError {
             return "Failed to decode response: \(error.localizedDescription)"
         case .networkError:
             return "Network error occurred"
+        case .invalidURL:
+            return "Invalid URL generated for Salesforce query"
         }
     }
 }

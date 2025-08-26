@@ -281,7 +281,6 @@ private extension RegistrationSignupSlidesView {
             HStack {
                 Spacer()
                 Button("Skip for Demo") {
-                    print("DEBUG: Skip for Demo button tapped!")
                     withAnimation {
                         if currentStep < Constants.totalSteps {
                             currentStep += 1
@@ -451,9 +450,7 @@ private extension RegistrationSignupSlidesView {
     
     func volunteerTypeButton(type: VolunteerType, title: String, subtitle: String, icon: String) -> some View {
         Button(action: { 
-            print("DEBUG: Volunteer type button tapped: \(type)")
             volunteerType = type
-            print("DEBUG: volunteerType set to: \(volunteerType)")
         }) {
             HStack {
                 Image(systemName: icon)

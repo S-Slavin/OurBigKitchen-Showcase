@@ -40,7 +40,7 @@ class FoodSafetyViewModel: ObservableObject {
     // MARK: - Data Loading
     
     private func prefillUserData() {
-        userManager.fetchUserProfile()
+        userManager.getCurrentUser()
             .receive(on: RunLoop.main)
             .sink(
                 receiveCompletion: { _ in },

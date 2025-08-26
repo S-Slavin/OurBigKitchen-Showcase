@@ -7,7 +7,7 @@ extension UserManager {
         do {
             // Try to get from network using the existing methods
             return try await withCheckedThrowingContinuation { continuation in
-                self.fetchUserProfile() // Calls the Combine version
+                self.getCurrentUser() // Calls the Combine version
                     .sink(
                         receiveCompletion: { completion in
                             if case .failure(let error) = completion {

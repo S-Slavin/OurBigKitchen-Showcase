@@ -58,7 +58,7 @@ final class UserManager: ObservableObject {
         NotificationCenter.default.post(name: .didDeleteUser, object: nil)
     }
     
-    func fetchUserProfile() -> AnyPublisher<AppModels.User, Error> {
+    func getCurrentUser() -> AnyPublisher<AppModels.User, Error> {
         isLoading = true
         
         return Future { [weak self] promise in
@@ -68,13 +68,13 @@ final class UserManager: ObservableObject {
                     return
                 }
                 
-                guard self.currentUser != nil else {
+                guard let currentUser = self.currentUser else {
                     promise(.failure(UserManagerError.userNotFound))
                     return
                 }
                 
                 self.isLoading = false
-                promise(.success(self.currentUser!))
+                promise(.success(currentUser))
             }
         }.eraseToAnyPublisher()
     }
@@ -127,7 +127,7 @@ final class UserManager: ObservableObject {
                     return
                 }
                 
-                guard self.currentUser != nil else {
+                guard let currentUser = self.currentUser else {
                     promise(.failure(UserManagerError.userNotFound))
                     return
                 }

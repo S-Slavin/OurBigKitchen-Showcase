@@ -99,7 +99,7 @@ class FoodSafetyService: ObservableObject {
     
     private func updateUserFoodSafetyStatus(email: String) {
         // Get current user
-        userManager.fetchUserProfile()
+        userManager.getCurrentUser()
             .map { user -> AppModels.User? in
                 // Only update if this is the current user's email
                 guard user.email.lowercased() == email.lowercased() else {
