@@ -84,6 +84,7 @@ struct AuthTypeSelectionView: View {
             Button(action: {
                 print("DEBUG: Continue button tapped!")
                 print("DEBUG: selectedAction = \(selectedAction)")
+                print("DEBUG: showSignUpView before = \(showSignUpView)")
                 
                 if selectedAction == .signIn {
                     print("DEBUG: Navigating to Sign In")
@@ -91,6 +92,7 @@ struct AuthTypeSelectionView: View {
                 } else {
                     print("DEBUG: Navigating to Sign Up")
                     showSignUpView = true
+                    print("DEBUG: showSignUpView after = \(showSignUpView)")
                 }
             }) {
                 Text(selectedAction == .signIn ? "Sign In" : "Continue to Sign Up")
@@ -127,6 +129,16 @@ struct AuthTypeSelectionView: View {
                 Text("showSignUpView: \(showSignUpView ? "true" : "false")")
                     .font(.caption)
                     .foregroundColor(.secondary)
+                
+                // Test button to force navigation
+                Button("TEST: Force Show Registration") {
+                    print("DEBUG: Test button tapped!")
+                    showSignUpView = true
+                }
+                .padding()
+                .background(Color.red.opacity(0.8))
+                .foregroundColor(.white)
+                .cornerRadius(8)
             }
             .padding()
             .background(Color.gray.opacity(0.1))
