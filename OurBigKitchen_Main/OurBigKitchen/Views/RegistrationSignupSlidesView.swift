@@ -276,7 +276,7 @@ private extension RegistrationSignupSlidesView {
     
     // MARK: - Navigation Buttons
     var navigationButtons: some View {
-        VStack(spacing: Constants.smallSpacing) {
+        VStack(spacing: Constants.mobileSpacing) {
             // Skip for Demo button - available on every section
             HStack {
                 Spacer()
@@ -299,12 +299,10 @@ private extension RegistrationSignupSlidesView {
                 )
                 .cornerRadius(12)
             }
-            .padding(.horizontal, Constants.buttonPadding)
-            
-
+            .padding(.horizontal, Constants.mobilePadding)
             
             // Main navigation buttons
-            HStack(spacing: Constants.smallSpacing) {
+            HStack(spacing: Constants.mobileSpacing) {
                 if !isFirstStep {
                     backButton
                 }
@@ -313,6 +311,7 @@ private extension RegistrationSignupSlidesView {
                 
                 nextButton
             }
+            .padding(.horizontal, Constants.mobilePadding)
         }
     }
     
@@ -322,13 +321,14 @@ private extension RegistrationSignupSlidesView {
                 Image(systemName: "chevron.left")
                 Text("Back")
             }
+            .font(.subheadline)
             .foregroundColor(primaryColor)
-            .padding(.horizontal, 24)
-            .padding(.vertical, 12)
+            .padding(.horizontal, Constants.mobilePadding)
+            .padding(.vertical, 8)
             .background(Color.white)
-            .cornerRadius(8)
+            .cornerRadius(Constants.cornerRadius)
             .overlay(
-                RoundedRectangle(cornerRadius: 8)
+                RoundedRectangle(cornerRadius: Constants.cornerRadius)
                     .stroke(primaryColor, lineWidth: 1)
             )
         }
@@ -343,16 +343,17 @@ private extension RegistrationSignupSlidesView {
                         .scaleEffect(0.8)
                 } else {
                     Text(isLastStep ? "Create Account" : "Next")
+                        .font(.subheadline)
                     if !isLastStep {
                         Image(systemName: "chevron.right")
                     }
                 }
             }
             .foregroundColor(.white)
-            .padding(.horizontal, 24)
-            .padding(.vertical, 12)
+            .padding(.horizontal, Constants.mobilePadding)
+            .padding(.vertical, 8)
             .background(canProceed ? primaryColor : Color.gray.opacity(0.5))
-            .cornerRadius(8)
+            .cornerRadius(Constants.cornerRadius)
         }
         .disabled(!canProceed || isLoading)
         .overlay(
