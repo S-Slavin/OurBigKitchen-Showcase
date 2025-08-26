@@ -295,18 +295,6 @@ private extension RegistrationSignupSlidesView {
             }
             .padding(.horizontal, Constants.buttonPadding)
             
-            // Debug info
-            HStack {
-                Text("Step: \(currentStep + 1)/\(Constants.totalSteps)")
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-                Spacer()
-                Text("Can proceed: \(canProceed ? "Yes" : "No")")
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-            }
-            .padding(.horizontal, Constants.buttonPadding)
-            
             // Main navigation buttons
             HStack(spacing: Constants.smallSpacing) {
                 if !isFirstStep {

@@ -43,47 +43,7 @@ struct RootView: View {
                 })
             } else if !appState.isAuthenticated {
                 let _ = print("DEBUG RootView: Showing AuthTypeSelectionView")
-                VStack(spacing: 20) {
-                    AuthTypeSelectionView()
-                    
-                    // Enhanced debug button to reset onboarding
-                    VStack(spacing: 8) {
-                        Text("Debug Tools")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .padding(.top, 10)
-                        
-                        Button(action: {
-                            UserDefaults.standard.set(false, forKey: "hasSeenOnboarding")
-                            UserDefaults.standard.set(false, forKey: "hasSignedIn")
-                            UserDefaults.standard.set(false, forKey: "isAuthenticated")
-                            appState.objectWillChange.send()
-                        }) {
-                            HStack(spacing: 8) {
-                                Image(systemName: "arrow.clockwise.circle.fill")
-                                    .font(.system(size: 16))
-                                Text("Reset Onboarding")
-                                    .font(.system(size: 14, weight: .medium))
-                            }
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 12)
-                            .background(
-                                LinearGradient(
-                                    gradient: Gradient(colors: [Color.blue.opacity(0.8), Color.purple.opacity(0.8)]),
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
-                            )
-                            .cornerRadius(25)
-                            .shadow(color: .black.opacity(0.2), radius: 4, x: 0, y: 2)
-                        }
-                        .scaleEffect(1.0)
-                        .animation(.easeInOut(duration: 0.2), value: true)
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 20)
-                }
+                AuthTypeSelectionView()
             } else if appState.needsToChooseVolunteerType {
                 let _ = print("DEBUG RootView: Showing VolunteerTypeSelectionView")
                 VolunteerTypeSelectionView()

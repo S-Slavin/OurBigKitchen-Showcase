@@ -81,72 +81,17 @@ struct AuthTypeSelectionView: View {
             Spacer()
             
             // Continue Button
-            Button(action: {
+            Button("Continue") {
                 print("DEBUG: Continue button tapped!")
-                print("DEBUG: selectedAction = \(selectedAction)")
-                print("DEBUG: showSignUpView before = \(showSignUpView)")
-                
                 if selectedAction == .signIn {
-                    print("DEBUG: Navigating to Sign In")
                     showSignInView = true
                 } else {
-                    print("DEBUG: Navigating to Sign Up")
-                    showSignUpView = true
-                    print("DEBUG: showSignUpView after = \(showSignUpView)")
-                }
-            }) {
-                Text(selectedAction == .signIn ? "Sign In" : "Continue to Sign Up")
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(
-                        LinearGradient(
-                            gradient: Gradient(colors: [primaryColor, accentColor]),
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    )
-                    .cornerRadius(25)
-                    .shadow(color: primaryColor.opacity(0.4), radius: 8, x: 0, y: 5)
-            }
-            .buttonStyle(ButtonStyles.scale)
-            .padding(.horizontal)
-            .padding(.bottom, 30)
-            
-            // Debug info display
-            VStack(spacing: 8) {
-                Text("Debug Info:")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                Text("Selected Action: \(selectedAction == .signIn ? "Sign In" : "Sign Up")")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                Text("showSignInView: \(showSignInView ? "true" : "false")")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                Text("showSignUpView: \(showSignUpView ? "true" : "false")")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                
-                // Test button to force navigation
-                Button("TEST: Force Show Registration") {
-                    print("DEBUG: Test button tapped!")
                     showSignUpView = true
                 }
-                .padding()
-                .background(Color.red.opacity(0.8))
-                .foregroundColor(.white)
-                .cornerRadius(8)
             }
-            .padding()
-            .background(Color.gray.opacity(0.1))
-            .cornerRadius(8)
-            .padding(.horizontal)
+            .buttonStyle(PrimaryButtonStyle())
+            .disabled(selectedAction == nil)
         }
-        .background(backgroundColor)
-        .edgesIgnoringSafeArea(.all)
         .sheet(isPresented: $showSignInView) {
             NavigationView {
                 SimpleSignInView()
