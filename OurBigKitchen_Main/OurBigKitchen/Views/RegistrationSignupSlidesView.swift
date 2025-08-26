@@ -1167,7 +1167,7 @@ struct RegistrationSignupSlidesView_Previews: PreviewProvider {
 // MARK: - Button Styles
 
 struct PrimaryButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
+    func makeBody(configuration: ButtonStyleConfiguration) -> some View {
         configuration.label
             .font(.headline)
             .foregroundColor(.white)
@@ -1181,7 +1181,7 @@ struct PrimaryButtonStyle: ButtonStyle {
 }
 
 struct SecondaryButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
+    func makeBody(configuration: ButtonStyleConfiguration) -> some View {
         configuration.label
             .font(.headline)
             .foregroundColor(ThemeManager.Colors.primary)
