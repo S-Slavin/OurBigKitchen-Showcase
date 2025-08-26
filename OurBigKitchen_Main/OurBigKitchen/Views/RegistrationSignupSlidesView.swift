@@ -953,6 +953,12 @@ private extension RegistrationSignupSlidesView {
                 print("DEBUG: appState.hasCompletedRegistration = \(appState.hasCompletedRegistration)")
                 print("DEBUG: appState.userProfile = \(appState.userProfile?.firstName ?? "nil") \(appState.userProfile?.lastName ?? "nil")")
                 
+                // CRITICAL: Refresh app state one more time before dismissing
+                appState.refreshAuthState()
+                appState.objectWillChange.send()
+                
+                print("DEBUG: After refresh - appState.isAuthenticated = \(appState.isAuthenticated)")
+                
                 // First dismiss the sheet
                 showSalesforceSync = false
                 
@@ -1038,8 +1044,14 @@ private extension RegistrationSignupSlidesView {
                 wwccExpiryDate: wwccNumber.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : wwccExpiryDate
             )
             
+            // CRITICAL: Refresh the app state to pick up the new authentication values
+            appState.refreshAuthState()
+            
             // Update app state with user profile
             updateAppStateWithUserProfile()
+            
+            // Force the app state to update the UI
+            appState.objectWillChange.send()
             
             // Try to sync to Salesforce, but don't block on failure
             await syncToSalesforce()
