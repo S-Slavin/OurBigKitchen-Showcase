@@ -1,6 +1,7 @@
 import SwiftUI
 import UIKit
 import Foundation
+import Combine // Added for Combine
 
 // MARK: - Registration Signup Slides View
 /// A multi-step registration flow for new volunteers with professional styling and validation
@@ -65,6 +66,9 @@ struct RegistrationSignupSlidesView: View {
     @State private var showError = false
     @State private var errorMessage = ""
     @State private var showSalesforceSync = false
+    
+    // MARK: - Combine
+    private var cancellables = Set<AnyCancellable>()
     
     // MARK: - Computed Properties
     private var primaryColor: Color { ThemeManager.Colors.primary }
@@ -914,6 +918,10 @@ private extension RegistrationSignupSlidesView {
             
             Button("Continue") {
                 // Navigate to main app
+                dismiss()
+                appState.isAuthenticated = true
+                appState.hasAcceptedTerms = true
+                appState.hasAcceptedHealthProtocols = true
             }
             .buttonStyle(ButtonStyles.springy)
         }
@@ -941,13 +949,17 @@ private extension RegistrationSignupSlidesView {
 private extension RegistrationSignupSlidesView {
     
     func nextStep() {
+        print("DEBUG: nextStep() called, currentStep: \(currentStep)")
+        
         guard currentStep < Constants.totalSteps - 1 else {
+            print("DEBUG: Reached last step, creating account...")
             Task {
                 await createAccount()
             }
             return
         }
         
+        print("DEBUG: Moving to next step: \(currentStep + 1)")
         withAnimation {
             currentStep += 1
         }
@@ -973,19 +985,32 @@ private extension RegistrationSignupSlidesView {
             return
         }
         
-        await authViewModel.signUp(
-            firstName: firstName.trimmingCharacters(in: .whitespacesAndNewlines),
-            lastName: lastName.trimmingCharacters(in: .whitespacesAndNewlines),
-            email: email.trimmingCharacters(in: .whitespacesAndNewlines),
-            password: password,
-            volunteerType: volunteerType,
-            dateOfBirth: dateOfBirth,
-            wwccNumber: wwccNumber.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : wwccNumber.trimmingCharacters(in: .whitespacesAndNewlines),
-            wwccExpiryDate: wwccNumber.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : wwccExpiryDate
-        )
+        do {
+            await authViewModel.signUp(
+                firstName: firstName.trimmingCharacters(in: .whitespacesAndNewlines),
+                lastName: lastName.trimmingCharacters(in: .whitespacesAndNewlines),
+                email: email.trimmingCharacters(in: .whitespacesAndNewlines),
+                password: password,
+                volunteerType: volunteerType,
+                dateOfBirth: dateOfBirth,
+                wwccNumber: wwccNumber.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : wwccNumber.trimmingCharacters(in: .whitespacesAndNewlines),
+                wwccExpiryDate: wwccNumber.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : wwccExpiryDate
+            )
+            
+            // Try to sync to Salesforce, but don't block on failure
+            await syncToSalesforce()
+            
+            // Update app state
+            updateAppStateWithUserProfile()
+            
+            // Show success
+            showSalesforceSync = true
+            
+        } catch {
+            errorMessage = "Account creation failed: \(error.localizedDescription)"
+            showError = true
+        }
         
-        await syncToSalesforce()
-        updateAppStateWithUserProfile()
         isLoading = false
     }
     
@@ -1092,7 +1117,7 @@ private extension RegistrationSignupSlidesView {
                 }
             }
         )
-        .store(in: &salesforceManager.cancellables)
+        .store(in: &cancellables)
     }
 }
 
