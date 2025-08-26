@@ -523,7 +523,7 @@ private extension RegistrationSignupSlidesView {
     }
     
     var nameFieldsSection: some View {
-        VStack(spacing: Constants.smallSpacing) {
+        VStack(spacing: Constants.spacing) {
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     Text("First Name")
@@ -625,7 +625,7 @@ private extension RegistrationSignupSlidesView {
     }
     
     var passwordFieldsSection: some View {
-        VStack(spacing: Constants.smallSpacing) {
+        VStack(spacing: Constants.spacing) {
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     Text("Password")
@@ -750,7 +750,7 @@ private extension RegistrationSignupSlidesView {
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, Constants.buttonPadding)
             
-            VStack(spacing: Constants.smallSpacing) {
+            VStack(spacing: Constants.spacing) {
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
                         Text("WWCC Number")
