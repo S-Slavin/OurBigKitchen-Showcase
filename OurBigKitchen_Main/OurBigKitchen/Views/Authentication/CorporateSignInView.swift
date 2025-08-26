@@ -61,6 +61,32 @@ struct CorporateSignInView: View {
                                     .transition(.move(edge: .top).combined(with: .opacity))
                             }
 
+                            // Skip for Demo button
+                            Button(action: {
+                                print("DEBUG: Skip for Demo tapped on CorporateSignInView")
+                                // Skip to main app
+                                DispatchQueue.main.async {
+                                    appState.isAuthenticated = true
+                                    appState.hasAcceptedTerms = true
+                                    appState.hasAcceptedHealthProtocols = true
+                                    appState.needsToChooseVolunteerType = false
+                                    appState.objectWillChange.send()
+                                }
+                            }) {
+                                Text("Skip for Demo")
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 6)
+                                    .background(Color.clear)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                                    )
+                                    .cornerRadius(12)
+                            }
+                            .padding(.bottom, 10)
+
                             Button(action: signUp) {
                                 ZStack {
                                     Text("Sign Up")
@@ -208,6 +234,32 @@ struct CorporateLoginView: View {
                                     .transition(.move(edge: .top).combined(with: .opacity))
                             }
                             
+                            // Skip for Demo button
+                            Button(action: {
+                                print("DEBUG: Skip for Demo tapped on CorporateLoginView")
+                                // Skip to main app
+                                DispatchQueue.main.async {
+                                    appState.isAuthenticated = true
+                                    appState.hasAcceptedTerms = true
+                                    appState.hasAcceptedHealthProtocols = true
+                                    appState.needsToChooseVolunteerType = false
+                                    appState.objectWillChange.send()
+                                }
+                            }) {
+                                Text("Skip for Demo")
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 6)
+                                    .background(Color.clear)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                                    )
+                                    .cornerRadius(12)
+                            }
+                            .padding(.bottom, 10)
+                            
                             Button(action: login) {
                                 ZStack {
                                     Text("Log In")
@@ -237,22 +289,6 @@ struct CorporateLoginView: View {
                             .buttonStyle(ButtonStyles.scale)
                             .padding(.horizontal, 10)
                             .padding(.top, 10)
-                            
-                            #if DEBUG
-                            Button(action: demoLogin) {
-                                Text("Demo Login")
-                                    .font(.headline)
-                                    .foregroundColor(primaryColor)
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 16)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 25)
-                                            .stroke(primaryColor, lineWidth: 2)
-                                    )
-                            }
-                            .buttonStyle(ButtonStyles.scale)
-                            .padding(.horizontal, 10)
-                            #endif
                         }
                         .padding(.vertical, 25)
                         .padding(.horizontal, 5)
@@ -289,17 +325,19 @@ struct CorporateLoginView: View {
             VStack {
                 HStack {
                     Spacer()
-                    Button("SKIP FOR DEMO") {
+                    Button("Skip for Demo") {
                         showPasswordReset = false
                     }
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
-                    .padding(.vertical, 16)
-                    .padding(.horizontal, 24)
-                    .background(Color.orange)
-                    .cornerRadius(15)
-                    .shadow(color: .black.opacity(0.3), radius: 5, x: 0, y: 2)
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Color.clear)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                    )
+                    .cornerRadius(12)
                     .padding()
                 }
                 
@@ -334,31 +372,7 @@ struct CorporateLoginView: View {
         }
     }
     
-    private func demoLogin() {
-        isLoading = true
-        errorMessage = ""
-        showError = false
-        
-        Task {
-            do {
-                let user = User(
-                    id: UUID().uuidString,
-                    firstName: "Demo",
-                    lastName: "User",
-                    email: "demo@corporate.com",
-                    role: .corporate
-                )
-                try PersistenceManager.shared.save(user, forKey: "currentUser")
-                UserDefaults.standard.set(true, forKey: "isAuthenticated")
-                UserDefaults.standard.set(true, forKey: "hasSignedIn")
-                NotificationCenter.default.post(name: .didUpdateAuth, object: nil)
-            } catch let error as NSError {
-                errorMessage = "Failed to save demo user data: \(error.localizedDescription)"
-                showError = true
-            }
-            isLoading = false
-        }
-    }
+
 }
 
 struct CorporateSignInView_Previews: PreviewProvider {
