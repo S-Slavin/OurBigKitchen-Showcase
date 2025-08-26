@@ -98,5 +98,17 @@ struct RootView: View {
                 ContentView()
             }
         }
+        .onReceive(appState.$isAuthenticated) { _ in
+            print("DEBUG RootView: isAuthenticated changed, forcing update")
+            appState.objectWillChange.send()
+        }
+        .onReceive(appState.$needsToChooseVolunteerType) { _ in
+            print("DEBUG RootView: needsToChooseVolunteerType changed, forcing update")
+            appState.objectWillChange.send()
+        }
+        .onAppear {
+            print("DEBUG RootView: View appeared, checking state consistency")
+            appState.ensureStateConsistency()
+        }
     }
 }

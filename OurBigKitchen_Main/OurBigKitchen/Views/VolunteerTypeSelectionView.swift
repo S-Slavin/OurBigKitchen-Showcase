@@ -78,8 +78,10 @@ struct VolunteerTypeSelectionView: View {
                     
                     // Continue Button
                     Button(action: {
+                        print("DEBUG: VolunteerTypeSelectionView - Continue button tapped")
                         // Update user profile with selected volunteer type
                         if let currentUser = appState.userProfile {
+                            print("DEBUG: Updating user profile with volunteer type: \(selectedType)")
                             // Update user role based on volunteer type
                             let role: AppModels.UserRole = selectedType == .individual ? .volunteer : .corporateVolunteer
                             
@@ -101,6 +103,35 @@ struct VolunteerTypeSelectionView: View {
                             // Update app state
                             appState.userProfile = updatedUser
                             appState.needsToChooseVolunteerType = false
+                            
+                            print("DEBUG: VolunteerTypeSelectionView - Flow completed, user ready for main app")
+                            
+                            // Force UI update
+                            appState.objectWillChange.send()
+                        } else {
+                            print("DEBUG: No user profile found, creating basic profile")
+                            // Create basic user profile if none exists
+                            let basicUser = AppModels.User(
+                                id: UUID().uuidString,
+                                firstName: "User",
+                                lastName: "User",
+                                email: "user@example.com",
+                                role: selectedType == .individual ? .volunteer : .corporateVolunteer,
+                                preferences: AppModels.UserPreferences(),
+                                achievements: [],
+                                stats: AppModels.UserStats(),
+                                hasFoodSafetyRegistration: false,
+                                dob: Date(),
+                                wwcNumber: nil,
+                                wwcExpiry: nil,
+                                companyName: selectedType == .corporate ? "Corporate Organization" : nil
+                            )
+                            
+                            appState.userProfile = basicUser
+                            appState.needsToChooseVolunteerType = false
+                            
+                            print("DEBUG: VolunteerTypeSelectionView - Basic profile created, flow completed")
+                            appState.objectWillChange.send()
                         }
                     }) {
                         Text("Continue")

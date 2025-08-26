@@ -206,6 +206,44 @@ class AppState: ObservableObject {
     
     // MARK: - Public Methods
     
+    func ensureStateConsistency() {
+        print("DEBUG: AppState - Ensuring state consistency")
+        
+        // Check for invalid state combinations
+        if isAuthenticated && !hasAcceptedTerms {
+            print("DEBUG: AppState - Invalid state: authenticated but no terms accepted")
+            // Reset to valid state
+            isAuthenticated = false
+            needsToChooseVolunteerType = false
+        }
+        
+        if needsToChooseVolunteerType && !isAuthenticated {
+            print("DEBUG: AppState - Invalid state: needs volunteer type but not authenticated")
+            needsToChooseVolunteerType = false
+        }
+        
+        print("DEBUG: AppState - Final state: isAuthenticated=\(isAuthenticated), needsToChooseVolunteerType=\(needsToChooseVolunteerType), hasAcceptedTerms=\(hasAcceptedTerms)")
+    }
+    
+    func resetToLoginState() {
+        print("DEBUG: AppState - Resetting to login state")
+        isAuthenticated = false
+        needsToChooseVolunteerType = false
+        hasAcceptedTerms = false
+        hasAcceptedHealthProtocols = false
+        userProfile = nil
+        selectedVolunteerType = nil
+        
+        // Clear UserDefaults
+        let defaults = UserDefaults.standard
+        defaults.set(false, forKey: "isAuthenticated")
+        defaults.set(false, forKey: "hasSignedIn")
+        defaults.set(false, forKey: "hasAcceptedTerms")
+        defaults.set(false, forKey: "hasAcceptedHealthProtocols")
+        
+        objectWillChange.send()
+    }
+    
     func forceLogout() {
         isAuthenticated = false
         userProfile = nil

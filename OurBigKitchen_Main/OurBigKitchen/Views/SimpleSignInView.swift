@@ -87,10 +87,15 @@ struct SimpleSignInView: View {
             if isAuthenticated {
                 print("DEBUG: Authentication successful, setting appState properties...")
                 // User is authenticated, now they need to choose Individual/Corporate
-                appState.isAuthenticated = true
-                appState.needsToChooseVolunteerType = true
-                print("DEBUG: appState.isAuthenticated = \(appState.isAuthenticated)")
-                print("DEBUG: appState.needsToChooseVolunteerType = \(appState.needsToChooseVolunteerType)")
+                DispatchQueue.main.async {
+                    appState.isAuthenticated = true
+                    appState.needsToChooseVolunteerType = true
+                    print("DEBUG: appState.isAuthenticated = \(appState.isAuthenticated)")
+                    print("DEBUG: appState.needsToChooseVolunteerType = \(appState.needsToChooseVolunteerType)")
+                    
+                    // Force UI update
+                    appState.objectWillChange.send()
+                }
             }
         }
         .onReceive(authViewModel.$errorMessage) { errorMessage in

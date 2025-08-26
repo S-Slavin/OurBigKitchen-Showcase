@@ -70,22 +70,28 @@ class AuthViewModel: ObservableObject {
             
             try PersistenceManager.shared.save(user, forKey: "currentUser")
             
-            self.isAuthenticated = true
-            self.isLoading = false
-            
-            UserDefaults.standard.set(true, forKey: "isAuthenticated")
-            UserDefaults.standard.set(true, forKey: "hasSignedIn")
-            
-            if rememberPassword {
-                saveCredentials()
+            await MainActor.run {
+                self.isAuthenticated = true
+                self.isLoading = false
+                
+                // Update UserDefaults
+                UserDefaults.standard.set(true, forKey: "isAuthenticated")
+                UserDefaults.standard.set(true, forKey: "hasSignedIn")
+                
+                if rememberPassword {
+                    saveCredentials()
+                }
+                
+                print("DEBUG: AuthViewModel - Authentication successful, posting notification")
+                NotificationCenter.default.post(name: .didUpdateAuth, object: nil)
             }
             
-            NotificationCenter.default.post(name: .didUpdateAuth, object: nil)
-            
         } catch {
-            self.errorMessage = error.localizedDescription
-            self.showError = true
-            self.isLoading = false
+            await MainActor.run {
+                self.errorMessage = error.localizedDescription
+                self.showError = true
+                self.isLoading = false
+            }
         }
     }
     
