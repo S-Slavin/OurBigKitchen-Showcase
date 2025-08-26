@@ -307,29 +307,6 @@ private extension RegistrationSignupSlidesView {
     // MARK: - Navigation Buttons
     var navigationButtons: some View {
         VStack(spacing: Constants.mobileSpacing) {
-            // Skip for Demo button - available on every section
-            HStack {
-                Spacer()
-                Button("Skip for Demo") {
-                    withAnimation {
-                        if currentStep < Constants.totalSteps {
-                            currentStep += 1
-                        }
-                    }
-                }
-                .font(.caption2)
-                .foregroundColor(.secondary)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(Color.clear)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                )
-                .cornerRadius(12)
-            }
-            .padding(.horizontal, Constants.mobilePadding)
-            
             // Main navigation buttons
             HStack(spacing: Constants.mobileSpacing) {
                 if !isFirstStep {
@@ -925,25 +902,6 @@ private extension RegistrationSignupSlidesView {
             }
             
             Spacer()
-            
-            // Skip for Demo button
-            Button(action: {
-                // Skip to success view
-                showSalesforceSync = true
-            }) {
-                Text("Skip for Demo")
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(Color.clear)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                    )
-                    .cornerRadius(12)
-            }
-            .padding(.bottom, 20)
         }
         .padding(.vertical, Constants.buttonPadding)
     }
