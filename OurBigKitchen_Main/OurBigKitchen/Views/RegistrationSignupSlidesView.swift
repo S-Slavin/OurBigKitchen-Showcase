@@ -286,8 +286,12 @@ private extension RegistrationSignupSlidesView {
                 .foregroundColor(.secondary)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 6)
-                .background(Color.gray.opacity(0.1))
-                .cornerRadius(15)
+                .background(Color.clear)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                )
+                .cornerRadius(12)
             }
             .padding(.horizontal, Constants.buttonPadding)
             
