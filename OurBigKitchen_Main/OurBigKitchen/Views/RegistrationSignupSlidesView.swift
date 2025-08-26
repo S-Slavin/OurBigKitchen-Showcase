@@ -951,6 +951,7 @@ private extension RegistrationSignupSlidesView {
                 print("DEBUG: Continue to App button tapped")
                 print("DEBUG: appState.isAuthenticated = \(appState.isAuthenticated)")
                 print("DEBUG: appState.hasCompletedRegistration = \(appState.hasCompletedRegistration)")
+                print("DEBUG: appState.userProfile = \(appState.userProfile?.firstName ?? "nil") \(appState.userProfile?.lastName ?? "nil")")
                 
                 // First dismiss the sheet
                 showSalesforceSync = false
@@ -1024,26 +1025,33 @@ private extension RegistrationSignupSlidesView {
             return
         }
         
-        // Attempt to create account and wait for it to complete
-        await authViewModel.signUp(
-            firstName: firstName.trimmingCharacters(in: .whitespacesAndNewlines),
-            lastName: lastName.trimmingCharacters(in: .whitespacesAndNewlines),
-            email: email.trimmingCharacters(in: .whitespacesAndNewlines),
-            password: password,
-            volunteerType: volunteerType,
-            dateOfBirth: dateOfBirth,
-            wwccNumber: wwccNumber.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : wwccNumber.trimmingCharacters(in: .whitespacesAndNewlines),
-            wwccExpiryDate: wwccNumber.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : wwccExpiryDate
-        )
-        
-        // Update app state with user profile
-        updateAppStateWithUserProfile()
-        
-        // Try to sync to Salesforce, but don't block on failure
-        await syncToSalesforce()
-        
-        // Show success - now the app state should be properly updated
-        showSalesforceSync = true
+        do {
+            // Attempt to create account and wait for it to complete
+            await authViewModel.signUp(
+                firstName: firstName.trimmingCharacters(in: .whitespacesAndNewlines),
+                lastName: lastName.trimmingCharacters(in: .whitespacesAndNewlines),
+                email: email.trimmingCharacters(in: .whitespacesAndNewlines),
+                password: password,
+                volunteerType: volunteerType,
+                dateOfBirth: dateOfBirth,
+                wwccNumber: wwccNumber.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : wwccNumber.trimmingCharacters(in: .whitespacesAndNewlines),
+                wwccExpiryDate: wwccNumber.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : wwccExpiryDate
+            )
+            
+            // Update app state with user profile
+            updateAppStateWithUserProfile()
+            
+            // Try to sync to Salesforce, but don't block on failure
+            await syncToSalesforce()
+            
+            // Show success - now the app state should be properly updated
+            showSalesforceSync = true
+            
+        } catch {
+            // Handle any errors from signup
+            errorMessage = "Failed to create account: \(error.localizedDescription)"
+            showError = true
+        }
         
         isLoading = false
     }
