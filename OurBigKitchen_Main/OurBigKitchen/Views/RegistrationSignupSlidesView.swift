@@ -968,22 +968,6 @@ private extension RegistrationSignupSlidesView {
                 .foregroundColor(.secondary)
             
             Button("Continue to App") {
-                // Update UserDefaults to persist the authentication state
-                UserDefaults.standard.set(true, forKey: "isAuthenticated")
-                UserDefaults.standard.set(true, forKey: "hasSignedIn")
-                UserDefaults.standard.set(true, forKey: "hasAcceptedTerms")
-                UserDefaults.standard.set(true, forKey: "hasAcceptedHealthProtocols")
-                
-                // Update app state to match UserDefaults
-                appState.isAuthenticated = true
-                appState.hasAcceptedTerms = true
-                appState.hasAcceptedHealthProtocols = true
-                appState.needsToChooseVolunteerType = false
-                appState.hasCompletedRegistration = true
-                
-                // Force UI update
-                appState.objectWillChange.send()
-                
                 // Dismiss the sheet and view
                 showSalesforceSync = false
                 dismiss()
@@ -1046,6 +1030,7 @@ private extension RegistrationSignupSlidesView {
             return
         }
         
+        // Attempt to create account
         await authViewModel.signUp(
             firstName: firstName.trimmingCharacters(in: .whitespacesAndNewlines),
             lastName: lastName.trimmingCharacters(in: .whitespacesAndNewlines),
@@ -1059,9 +1044,6 @@ private extension RegistrationSignupSlidesView {
         
         // Try to sync to Salesforce, but don't block on failure
         await syncToSalesforce()
-        
-        // Update app state
-        updateAppStateWithUserProfile()
         
         // Show success
         showSalesforceSync = true
