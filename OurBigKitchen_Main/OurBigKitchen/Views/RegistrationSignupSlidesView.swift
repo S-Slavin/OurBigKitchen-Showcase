@@ -277,11 +277,8 @@ private extension RegistrationSignupSlidesView {
                 Button("Skip for Demo") {
                     print("DEBUG: Skip for Demo button tapped!")
                     withAnimation {
-                        if currentStep < Constants.totalSteps - 1 {
+                        if currentStep < Constants.totalSteps {
                             currentStep += 1
-                        } else {
-                            // If on last step, go back to first step
-                            currentStep = 1
                         }
                     }
                 }
