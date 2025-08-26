@@ -489,7 +489,7 @@ private extension RegistrationSignupSlidesView {
     }
     
     var personalInfoView: some View {
-        VStack(spacing: Constants.mobileSpacing) {
+        VStack(spacing: Constants.spacing) {
             Spacer()
             
             Text("Personal Information")
@@ -507,23 +507,23 @@ private extension RegistrationSignupSlidesView {
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
-            .padding(.bottom, 10)
+            .padding(.bottom, 16)
             
-            VStack(spacing: Constants.mobileSpacing) {
+            VStack(spacing: Constants.spacing) {
                 nameFieldsSection
                 emailFieldSection
                 passwordFieldsSection
                 dateOfBirthSection
             }
-            .padding(.horizontal, Constants.mobilePadding)
+            .padding(.horizontal, Constants.buttonPadding)
             
             Spacer()
         }
-        .padding(.vertical, Constants.mobilePadding)
+        .padding(.vertical, Constants.buttonPadding)
     }
     
     var nameFieldsSection: some View {
-        VStack(spacing: Constants.mobileSpacing) {
+        VStack(spacing: Constants.smallSpacing) {
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     Text("First Name")
