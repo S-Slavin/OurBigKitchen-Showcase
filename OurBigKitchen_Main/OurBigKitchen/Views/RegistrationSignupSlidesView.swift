@@ -271,10 +271,11 @@ private extension RegistrationSignupSlidesView {
     // MARK: - Navigation Buttons
     var navigationButtons: some View {
         VStack(spacing: Constants.smallSpacing) {
-            // Skip for Demo button
+            // Skip for Demo button - Always visible
             HStack {
                 Spacer()
                 Button("Skip for Demo") {
+                    print("DEBUG: Skip for Demo button tapped!")
                     // Skip to the end for demo purposes
                     withAnimation {
                         currentStep = Constants.totalSteps - 1
@@ -286,6 +287,18 @@ private extension RegistrationSignupSlidesView {
                 .padding(.vertical, 8)
                 .background(Color.gray.opacity(0.1))
                 .cornerRadius(20)
+            }
+            .padding(.horizontal, Constants.buttonPadding)
+            
+            // Debug info
+            HStack {
+                Text("Step: \(currentStep + 1)/\(Constants.totalSteps)")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                Spacer()
+                Text("Can proceed: \(canProceed ? "Yes" : "No")")
+                    .font(.caption2)
+                    .foregroundColor(canProceed ? .green : .red)
             }
             .padding(.horizontal, Constants.buttonPadding)
             
@@ -435,7 +448,11 @@ private extension RegistrationSignupSlidesView {
     }
     
     func volunteerTypeButton(type: VolunteerType, title: String, subtitle: String, icon: String) -> some View {
-        Button(action: { volunteerType = type }) {
+        Button(action: { 
+            print("DEBUG: Volunteer type button tapped: \(type)")
+            volunteerType = type
+            print("DEBUG: volunteerType set to: \(volunteerType)")
+        }) {
             HStack {
                 Image(systemName: icon)
                     .foregroundColor(volunteerType == type ? .white : primaryColor)
@@ -950,6 +967,8 @@ private extension RegistrationSignupSlidesView {
     
     func nextStep() {
         print("DEBUG: nextStep() called, currentStep: \(currentStep)")
+        print("DEBUG: canProceed = \(canProceed)")
+        print("DEBUG: volunteerType = \(volunteerType)")
         
         guard currentStep < Constants.totalSteps - 1 else {
             print("DEBUG: Reached last step, creating account...")
