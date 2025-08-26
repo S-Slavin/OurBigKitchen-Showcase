@@ -266,14 +266,35 @@ private extension RegistrationSignupSlidesView {
     
     // MARK: - Navigation Buttons
     var navigationButtons: some View {
-        HStack(spacing: Constants.smallSpacing) {
-            if !isFirstStep {
-                backButton
+        VStack(spacing: Constants.smallSpacing) {
+            // Skip for Demo button
+            HStack {
+                Spacer()
+                Button("Skip for Demo") {
+                    // Skip to the end for demo purposes
+                    withAnimation {
+                        currentStep = Constants.totalSteps - 1
+                    }
+                }
+                .font(.caption)
+                .foregroundColor(.secondary)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                .background(Color.gray.opacity(0.1))
+                .cornerRadius(20)
             }
+            .padding(.horizontal, Constants.buttonPadding)
             
-            Spacer()
-            
-            nextButton
+            // Main navigation buttons
+            HStack(spacing: Constants.smallSpacing) {
+                if !isFirstStep {
+                    backButton
+                }
+                
+                Spacer()
+                
+                nextButton
+            }
         }
     }
     
@@ -455,6 +476,17 @@ private extension RegistrationSignupSlidesView {
                 .foregroundColor(primaryColor)
                 .multilineTextAlignment(.center)
             
+            // Mandatory fields note
+            HStack {
+                Text("*")
+                    .foregroundColor(.red)
+                    .fontWeight(.bold)
+                Text("indicates required fields")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            .padding(.bottom, 10)
+            
             VStack(spacing: 20) {
                 nameFieldsSection
                 emailFieldSection
@@ -475,6 +507,9 @@ private extension RegistrationSignupSlidesView {
                     Text("First Name")
                         .font(.headline)
                         .foregroundColor(primaryColor)
+                    Text("*")
+                        .foregroundColor(.red)
+                        .fontWeight(.bold)
                     
                     if !firstName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                         Image(systemName: "checkmark.circle.fill")
@@ -498,6 +533,9 @@ private extension RegistrationSignupSlidesView {
                     Text("Last Name")
                         .font(.headline)
                         .foregroundColor(primaryColor)
+                    Text("*")
+                        .foregroundColor(.red)
+                        .fontWeight(.bold)
                     
                     if !lastName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                         Image(systemName: "checkmark.circle.fill")
@@ -524,6 +562,9 @@ private extension RegistrationSignupSlidesView {
                 Text("Email Address")
                     .font(.headline)
                     .foregroundColor(primaryColor)
+                Text("*")
+                    .foregroundColor(.red)
+                    .fontWeight(.bold)
                 
                 if !email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && isValidEmail(email) {
                     Image(systemName: "checkmark.circle.fill")
@@ -565,6 +606,9 @@ private extension RegistrationSignupSlidesView {
                     Text("Password")
                         .font(.headline)
                         .foregroundColor(primaryColor)
+                    Text("*")
+                        .foregroundColor(.red)
+                        .fontWeight(.bold)
                     
                     if !password.isEmpty && password.count >= 6 {
                         Image(systemName: "checkmark.circle.fill")
@@ -590,6 +634,9 @@ private extension RegistrationSignupSlidesView {
                     Text("Confirm Password")
                         .font(.headline)
                         .foregroundColor(primaryColor)
+                    Text("*")
+                        .foregroundColor(.red)
+                        .fontWeight(.bold)
                     
                     if !confirmPassword.isEmpty && password == confirmPassword {
                         Image(systemName: "checkmark.circle.fill")
@@ -634,9 +681,14 @@ private extension RegistrationSignupSlidesView {
     
     var dateOfBirthSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Date of Birth")
-                .font(.headline)
-                .foregroundColor(primaryColor)
+            HStack {
+                Text("Date of Birth")
+                    .font(.headline)
+                    .foregroundColor(primaryColor)
+                Text("*")
+                    .foregroundColor(.red)
+                    .fontWeight(.bold)
+            }
             
             DatePicker("Date of Birth", selection: $dateOfBirth, displayedComponents: .date)
                 .datePickerStyle(CompactDatePickerStyle())
@@ -677,9 +729,14 @@ private extension RegistrationSignupSlidesView {
             
             VStack(spacing: Constants.smallSpacing) {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("WWCC Number")
-                        .font(.headline)
-                        .foregroundColor(primaryColor)
+                    HStack {
+                        Text("WWCC Number")
+                            .font(.headline)
+                            .foregroundColor(primaryColor)
+                        Text("*")
+                            .foregroundColor(.red)
+                            .fontWeight(.bold)
+                    }
                     
                     TextField("WWCC Number", text: $wwccNumber)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -688,9 +745,14 @@ private extension RegistrationSignupSlidesView {
                 }
                 
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Expiry Date")
-                        .font(.headline)
-                        .foregroundColor(primaryColor)
+                    HStack {
+                        Text("Expiry Date")
+                            .font(.headline)
+                            .foregroundColor(primaryColor)
+                        Text("*")
+                            .foregroundColor(.red)
+                            .fontWeight(.bold)
+                    }
                     
                     DatePicker("Expiry Date", selection: $wwccExpiryDate, displayedComponents: .date)
                         .datePickerStyle(CompactDatePickerStyle())
