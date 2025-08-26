@@ -181,6 +181,23 @@ struct RegistrationSignupSlidesView: View {
         }
         .onAppear {
             authViewModel.setAppState(appState)
+            print("DEBUG: RegistrationSignupSlidesView appeared")
+            print("DEBUG: Initial state - firstName: '\(firstName)', lastName: '\(lastName)', email: '\(email)', password: '\(password)', confirmPassword: '\(confirmPassword)'")
+        }
+        .onChange(of: firstName) { newValue in
+            print("DEBUG: firstName changed to: '\(newValue)'")
+        }
+        .onChange(of: lastName) { newValue in
+            print("DEBUG: lastName changed to: '\(newValue)'")
+        }
+        .onChange(of: email) { newValue in
+            print("DEBUG: email changed to: '\(newValue)'")
+        }
+        .onChange(of: password) { newValue in
+            print("DEBUG: password changed to: '\(newValue)' (length: \(newValue.count))")
+        }
+        .onChange(of: confirmPassword) { newValue in
+            print("DEBUG: confirmPassword changed to: '\(newValue)'")
         }
     }
 }
