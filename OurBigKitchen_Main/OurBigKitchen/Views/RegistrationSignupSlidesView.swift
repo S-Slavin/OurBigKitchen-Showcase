@@ -1005,10 +1005,11 @@ private extension RegistrationSignupSlidesView {
 private extension RegistrationSignupSlidesView {
     
     func createAccount() async {
+        print("DEBUG: 🚀 createAccount() started")
         isLoading = true
         
         // DEMO MODE: Skip validation and go straight to app
-        print("DEBUG: Create Account tapped - DEMO MODE - bypassing validation")
+        print("DEBUG: ✅ Create Account tapped - DEMO MODE - bypassing validation")
         
         // Skip validation in demo mode
         // guard validateForm() else {
@@ -1023,6 +1024,16 @@ private extension RegistrationSignupSlidesView {
             let demoEmail = email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "demo@example.com" : email.trimmingCharacters(in: .whitespacesAndNewlines)
             let demoPassword = password.isEmpty ? "demo123" : password
             
+            print("DEBUG: 🔐 Setting AuthViewModel properties...")
+            // Set the AuthViewModel properties so validation passes
+            authViewModel.firstName = demoFirstName
+            authViewModel.lastName = demoLastName
+            authViewModel.email = demoEmail
+            authViewModel.password = demoPassword
+            authViewModel.confirmPassword = demoPassword
+            authViewModel.hasAcceptedTerms = true
+            
+            print("DEBUG: 🔐 Calling authViewModel.signUp()...")
             // Attempt to create account and wait for it to complete
             await authViewModel.signUp(
                 firstName: demoFirstName,
@@ -1034,6 +1045,7 @@ private extension RegistrationSignupSlidesView {
                 wwccNumber: wwccNumber.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : wwccNumber.trimmingCharacters(in: .whitespacesAndNewlines),
                 wwccExpiryDate: wwccNumber.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : wwccExpiryDate
             )
+            print("DEBUG: ✅ authViewModel.signUp() completed")
             
             // CRITICAL: Refresh the app state to pick up the new authentication values
             appState.refreshAuthState()
@@ -1068,7 +1080,9 @@ private extension RegistrationSignupSlidesView {
             
         // Error handling is done within the function if needed
         
+        print("DEBUG: 🏁 Setting isLoading to false")
         isLoading = false
+        print("DEBUG: 🎯 createAccount() completed successfully")
     }
 }
     
