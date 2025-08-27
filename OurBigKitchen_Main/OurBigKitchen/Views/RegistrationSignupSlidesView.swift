@@ -1059,24 +1059,25 @@ private extension RegistrationSignupSlidesView {
             // Try to sync to Salesforce, but don't block on failure
             await syncToSalesforce()
             
-            // Use the same authentication flow as login
-            print("DEBUG: Account created successfully - using standard authentication flow")
+            // DEMO MODE: Go straight to home screen like welcome flow
+            print("DEBUG: Account created successfully - going straight to home screen")
             
-            // The authViewModel.signUp() should have already set the authentication state
-            // Now we just need to ensure the app state is properly updated
-            // This follows the same pattern as SimpleSignInView
+            // Set all app state to completed so user goes to home screen immediately
             DispatchQueue.main.async {
-                // Set the same state as successful login
                 appState.isAuthenticated = true
-                appState.needsToChooseVolunteerType = false
                 appState.hasCompletedRegistration = true
+                appState.hasAcceptedTerms = true
+                appState.hasAcceptedHealthProtocols = true
+                appState.needsToChooseVolunteerType = false
                 
-                // Force UI update
+                // Force UI update - this should take user to home screen
                 appState.objectWillChange.send()
+                
+                print("DEBUG: 🏠 App state set for home screen navigation")
             }
             
-            // Show success sheet (same as login flow)
-            showSalesforceSync = true
+            // NO success sheet - go straight to app like welcome flow
+            // showSalesforceSync = true
             
         // Error handling is done within the function if needed
         
