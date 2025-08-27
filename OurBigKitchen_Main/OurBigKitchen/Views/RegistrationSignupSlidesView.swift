@@ -1081,10 +1081,16 @@ private extension RegistrationSignupSlidesView {
                 appState.hasAcceptedHealthProtocols = true
                 appState.needsToChooseVolunteerType = false
                 
+                // CRITICAL: Also update UserDefaults so other views can see the authentication state
+                UserDefaults.standard.set(true, forKey: "isAuthenticated")
+                UserDefaults.standard.set(true, forKey: "hasSignedIn")
+                UserDefaults.standard.set(true, forKey: "hasAcceptedTerms")
+                UserDefaults.standard.set(true, forKey: "hasAcceptedHealthProtocols")
+                
                 // Force UI update - this should take user to home screen
                 appState.objectWillChange.send()
                 
-                print("DEBUG: 🏠 App state set for home screen navigation")
+                print("DEBUG: 🏠 App state and UserDefaults set for home screen navigation")
             }
             
             // NO success sheet - go straight to app like welcome flow

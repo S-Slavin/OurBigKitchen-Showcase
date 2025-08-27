@@ -84,18 +84,21 @@ class HomeDashboardViewModel: ObservableObject {
         
         // Load today's stats with mock data for demo
         Task {
-            // Create mock stats for demo purposes
-            let mockStats = DailyStats(
-                id: UUID().uuidString,
-                date: Date(),
-                mealsServed: 45,
-                volunteersPresent: 12,
-                hoursContributed: 8.5,
-                peopleServed: 120,
-                foodWasteSaved: 2.5,
-                donationsReceived: 150.0
-            )
-            self.todayStats = mockStats
+            await MainActor.run {
+                // Create mock stats for demo purposes
+                let mockStats = DailyStats(
+                    id: UUID().uuidString,
+                    date: Date(),
+                    mealsServed: 45,
+                    volunteersPresent: 12,
+                    hoursContributed: 8.5,
+                    peopleServed: 120,
+                    foodWasteSaved: 2.5,
+                    donationsReceived: 150.0
+                )
+                self.todayStats = mockStats
+                print("DEBUG: HomeDashboardViewModel - Mock stats loaded")
+            }
         }
         
         // Load upcoming events using the async method that has mock data
@@ -124,7 +127,9 @@ class HomeDashboardViewModel: ObservableObject {
         // Load upcoming sessions
         loadUpcomingSessions()
         
-        isLoading = false
+        // Don't set isLoading to false immediately - let the async tasks complete
+        // The loading state will be managed by individual task completion
+        // isLoading = false
     }
     
     // Add a method to save user contributions directly from the home screen
@@ -155,5 +160,6 @@ class HomeDashboardViewModel: ObservableObject {
         // In a real app, you would fetch from a server or database
         // For now, just use sample data
         self.upcomingSessions = UpcomingSession.samples
+        print("DEBUG: HomeDashboardViewModel - Upcoming sessions loaded: \(self.upcomingSessions.count) sessions")
     }
 } 
