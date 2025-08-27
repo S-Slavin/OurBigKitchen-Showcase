@@ -237,19 +237,23 @@ class ImpactDashboardViewModel: ObservableObject {
     }
     
     private func checkAuthenticationStatus() {
-        // In a real app, this would check the user's authentication state
-        // Mock implementation for now
-        let isLoggedIn = UserDefaults.standard.bool(forKey: "isUserLoggedIn")
-        if isLoggedIn {
+        // Check the same authentication key used by the main app
+        let isAuthenticated = UserDefaults.standard.bool(forKey: "isAuthenticated")
+        if isAuthenticated {
             isUserSignedIn = true
+            // Get user name from UserDefaults or use default
             userName = UserDefaults.standard.string(forKey: "userName") ?? "User"
+        } else {
+            isUserSignedIn = false
+            userName = "Guest"
         }
     }
     
     func signOut() {
         isUserSignedIn = false
         userName = "Guest"
-        UserDefaults.standard.set(false, forKey: "isUserLoggedIn")
+        // Use the same authentication key as the main app
+        UserDefaults.standard.set(false, forKey: "isAuthenticated")
         UserDefaults.standard.removeObject(forKey: "userName")
     }
     
