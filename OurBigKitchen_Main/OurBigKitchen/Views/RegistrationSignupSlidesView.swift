@@ -548,8 +548,8 @@ private extension RegistrationSignupSlidesView {
                 }
                 .padding(.horizontal, Constants.buttonPadding)
                 
-                // Add bottom padding for scrolling
-                Spacer(minLength: 100)
+                // Add bottom padding for scrolling to ensure navigation buttons are visible
+                Spacer(minLength: 150)
             }
         }
         .padding(.vertical, Constants.buttonPadding)
@@ -763,8 +763,8 @@ private extension RegistrationSignupSlidesView {
                     wwccNotRequiredView
                 }
                 
-                // Add bottom padding for scrolling
-                Spacer(minLength: 100)
+                // Add bottom padding for scrolling to ensure navigation buttons are visible
+                Spacer(minLength: 150)
             }
         }
         .padding(.vertical, Constants.buttonPadding)
@@ -871,8 +871,8 @@ private extension RegistrationSignupSlidesView {
                 }
                 .padding(.horizontal, Constants.buttonPadding)
                 
-                // Add bottom padding for scrolling but not too much
-                Spacer(minLength: 50)
+                // Add bottom padding for scrolling to ensure navigation buttons are visible
+                Spacer(minLength: 150)
             }
         }
         .padding(.vertical, Constants.buttonPadding)
@@ -901,30 +901,35 @@ private extension RegistrationSignupSlidesView {
     }
     
     var accountCreationView: some View {
-        VStack(spacing: Constants.spacing) {
-            Spacer()
-            
-            VStack(spacing: 20) {
-                Image(systemName: "person.badge.plus")
-                    .font(.system(size: Constants.iconSize))
-                    .foregroundColor(primaryColor)
+        ScrollView {
+            VStack(spacing: Constants.spacing) {
+                Spacer()
                 
-                Text("Ready to Create Your Account?")
-                    .font(.title)
-                    .fontWeight(.bold)
-                    .foregroundColor(primaryColor)
-                    .multilineTextAlignment(.center)
+                VStack(spacing: 20) {
+                    Image(systemName: "person.badge.plus")
+                        .font(.system(size: Constants.iconSize))
+                        .foregroundColor(primaryColor)
+                    
+                    Text("Ready to Create Your Account?")
+                        .font(.title)
+                        .fontWeight(.bold)
+                        .foregroundColor(primaryColor)
+                        .multilineTextAlignment(.center)
+                    
+                    Text("Review your information and create your volunteer account to get started with OurBigKitchen.")
+                        .font(.body)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, Constants.buttonPadding)
+                    
+                    accountSummaryView
+                }
                 
-                Text("Review your information and create your volunteer account to get started with OurBigKitchen.")
-                    .font(.body)
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, Constants.buttonPadding)
+                Spacer()
                 
-                accountSummaryView
+                // Add bottom padding for scrolling to ensure navigation buttons are visible
+                Spacer(minLength: 150)
             }
-            
-            Spacer()
         }
         .padding(.vertical, Constants.buttonPadding)
     }

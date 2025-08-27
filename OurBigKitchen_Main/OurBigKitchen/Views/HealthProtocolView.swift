@@ -84,19 +84,7 @@ struct HealthProtocolView: View {
                         .padding(.horizontal)
                         .padding(.top, 5)
                         
-                        // Skip button
-                        Button("SKIP FOR DEMO") {
-                            acceptAndContinue()
-                        }
-                        .font(.headline)
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                        .padding(.vertical, 16)
-                        .padding(.horizontal, 24)
-                        .background(Color.orange)
-                        .cornerRadius(12)
-                        .padding(.top, 20)
-                        .padding(.bottom, 10)
+                        // Demo button removed - production ready
                     }
                     .padding(.vertical, 20)
                     .background(Color(.systemBackground))

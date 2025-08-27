@@ -80,31 +80,7 @@ struct AuthTypeSelectionView: View {
             
             Spacer()
             
-            // Skip for Demo button
-            Button(action: {
-                print("DEBUG: Skip for Demo tapped on AuthTypeSelectionView")
-                // Skip to main app
-                DispatchQueue.main.async {
-                    appState.isAuthenticated = true
-                    appState.hasAcceptedTerms = true
-                    appState.hasAcceptedHealthProtocols = true
-                    appState.needsToChooseVolunteerType = false
-                    appState.objectWillChange.send()
-                }
-            }) {
-                Text("Skip for Demo")
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(Color.clear)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                    )
-                    .cornerRadius(12)
-            }
-            .padding(.bottom, 20)
+            // Demo button removed - production ready
             
             // Continue Button
             Button(action: {
