@@ -1007,18 +1007,28 @@ private extension RegistrationSignupSlidesView {
     func createAccount() async {
         isLoading = true
         
-        guard validateForm() else {
-            isLoading = false
-            return
-        }
+        // DEMO MODE: Skip validation and go straight to app
+        print("DEBUG: Create Account tapped - DEMO MODE - bypassing validation")
+        
+        // Skip validation in demo mode
+        // guard validateForm() else {
+        //     isLoading = false
+        //     return
+        // }
         
         do {
+            // DEMO MODE: Set demo values if fields are empty
+            let demoFirstName = firstName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Demo" : firstName.trimmingCharacters(in: .whitespacesAndNewlines)
+            let demoLastName = lastName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "User" : lastName.trimmingCharacters(in: .whitespacesAndNewlines)
+            let demoEmail = email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "demo@example.com" : email.trimmingCharacters(in: .whitespacesAndNewlines)
+            let demoPassword = password.isEmpty ? "demo123" : password
+            
             // Attempt to create account and wait for it to complete
             await authViewModel.signUp(
-                firstName: firstName.trimmingCharacters(in: .whitespacesAndNewlines),
-                lastName: lastName.trimmingCharacters(in: .whitespacesAndNewlines),
-                email: email.trimmingCharacters(in: .whitespacesAndNewlines),
-                password: password,
+                firstName: demoFirstName,
+                lastName: demoLastName,
+                email: demoEmail,
+                password: demoPassword,
                 volunteerType: volunteerType,
                 dateOfBirth: dateOfBirth,
                 wwccNumber: wwccNumber.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : wwccNumber.trimmingCharacters(in: .whitespacesAndNewlines),
