@@ -1047,17 +1047,28 @@ private extension RegistrationSignupSlidesView {
             )
             print("DEBUG: ✅ authViewModel.signUp() completed")
             
+            print("DEBUG: 🔄 About to call appState.refreshAuthState()...")
             // CRITICAL: Refresh the app state to pick up the new authentication values
             appState.refreshAuthState()
+            print("DEBUG: ✅ appState.refreshAuthState() completed")
             
+            print("DEBUG: 👤 About to call updateAppStateWithUserProfile()...")
             // Update app state with user profile
             updateAppStateWithUserProfile()
+            print("DEBUG: ✅ updateAppStateWithUserProfile() completed")
             
+            print("DEBUG: 📱 About to send objectWillChange...")
             // Force the app state to update the UI
             appState.objectWillChange.send()
+            print("DEBUG: ✅ objectWillChange sent")
             
+            print("DEBUG: ☁️ About to call syncToSalesforce()...")
             // Try to sync to Salesforce, but don't block on failure
-            await syncToSalesforce()
+            // Use Task.detached to avoid blocking the main flow
+            Task.detached {
+                await self.syncToSalesforce()
+            }
+            print("DEBUG: ✅ syncToSalesforce() started (non-blocking)")
             
             // DEMO MODE: Go straight to home screen like welcome flow
             print("DEBUG: Account created successfully - going straight to home screen")
