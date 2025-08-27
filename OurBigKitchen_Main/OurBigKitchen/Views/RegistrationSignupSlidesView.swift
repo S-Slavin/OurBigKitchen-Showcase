@@ -390,54 +390,14 @@ private extension RegistrationSignupSlidesView {
             .foregroundColor(.white)
             .padding(.horizontal, Constants.mobilePadding)
             .padding(.vertical, 8)
-            .background(canProceed ? primaryColor : Color.gray.opacity(0.5))
+            .background(primaryColor) // DEMO MODE: Always show primary color
             .cornerRadius(Constants.cornerRadius)
         }
         .disabled(isLoading) // DEMO MODE: No validation blocking
         // DEMO MODE: No validation messages needed
     }
     
-    private var validationMessage: String {
-        switch currentStep {
-        case Step.personalInfo.rawValue:
-            if firstName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                return "First name is required"
-            } else if lastName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                return "Last name is required"
-            } else if email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                return "Email is required"
-            } else if !isValidEmail(email) {
-                return "Please enter a valid email"
-            } else if password.isEmpty {
-                return "Password is required"
-            } else if password.count < 6 {
-                return "Password must be at least 6 characters"
-            } else if password != confirmPassword {
-                return "Passwords do not match"
-            }
-            return ""
-        case Step.wwcc.rawValue:
-            if calculatedAge >= 18 {
-                if wwccNumber.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    return "WWCC number is required for volunteers 18+"
-                } else if wwccExpiryDate <= Date() {
-                    return "WWCC expiry date must be in the future"
-                }
-            }
-            return ""
-        case Step.agreements.rawValue:
-            if !acceptedTerms {
-                return "Please accept Terms of Service"
-            } else if !acceptedHealthProtocols {
-                return "Please accept Health & Safety Protocols"
-            } else if !acceptedPrivacyPolicy {
-                return "Please accept Privacy Policy"
-            }
-            return ""
-        default:
-            return ""
-        }
-    }
+    // DEMO MODE: No validation messages needed
 }
 
 // MARK: - Step Views
