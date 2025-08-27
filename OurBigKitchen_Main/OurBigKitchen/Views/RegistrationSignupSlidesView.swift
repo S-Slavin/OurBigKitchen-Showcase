@@ -78,31 +78,9 @@ struct RegistrationSignupSlidesView: View {
     private var currentStepEnum: Step { Step(rawValue: currentStep) ?? .volunteerType }
     
     private var canProceed: Bool {
-        let result: Bool
-        switch currentStep {
-        case Step.volunteerType.rawValue:
-            result = true
-        case Step.personalInfo.rawValue:
-            let personalInfoValid = isPersonalInfoValid
-            print("DEBUG: Personal Info validation - firstName: '\(firstName)', lastName: '\(lastName)', email: '\(email)', password: '\(password)', confirmPassword: '\(confirmPassword)', result: \(personalInfoValid)")
-            result = personalInfoValid
-        case Step.wwcc.rawValue:
-            let wwccValid = isWWCCValid
-            print("DEBUG: WWCC validation - age: \(calculatedAge), wwccNumber: '\(wwccNumber)', expiryDate: \(wwccExpiryDate), result: \(wwccValid)")
-            result = wwccValid
-        case Step.agreements.rawValue:
-            let agreementsValid = areAgreementsAccepted
-            print("DEBUG: Agreements validation - terms: \(acceptedTerms), health: \(acceptedHealthProtocols), privacy: \(acceptedPrivacyPolicy), result: \(agreementsValid)")
-            result = agreementsValid
-        case Step.accountCreation.rawValue:
-            result = true
-        default:
-            result = false
-        }
-        
-        print("DEBUG: canProceed check - Step: \(currentStep), Result: \(result)")
-        
-        return result
+        // DEMO MODE: Always allow proceeding to next step
+        print("DEBUG: DEMO MODE - canProceed always true for step \(currentStep)")
+        return true
     }
     
     private var isLastStep: Bool { currentStep == Constants.totalSteps - 1 }
@@ -415,20 +393,8 @@ private extension RegistrationSignupSlidesView {
             .background(canProceed ? primaryColor : Color.gray.opacity(0.5))
             .cornerRadius(Constants.cornerRadius)
         }
-        .disabled(!canProceed || isLoading)
-        .overlay(
-            Group {
-                if !canProceed && !isLoading {
-                    VStack {
-                        Spacer()
-                        Text(validationMessage)
-                            .font(.caption)
-                            .foregroundColor(.red)
-                            .padding(.top, 4)
-                    }
-                }
-            }
-        )
+        .disabled(isLoading) // DEMO MODE: No validation blocking
+        // DEMO MODE: No validation messages needed
     }
     
     private var validationMessage: String {
