@@ -121,6 +121,9 @@ class HomeDashboardViewModel: ObservableObject {
             }
             .store(in: &cancellables)
         
+        // Load upcoming sessions
+        loadUpcomingSessions()
+        
         isLoading = false
     }
     
