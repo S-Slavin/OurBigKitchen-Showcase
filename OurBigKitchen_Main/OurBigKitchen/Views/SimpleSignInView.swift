@@ -230,7 +230,30 @@ struct SimpleSignInView: View {
             }
             .buttonStyle(ButtonStyles.scale)
             
-            // Demo button removed - production ready
+            // Skip for Demo button
+            Button(action: {
+                print("DEBUG: Skip for Demo tapped on SimpleSignInView")
+                // Skip to main app
+                DispatchQueue.main.async {
+                    appState.isAuthenticated = true
+                    appState.hasAcceptedTerms = true
+                    appState.hasAcceptedHealthProtocols = true
+                    appState.needsToChooseVolunteerType = false
+                    appState.objectWillChange.send()
+                }
+            }) {
+                Text("Skip for Demo")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Color.clear)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                    )
+                    .cornerRadius(12)
+            }
             
             // Alternative sign in options
             VStack(spacing: 16) {

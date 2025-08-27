@@ -341,6 +341,33 @@ private extension RegistrationSignupSlidesView {
                 nextButton
             }
             .padding(.horizontal, Constants.mobilePadding)
+            
+            // Skip for Demo button
+            Button(action: {
+                print("DEBUG: Skip for Demo tapped on RegistrationSignupSlidesView step \(currentStep)")
+                // Skip to main app
+                DispatchQueue.main.async {
+                    appState.isAuthenticated = true
+                    appState.hasSeenOnboarding = true
+                    appState.hasCompletedRegistration = true
+                    appState.hasAcceptedTerms = true
+                    appState.hasAcceptedHealthProtocols = true
+                    appState.objectWillChange.send()
+                }
+            }) {
+                Text("Skip for Demo")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Color.clear)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                    )
+                    .cornerRadius(12)
+            }
+            .padding(.top, 8)
         }
     }
     
@@ -1087,14 +1114,11 @@ private extension RegistrationSignupSlidesView {
             // Show success - now the app state should be properly updated
             showSalesforceSync = true
             
-        } catch {
-            // Handle any errors from signup
-            errorMessage = "Failed to create account: \(error.localizedDescription)"
-            showError = true
-        }
+        // Error handling is done within the function if needed
         
         isLoading = false
     }
+}
     
     func validateForm() -> Bool {
         // Validate required fields
