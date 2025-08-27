@@ -1047,8 +1047,21 @@ private extension RegistrationSignupSlidesView {
             // Try to sync to Salesforce, but don't block on failure
             await syncToSalesforce()
             
-            // Show success - now the app state should be properly updated
-            showSalesforceSync = true
+            // DEMO MODE: Skip success sheet and go straight to app
+            print("DEBUG: Account created successfully - navigating to app immediately")
+            
+            // Ensure app state is properly set for navigation
+            appState.isAuthenticated = true
+            appState.hasCompletedRegistration = true
+            appState.hasAcceptedTerms = true
+            appState.hasAcceptedHealthProtocols = true
+            appState.needsToChooseVolunteerType = false
+            
+            // Force UI update
+            appState.objectWillChange.send()
+            
+            // Navigate to app immediately (no success sheet)
+            // showSalesforceSync = true
             
         // Error handling is done within the function if needed
         
